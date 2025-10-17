@@ -1,0 +1,53 @@
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Seguimiento de Artritis</h2>
+        <p class="page-subtitle">Registra tus síntomas y medicación diaria.</p>
+    </div>
+    <button id="add-artritis-btn" class="button button-primary">
+        <i data-lucide="plus"></i> Primer Registro
+    </button>
+</div>
+<div id="artritis-list-container" class="data-list-container">
+    <div id="empty-artritis-list" class="empty-state-card">
+        <img src="images/artritis.png" alt="Icono de articulación" class="empty-state-icon">
+        <h3 class="empty-state-title">Comienza tu seguimiento de artritis</h3>
+        <p class="empty-state-subtitle">Registra tus síntomas y medicación diaria para un mejor control.</p>
+    </div>
+    <ul id="artritis-list" class="data-list"></ul>
+</div>
+<div id="artritis-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Nuevo Registro de Artritis</h2>
+            <button class="modal-close-btn" data-modal-id="artritis-modal"><i data-lucide="x"></i></button>
+        </div>
+        <form id="artritis-form" class="space-y-4">
+            <input type="hidden" name="editingId" value="">
+            <div class="form-group">
+                <label for="painLevel">Nivel de dolor actual (0-10)</label>
+                <select name="painLevel" id="painLevel" class="form-input">
+                    <script>for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);</script>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Articulaciones afectadas</label>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Manos"> Manos</label>
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Muñecas"> Muñecas</label>
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Codos"> Codos</label>
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Hombros"> Hombros</label>
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Rodillas"> Rodillas</label>
+                    <label class="checkbox-label"><input type="checkbox" name="joints" value="Pies"> Pies</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="artritis-notes">Notas adicionales</label>
+                <textarea id="artritis-notes" name="notes" placeholder="Observaciones, factores desencadenantes, etc." class="form-input" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="button button-secondary modal-close-btn" data-modal-id="artritis-modal">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>

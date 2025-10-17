@@ -1,0 +1,29 @@
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Asistente IA</h2>
+        <p class="page-subtitle">Consulta información médica general. Este asistente no reemplaza un diagnóstico profesional.</p>
+    </div>
+</div>
+
+<div class="chat-container">
+    <div id="chat-messages" class="chat-messages">
+        <!-- Mensaje de bienvenida inicial -->
+        <div class="chat-message ai">
+            <div class="chat-bubble">
+                <p>¡Hola! Soy tu asistente virtual de MedicalHome. Puedes preguntarme sobre condiciones médicas, medicamentos o procedimientos. ¿En qué puedo ayudarte hoy?</p>
+                <p class="disclaimer">Recuerda: Soy un asistente informativo y no puedo proporcionar diagnósticos médicos. Consulta siempre a un profesional de la salud.</p>
+            </div>
+        </div>
+        <!-- Los mensajes se añadirán aquí dinámicamente -->
+    </div>
+
+    <div class="chat-input-area">
+        <form id="ai-form" class="chat-form">
+            <input type="text" id="ai-input" name="prompt" class="form-input" placeholder="Escribe tu pregunta aquí..." autocomplete="off" required>
+            <button type="submit" id="ai-send-btn" class="button button-primary">
+                <i data-lucide="send"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
