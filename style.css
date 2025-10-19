@@ -41,9 +41,16 @@ ul { list-style: none; }
     position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
     display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
+
 .modal-content {
-    background-color: var(--bg-primary); padding: 2rem; border-radius: 12px;
-    width: 90%; max-width: 450px; text-align: center;
+    background-color: var(--bg-primary); 
+    padding: 2rem; 
+    border-radius: 12px;
+    width: 90%; 
+    max-width: 500px; /* Un poco más de espacio para formularios largos */
+    text-align: left;
+    max-height: 90vh; /* Límite de altura */
+    overflow-y: auto; /* Activa el scroll si es necesario */
 }
 .modal-logo { width: 60px; height: 60px; margin: 0 auto 1rem; }
 .modal-icon { width: 48px; height: 48px; margin: 0 auto 1rem; color: var(--primary-blue);}
@@ -57,6 +64,7 @@ ul { list-style: none; }
     border-radius: 8px; padding: 0.75rem; min-height: 120px;
     font-family: inherit; font-size: 1rem; color: var(--text-primary);
 }
+
 
 /* --- Componentes Genéricos --- */
 .button { padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
@@ -92,6 +100,16 @@ ul { list-style: none; }
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
 }
+/*-- para poner el boton al frente del titulo--*/
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem; 
+    /* Opcional: para dar espacio debajo */
+
+}
+/*-----------------*/
 .summary-card {
     display: block; background-color: var(--bg-primary); border-radius: 12px;
     border: 1px solid var(--border-color); padding: 1.5rem;
@@ -188,7 +206,6 @@ ul { list-style: none; }
     color: var(--text-primary);
 }
 
-
 /* --- Menú Lateral (Sidebar) --- */
 .sidebar {
     position: fixed; top: 0; left: 0; height: 100vh;
@@ -207,9 +224,9 @@ ul { list-style: none; }
 .nav-divider { border: none; height: 1px; background-color: var(--border-color); margin: 0.5rem 0.75rem; }
 .nav-link {
     display: flex; align-items: center; gap: 0.85rem;
-    padding: 0.5rem 0.75rem; /* Aún más delgado */
+    padding: 0.5rem 0.75rem;
     border-radius: 6px; margin-bottom: 0.1rem;
-    font-weight: 500; font-size: 0.85rem; /* Fuente más pequeña */
+    font-weight: 500; font-size: 0.85rem;
     white-space: nowrap;
 }
 .nav-link:hover { background-color: var(--bg-secondary); }
@@ -286,3 +303,68 @@ ul { list-style: none; }
 }
 body.dark-theme .switch label span:first-child { background: var(--bg-secondary); }
 .switch input:checked + label span:first-child { transform: translateX(24px); }
+
+/* --- Estilos para el Toggle Switch (Recordatorios) --- */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-blue); /* Color cuando está activo */
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/*------------------- boton citas----*/
+/* --- Estilos para botones de asistencia en Citas --- */
+.attendance-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+.attendance-btn.attended-yes {
+    background-color: #E8F5E9; /* Verde claro */
+    color: #2E7D32;
+    border-color: #A5D6A7;
+}
+.attendance-btn.attended-no {
+    background-color: #FFEBEE; /* Rojo claro */
+    color: #C62828;
+    border-color: #EF9A9A;
+}
