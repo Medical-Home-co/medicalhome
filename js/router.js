@@ -1,72 +1,78 @@
-import { getUserProfile } from './storage.js';
+// js/router.js
+
+// Mapeo de rutas: hash -> plantilla HTML -> script JS
+const routes = {
+    'dashboard': {
+        template: 'templates/dashboard.html',
+        script: 'js/dashboard.js'
+    },
+    // --- Aquí agregaremos las otras 11 secciones ---
+    // 'perfil': {
+    //     template: 'templates/perfil.html',
+    //     script: 'js/perfil.js'
+    // },
+};
 
 const appContent = document.getElementById('app-content');
-const pageScripts = {};
+let currentPageModule = null; // Para guardar el módulo JS de la página actual
 
-async function loadPage(page) {
-    if (page === 'logout') return;
-    
+async function loadPage(pageKey) {
+    // 1. Obtener la ruta o usar 'dashboard' por defecto
+    const route = routes[pageKey] || null;
+
+    // Si la ruta no existe, mostrar un "En construcción"
+    if (!route) {
+        appContent.innerHTML = `
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">${pageKey.charAt(0).toUpperCase() + pageKey.slice(1)}</h2>
+                    <p class="page-subtitle">Esta sección está en construcción.</p>
+                </div>
+            </div>`;
+        return;
+    }
+
     try {
-        const response = await fetch(`templates/${page}.html`);
-        if (!response.ok) throw new Error('Página no encontrada');
+        // 2. Cargar el contenido HTML de la plantilla
+        const response = await fetch(route.template);
+        if (!response.ok) throw new Error('Plantilla no encontrada');
+        const html = await response.text();
         
-        appContent.innerHTML = await response.text();
+        // 3. Inyectar el HTML en el <main>
+        appContent.innerHTML = html;
 
-        if (!pageScripts[page]) {
-             try {
-                const module = await import(`./pages/${page}.js`);
-                pageScripts[page] = module;
-            } catch (error) {
-                console.log(`No se encontró script para la página: ${page}`);
-                pageScripts[page] = { init: () => {} };
-            }
+        // 4. Cargar dinámicamente el módulo JS de la página
+        // Usamos un 'cache-buster' (la fecha) para asegurar que se carga el script nuevo en desarrollo
+        const modulePath = `${route.script}?v=${new Date().getTime()}`;
+        currentPageModule = await import(`../${modulePath}`);
+        
+        // 5. Ejecutar la función 'init' de ese módulo
+        if (currentPageModule && typeof currentPageModule.init === 'function') {
+            currentPageModule.init();
         }
-        pageScripts[page].init();
-
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-        updateNavProfile();
 
     } catch (error) {
         console.error('Error al cargar la página:', error);
-        appContent.innerHTML = `<h2>Error 404</h2><p>Página no encontrada.</p>`;
+        appContent.innerHTML = `<p>Error al cargar el contenido. Intenta de nuevo.</p>`;
     }
 }
 
-async function updateNavProfile() {
-    const profile = await getUserProfile();
-    const navProfileName = document.getElementById('nav-profile-name');
-    if (profile && navProfileName) {
-        navProfileName.textContent = profile.fullName || 'Usuario';
-    }
-}
+function handleNavigation() {
+    const hash = window.location.hash.substring(1) || 'dashboard';
+    loadPage(hash);
 
-export function router() {
-    const path = window.location.hash.substring(1) || 'dashboard';
-    loadPage(path);
-    
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.hash === `#${path}` || (link.classList.contains('accordion-toggle') && document.querySelector(`.sub-link[href="#${path}"]`)));
+    // Actualizar el estado 'active' de los enlaces
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+        link.classList.remove('active');
+        // Usamos startsWith para que los sub-menús también activen al padre (si quisiéramos)
+        // Por ahora, usamos href === para coincidencia exacta
+        if (link.getAttribute('href') === `#${hash}`) {
+            link.classList.add('active');
+        }
     });
 }
 
-export function setupAccordion() {
-    document.querySelectorAll('.accordion-toggle').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const parentItem = button.closest('.nav-item-accordion');
-            parentItem.classList.toggle('open');
-        });
-    });
-}
-
-export function closeNavOnLinkClick() {
-     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768 && !link.classList.contains('accordion-toggle')) {
-                document.getElementById('main-nav').classList.remove('active');
-            }
-        });
-    });
+export function initRouter() {
+    window.addEventListener('hashchange', handleNavigation);
+    handleNavigation(); // Carga inicial
 }

@@ -1,85 +1,100 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-
+    // Código inicial para configurar el body, app-shell, etc.
     const body = document.body;
     const appShell = document.querySelector('.app-shell');
     body.classList.remove('hidden');
 
-    // --- Lógica del Router (Simulado) ---
+    // --- Lógica del Router (Versión Modular) ---
     const appContent = document.getElementById('app-content');
-    const mainContentTemplate = appContent.innerHTML; // Guardar el dashboard inicial
 
     async function loadPage(page) {
-        // Simula la carga de página
-        // En una implementación real, aquí se usaría fetch() para cargar plantillas
-        const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
-        
-        let content = `<h1 class="page-title">Página de ${pageTitle}</h1>`;
-        
-        if (page === 'dashboard') {
-            // Re-generar el dashboard para que los enlaces funcionen
+        // Mapa de rutas: Asocia cada 'hash' con su plantilla y script
+        const routes = {
+            'perfil': {
+                template: 'templates/perfil.html',
+                script: './perfil.js'
+            },
+            'medicamentos': {
+                template: 'templates/medicamentos.html',
+                script: './pages/medicamentos.js'
+            },
+            'citas': { // <-- RUTA NUEVA AÑADIDA
+                template: 'templates/citas.html',
+                script: './pages/citas.js'
+            },
+            // Aquí agregaremos las otras secciones en el futuro
+	'terapias': {     template: 'templates/terapias.html',
+    script: './pages/terapias.js'
+}
+        };
+
+        const route = routes[page];
+        let content = '';
+
+        if (route) {
+            // Si la página está en nuestro mapa, la cargamos
+            try {
+                const response = await fetch(route.template);
+                if (!response.ok) throw new Error('Plantilla no encontrada');
+                content = await response.text();
+            } catch (error) {
+                console.error(`Error al cargar la plantilla para ${page}:`, error);
+                content = '<p>Error al cargar la sección.</p>';
+            }
+        } else if (page === 'dashboard') {
+            // Mantenemos el dashboard simulado por ahora
             content = `
-                <header class="content-header">
-                    <a href="#0" class="content-logo">
-                        <img src="images/logo.png" alt="Logo">
-                        <span>MedicalHome</span>
-                    </a>
-                    <div class="notifications">
-                        <span class="badge">1</span>
-                        <i data-lucide="bell"></i>
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">Resumen de Salud</h2>
+                        <p class="page-subtitle">Una vista general de tu información más reciente.</p>
                     </div>
-                </header>
-                <div class="content-grid">
-                    <a href="#medicamentos" class="summary-card">
-                        <h3 class="card-title">Medicamentos</h3>
-                        <ul class="card-item-list">
-                            <li><span class="item-name">Lisinopril 10mg</span><span class="item-detail">1 vez/día - 08:00 AM</span></li>
-                            <li><span class="item-name">Metformina 850mg</span><span class="item-detail">2 veces/día - 09:00 AM, 09:00 PM</span></li>
-                        </ul>
-                    </a>
-                    <a href="#citas" class="summary-card"><h3 class="card-title">Próximas Citas</h3><ul class="card-item-list"><li><span class="item-name">Control Cardiología</span><span class="item-detail">Mañana, 10:30 AM</span></li></ul></a>
-                    <a href="#terapias" class="summary-card"><h3 class="card-title">Terapias</h3></a>
-                    <a href="#renal" class="summary-card"><h3 class="card-title">Seguimiento Renal</h3></a>
-                    <a href="#cardiaco" class="summary-card"><h3 class="card-title">Seguimiento Cardiaco</h3></a>
-                    <a href="#diabetes" class="summary-card"><h3 class="card-title">Seguimiento Diabetes</h3></a>
-                    <a href="#artritis" class="summary-card"><h3 class="card-title">Seguimiento Artritis</h3></a>
-                    <a href="#tea" class="summary-card"><h3 class="card-title">Seguimiento TEA</h3></a>
-                    <a href="#respiratorio" class="summary-card"><h3 class="card-title">Seguimiento Respiratorio</h3></a>
-                    <a href="#gastrico" class="summary-card"><h3 class="card-title">Seguimiento Gástrico</h3></a>
-                    <a href="#general" class="summary-card"><h3 class="card-title">Seguimiento General</h3></a>
-                    <a href="#agenda" class="summary-card"><h3 class="card-title">Agenda</h3></a>
-                    <a href="#asistente-ia" class="summary-card"><h3 class="card-title">Asistente Virtual</h3></a>
-                    <a href="#bienestar" class="summary-card"><h3 class="card-title">Bienestar</h3></a>
+                </div>
+                <div id="dashboard-grid" class="dashboard-grid">
+                     <p>El dashboard dinámico se implementará aquí.</p>
                 </div>
             `;
+        } else {
+            // Para cualquier otra página, mostramos "En construcción"
+            const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
+            content = `<h1 class="page-title">Página de ${pageTitle}</h1><p>En construcción...</p>`;
         }
         
+        // 1. Inyectamos el HTML
         appContent.innerHTML = content;
         
-        // Actualizar el estado 'active' de los enlaces
+        // 2. Si la ruta tiene un script, lo importamos y ejecutamos su función 'init'
+        if (route && route.script) {
+            try {
+                const pageModule = await import(route.script);
+                if (pageModule.init && typeof pageModule.init === 'function') {
+                    pageModule.init();
+                }
+            } catch (error) {
+                console.error(`Error al cargar o ejecutar el script para ${page}:`, error);
+            }
+        }
+        
+        // 3. Actualizamos el estado 'active' en los menús
         document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
             link.classList.remove('active');
             if (link.getAttribute('href') === `#${page}`) {
                 link.classList.add('active');
             }
         });
-        if (window.lucide) {
-            lucide.createIcons();
-        }
     }
 
-    function handleNavigation() {
+    async function handleNavigation() {
         const hash = window.location.hash.substring(1) || 'dashboard';
-        loadPage(hash);
+        await loadPage(hash);
     }
 
     window.addEventListener('hashchange', handleNavigation);
     handleNavigation(); // Carga inicial
 
+    // --- LÓGICA DE MODALES Y MENÚS (SIN CAMBIOS) ---
 
-    // --- Lógica del Modal de Bienvenida ---
+    // Modal de Bienvenida
     const welcomeModal = document.getElementById('welcome-modal');
     if (welcomeModal) {
         const guestBtn = document.getElementById('guest-btn');
@@ -105,19 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Lógica de Modales "Quiénes somos" y "Reportar" ---
+    // Modales "Quiénes somos" y "Reportar"
     const aboutBtn = document.getElementById('about-btn');
     const reportBtn = document.getElementById('report-btn');
     const aboutModal = document.getElementById('about-modal');
     const reportModal = document.getElementById('report-modal');
 
-    function openModal(modal) {
-        if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeModalOnClick(modal) {
-        if (modal) modal.classList.add('hidden');
-    }
+    function openModal(modal) { if (modal) modal.classList.remove('hidden'); }
+    function closeModalOnClick(modal) { if (modal) modal.classList.add('hidden'); }
     
     aboutBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); });
     reportBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); });
@@ -130,25 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     const reportForm = document.getElementById('report-form');
-    reportForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = document.getElementById('report-text').value;
-        window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte de Fallo - MedicalHome&body=${encodeURIComponent(text)}`;
-        closeModalOnClick(reportModal);
-    });
+    if(reportForm) {
+        reportForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = document.getElementById('report-text').value;
+            window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte - MedicalHome&body=${encodeURIComponent(text)}`;
+            closeModalOnClick(reportModal);
+        });
+    }
 
-
-    // --- Lógica del Menú Lateral (Escritorio) ---
+    // Menú Lateral (Escritorio)
     const collapseBtn = document.querySelector('.collapse-btn');
     if (collapseBtn) {
         collapseBtn.addEventListener('click', () => {
             appShell.classList.toggle('collapsed');
-            const isCollapsed = appShell.classList.contains('collapsed');
-            collapseBtn.setAttribute('aria-expanded', !isCollapsed);
+            collapseBtn.setAttribute('aria-expanded', !appShell.classList.contains('collapsed'));
         });
     }
     
-    // --- Lógica del Acordeón ---
+    // Acordeón del Menú
     document.querySelectorAll('.accordion-toggle').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
@@ -157,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Lógica de Navegación Móvil ---
+    // Menú Móvil
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenuModal = document.getElementById('mobile-menu-modal');
     
@@ -181,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica del Switch de Tema ---
+    // Switch de Tema
     const themeToggle = document.getElementById('theme-toggle-desktop');
     if (themeToggle) {
         const currentTheme = localStorage.getItem('theme');
