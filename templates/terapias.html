@@ -1,1 +1,86 @@
-<div class="page-header"><div><h2 class="page-title">Terapias</h2></div></div>
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR TERAPIA === -->
+<div id="terapias-form-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align: left; max-width: 500px;">
+        <h2 id="terapia-form-title" class="modal-title">Agregar Terapia</h2>
+        <p class="modal-subtitle">Completa la información de la sesión.</p>
+        
+        <form id="terapia-form" class="modal-form" style="margin-top: 1.5rem;">
+            <input type="hidden" id="terapia-id">
+            <div class="form-group">
+                <label for="terapia-name">Nombre de la Terapia *</label>
+                <input type="text" id="terapia-name" name="name" class="form-input" placeholder="Ej: Fisioterapia Respiratoria" required>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="terapia-date">Fecha *</label>
+                    <input type="date" id="terapia-date" name="date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="terapia-time">Hora *</label>
+                    <input type="time" id="terapia-time" name="time" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="terapia-professional">Profesional</label>
+                <input type="text" id="terapia-professional" name="professional" class="form-input" placeholder="Ej: Dr. Solarte">
+            </div>
+            
+            <!-- Nuevos campos condicionales -->
+            <div class="form-group">
+                <label for="terapia-type">Tipo de Terapia *</label>
+                <select id="terapia-type" name="type" class="form-input" required>
+                    <option value="domiciliario">Domiciliario</option>
+                    <option value="ambulatorio">Ambulatorio</option>
+                </select>
+            </div>
+            
+            <div id="ambulatorio-fields" class="hidden" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                 <div class="form-group">
+                    <label for="terapia-entity">Entidad (Clínica) *</label>
+                    <input type="text" id="terapia-entity" name="entity" class="form-input" placeholder="Ej: Clínica del Alma">
+                </div>
+                 <div class="form-group">
+                    <label for="terapia-address">Dirección *</label>
+                    <input type="text" id="terapia-address" name="address" class="form-input" placeholder="Ej: Calle 123 #45-67">
+                </div>
+                 <div class="form-group">
+                    <label for="terapia-phone">Teléfono (Opcional)</label>
+                    <input type="tel" id="terapia-phone" name="phone" class="form-input" placeholder="Número de teléfono">
+                </div>
+            </div>
+            <!-- Fin de los nuevos campos -->
+
+            <div class="modal-actions" style="justify-content: center; flex-direction: row; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" id="cancel-terapia-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE TERAPIAS === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Terapias</h2>
+            <p class="page-subtitle">Gestiona tus sesiones de terapia</p>
+        </div>
+        <button id="add-terapia-main-btn" class="button button-primary hidden">
+            <span>+ Agregar</span>
+        </button>
+    </div>
+
+    <div id="terapias-list-container" class="content-grid">
+        <!-- Las tarjetas de terapias se generarán aquí -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay terapias) -->
+    <div id="terapias-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+
+        <h2 class="modal-title">Ingresa tus Terapias</h2>
+        <img src="images/terapia.png" alt="Icono de Terapias" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">Agrega tus sesiones para llevar un control de tu progreso.</p>
+        <button id="add-terapia-initial-btn" class="button button-primary">Agregar Terapia</button>
+    </div>
+</div>
+
