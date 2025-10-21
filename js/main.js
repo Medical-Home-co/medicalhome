@@ -1,81 +1,110 @@
+// --- js/main.js ---
+import { store } from './store.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Código inicial para configurar el body, app-shell, etc.
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
     const body = document.body;
     const appShell = document.querySelector('.app-shell');
     body.classList.remove('hidden');
 
-    // --- Lógica del Router (Versión Modular) ---
     const appContent = document.getElementById('app-content');
 
+    function createDynamicDashboard() {
+        const summary = store.getSummaryData();
+        let content = `
+            <header class="content-header">
+                <a href="#0" class="content-logo"><img src="images/logo.png" alt="Logo"><span>MedicalHome</span></a>
+            </header>
+            <div class="content-grid">`; // Consider using a more specific class like content-grid-dashboard if needed
+
+        // Profile Card
+        content += `
+            <a href="#perfil" class="summary-card ${!summary.hasProfile ? 'card-highlight' : ''}">
+                <h3 class="card-title">${summary.hasProfile ? `Hola, ${summary.profileName}` : '¡Crea tu Perfil!'}</h3>
+                <p class="card-subtitle">${summary.hasProfile ? 'Revisa tu perfil y datos' : 'Empieza a gestionar tu salud'}</p>
+            </a>`;
+
+        // Meds Card
+        content += `
+            <a href="#medicamentos" class="summary-card">
+                <h3 class="card-title">Medicamentos</h3>
+                <p class="card-subtitle">${summary.hasMeds ? `Tienes ${summary.medsCount} medicamentos registrados.` : 'Añade tus medicamentos'}</p>
+            </a>`;
+
+        // Citas Card
+        content += `
+            <a href="#citas" class="summary-card">
+                <h3 class="card-title">Próximas Citas</h3>
+                <p class="card-subtitle">${summary.hasCitas ? `Tienes ${summary.citasCount} citas agendadas.` : 'Agenda tu próxima cita'}</p>
+            </a>`;
+
+        // Add more cards here following the pattern...
+
+        content += '</div>';
+        return content;
+    }
+
+
     async function loadPage(page) {
-        // Mapa de rutas: Asocia cada 'hash' con su plantilla y script
         const routes = {
-            'perfil': {
-                template: 'templates/perfil.html',
-                script: './perfil.js'
-            },
-            'medicamentos': {
-                template: 'templates/medicamentos.html',
-                script: './pages/medicamentos.js'
-            },
-            'citas': { // <-- RUTA NUEVA AÑADIDA
-                template: 'templates/citas.html',
-                script: './pages/citas.js'
-            },
-            // Aquí agregaremos las otras secciones en el futuro
-	'terapias': {     template: 'templates/terapias.html',
-    script: './pages/terapias.js'
-}
+            'perfil':       { template: 'templates/perfil.html', script: './perfil.js' },
+            'medicamentos': { template: 'templates/medicamentos.html', script: './pages/medicamentos.js' },
+            'citas':        { template: 'templates/citas.html', script: './pages/citas.js' },
+            'terapias':     { template: 'templates/terapias.html', script: './pages/terapias.js' },
+            'renal':        { template: 'templates/renal.html', script: './pages/renal.js' },
+            'cardiaco':     { template: 'templates/cardiaco.html', script: './pages/cardiaco.js' },
+            'diabetes':     { template: 'templates/diabetes.html', script: './pages/diabetes.js' },
+            'artritis':     { template: 'templates/artritis.html', script: './pages/artritis.js' },
+            'tea':          { template: 'templates/tea.html', script: './pages/tea.js' },
+            'respiratorio': { template: 'templates/respiratorio.html', script: './pages/respiratorio.js' },
+            'gastrico':     { template: 'templates/gastrico.html', script: './pages/gastrico.js' },
+            'general':      { template: 'templates/general.html', script: './pages/general.js' },
+            'agenda':       { template: 'templates/agenda.html', script: './pages/agenda.js' },
+            'asistente-ia': { template: 'templates/asistente.html', script: './pages/asistente.js' },
+            'bienestar':    { template: 'templates/bienestar.html', script: './pages/bienestar.js' },
+            'notificaciones':{ template: 'templates/notificaciones.html', script: './pages/notificaciones.js' }
         };
 
-        const route = routes[page];
         let content = '';
+        const route = routes[page];
 
-        if (route) {
-            // Si la página está en nuestro mapa, la cargamos
+         if (page === 'dashboard') {
+            content = createDynamicDashboard();
+            appContent.innerHTML = content;
+            if (window.lucide) lucide.createIcons(); // Recreate icons for dashboard if any
+        } else if (route) {
             try {
                 const response = await fetch(route.template);
-                if (!response.ok) throw new Error('Plantilla no encontrada');
+                if (!response.ok) throw new Error(`Plantilla no encontrada: ${route.template}`);
                 content = await response.text();
-            } catch (error) {
-                console.error(`Error al cargar la plantilla para ${page}:`, error);
-                content = '<p>Error al cargar la sección.</p>';
-            }
-        } else if (page === 'dashboard') {
-            // Mantenemos el dashboard simulado por ahora
-            content = `
-                <div class="page-header">
-                    <div>
-                        <h2 class="page-title">Resumen de Salud</h2>
-                        <p class="page-subtitle">Una vista general de tu información más reciente.</p>
-                    </div>
-                </div>
-                <div id="dashboard-grid" class="dashboard-grid">
-                     <p>El dashboard dinámico se implementará aquí.</p>
-                </div>
-            `;
-        } else {
-            // Para cualquier otra página, mostramos "En construcción"
-            const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
-            content = `<h1 class="page-title">Página de ${pageTitle}</h1><p>En construcción...</p>`;
-        }
-        
-        // 1. Inyectamos el HTML
-        appContent.innerHTML = content;
-        
-        // 2. Si la ruta tiene un script, lo importamos y ejecutamos su función 'init'
-        if (route && route.script) {
-            try {
-                const pageModule = await import(route.script);
-                if (pageModule.init && typeof pageModule.init === 'function') {
-                    pageModule.init();
+                appContent.innerHTML = content;
+
+                if (route.script) {
+                    // Determinar la ruta correcta relativa a main.js
+                    const modulePath = route.script.startsWith('./pages/')
+                        ? route.script // Ya es relativa a js/pages/
+                        : `./${route.script}`; // Asume que está en js/
+                    const pageModule = await import(modulePath);
+                    if (pageModule.init && typeof pageModule.init === 'function') {
+                        pageModule.init();
+                    }
                 }
+                 if (window.lucide) lucide.createIcons(); // Recreate icons after loading content
+
             } catch (error) {
-                console.error(`Error al cargar o ejecutar el script para ${page}:`, error);
+                console.error(`Error al cargar la página ${page}:`, error);
+                appContent.innerHTML = `<div class="page-container"><h1 class="page-title">${page.charAt(0).toUpperCase() + page.slice(1)}</h1><p>Error al cargar el contenido.</p></div>`;
             }
+        } else {
+            const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
+            appContent.innerHTML = `<div class="page-container"><h1 class="page-title">Página de ${pageTitle}</h1><p>Esta sección no tiene una ruta definida o está en construcción.</p></div>`;
         }
-        
-        // 3. Actualizamos el estado 'active' en los menús
+
+
+        // Update active class on links
         document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
             link.classList.remove('active');
             if (link.getAttribute('href') === `#${page}`) {
@@ -90,11 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('hashchange', handleNavigation);
-    handleNavigation(); // Carga inicial
+    handleNavigation(); // Initial page load
 
-    // --- LÓGICA DE MODALES Y MENÚS (SIN CAMBIOS) ---
-
-    // Modal de Bienvenida
+    // --- Welcome Modal Logic ---
     const welcomeModal = document.getElementById('welcome-modal');
     if (welcomeModal) {
         const guestBtn = document.getElementById('guest-btn');
@@ -102,96 +129,103 @@ document.addEventListener('DOMContentLoaded', () => {
         const dontShowAgainCheckbox = document.getElementById('dont-show-again');
 
         const welcomeModalShown = localStorage.getItem('welcomeModalShown');
+        // Mostrar solo si la clave NO existe en localStorage
         if (!welcomeModalShown) {
             welcomeModal.classList.remove('hidden');
         }
 
         function closeModal() {
-            if (dontShowAgainCheckbox.checked) {
-                localStorage.setItem('welcomeModalShown', 'true');
+            // Guardar en localStorage SOLO si el checkbox está marcado
+            if (dontShowAgainCheckbox && dontShowAgainCheckbox.checked) {
+                try {
+                    localStorage.setItem('welcomeModalShown', 'true');
+                } catch (error) {
+                    console.error("Error al guardar en localStorage:", error);
+                }
             }
-            welcomeModal.classList.add('hidden');
+            welcomeModal.classList.add('hidden'); // Siempre ocultar al cerrar
         }
 
-        guestBtn.addEventListener('click', closeModal);
-        createUserBtn.addEventListener('click', () => {
+        guestBtn?.addEventListener('click', closeModal); // Added optional chaining
+        createUserBtn?.addEventListener('click', () => { // Added optional chaining
             closeModal();
+            sessionStorage.setItem('openProfileModal', 'true');
             window.location.hash = '#perfil';
         });
+    } else {
+        console.warn("El modal de bienvenida (#welcome-modal) no se encontró en index.html");
     }
 
-    // Modales "Quiénes somos" y "Reportar"
+    // --- About & Report Modals Logic ---
+    // (No changes needed here, assuming IDs exist in index.html)
     const aboutBtn = document.getElementById('about-btn');
     const reportBtn = document.getElementById('report-btn');
     const aboutModal = document.getElementById('about-modal');
     const reportModal = document.getElementById('report-modal');
 
-    function openModal(modal) { if (modal) modal.classList.remove('hidden'); }
-    function closeModalOnClick(modal) { if (modal) modal.classList.add('hidden'); }
-    
-    aboutBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); });
-    reportBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); });
+    function openModal(modal) { modal?.classList.remove('hidden'); }
+    function closeModalOnClick(modal) { modal?.classList.add('hidden'); }
+
+    aboutBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); });
+    reportBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); });
 
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            closeModalOnClick(aboutModal);
-            closeModalOnClick(reportModal);
+            // Find the closest modal parent and close it, more robust
+            const modalToClose = btn.closest('.modal-overlay');
+            closeModalOnClick(modalToClose);
         });
     });
-    
-    const reportForm = document.getElementById('report-form');
-    if(reportForm) {
-        reportForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = document.getElementById('report-text').value;
-            window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte - MedicalHome&body=${encodeURIComponent(text)}`;
-            closeModalOnClick(reportModal);
-        });
-    }
 
-    // Menú Lateral (Escritorio)
+    const reportForm = document.getElementById('report-form');
+    reportForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const textElement = document.getElementById('report-text');
+        const text = textElement ? textElement.value : '';
+        window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte de Fallo - MedicalHome&body=${encodeURIComponent(text)}`;
+        closeModalOnClick(reportModal);
+    });
+
+    // --- Sidebar Collapse Logic ---
     const collapseBtn = document.querySelector('.collapse-btn');
     if (collapseBtn) {
         collapseBtn.addEventListener('click', () => {
-            appShell.classList.toggle('collapsed');
-            collapseBtn.setAttribute('aria-expanded', !appShell.classList.contains('collapsed'));
+            appShell?.classList.toggle('collapsed'); // Optional chaining for safety
+            const isCollapsed = appShell?.classList.contains('collapsed');
+            collapseBtn.setAttribute('aria-expanded', !isCollapsed);
         });
     }
-    
-    // Acordeón del Menú
-    document.querySelectorAll('.accordion-toggle').forEach(button => {
-        button.addEventListener('click', (e) => {
+
+    // --- Accordion Logic ---
+    document.body.addEventListener('click', (e) => {
+        const accordionToggle = e.target.closest('.accordion-toggle');
+        if (accordionToggle) {
             e.preventDefault();
-            const parentItem = button.closest('.nav-item-accordion');
-            parentItem.classList.toggle('open');
-        });
+            const parentItem = accordionToggle.closest('.nav-item-accordion');
+            parentItem?.classList.toggle('open');
+        }
     });
 
-    // Menú Móvil
+    // --- Mobile Navigation Logic ---
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenuModal = document.getElementById('mobile-menu-modal');
-    
     if (mobileMenuBtn && mobileMenuModal) {
         const mobileMenuContent = document.querySelector('.mobile-menu-content');
         const desktopNav = document.querySelector('.sidebar-nav > .nav-links');
-
         if (mobileMenuContent && desktopNav && mobileMenuContent.children.length === 0) {
-            const clonedNav = desktopNav.cloneNode(true);
-            mobileMenuContent.appendChild(clonedNav);
+             try {
+                 const clonedNav = desktopNav.cloneNode(true);
+                 mobileMenuContent.appendChild(clonedNav);
+             } catch (error) { console.error("Error clonando menú:", error); }
         }
-
         mobileMenuBtn.addEventListener('click', () => mobileMenuModal.classList.toggle('hidden'));
-        mobileMenuModal.addEventListener('click', (e) => {
-            if (e.target === mobileMenuModal) mobileMenuModal.classList.add('hidden');
-        });
-        if (mobileMenuContent) {
-            mobileMenuContent.addEventListener('click', (e) => {
-                if(e.target.closest('a')) mobileMenuModal.classList.add('hidden');
-            });
+        mobileMenuModal.addEventListener('click', (e) => { if (e.target === mobileMenuModal) mobileMenuModal.classList.add('hidden'); });
+         if (mobileMenuContent) {
+            mobileMenuContent.addEventListener('click', (e) => { if (e.target.closest('a')) mobileMenuModal.classList.add('hidden'); });
         }
     }
 
-    // Switch de Tema
+    // --- Theme Switch Logic ---
     const themeToggle = document.getElementById('theme-toggle-desktop');
     if (themeToggle) {
         const currentTheme = localStorage.getItem('theme');
@@ -204,4 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light');
         });
     }
-});
+
+     // --- Share App Logic ---
+    document.querySelectorAll('a[href="#share"]').forEach(shareLink => {
+        shareLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const shareData = { title: 'MedicalHome', text: '¡Descubre MedicalHome!', url: window.location.origin };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } catch (err) { console.error('Error al compartir:', err); }
+            } else {
+                try { await navigator.clipboard.writeText(shareData.url); alert('¡Enlace copiado!'); } catch (err) { alert('No se pudo compartir.'); }
+            }
+        });
+    });
+
+}); // End DOMContentLoaded
