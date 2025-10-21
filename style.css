@@ -368,3 +368,36 @@ input:checked + .slider:before {
     color: #C62828;
     border-color: #EF9A9A;
 }
+
+/*------------------------------*/
+
+/*----botones notificaciones-------------------*/
+/* === INICIO SOLUCIÓN: Estilo para botón de estado activo === */
+
+/*
+   Define el aspecto del botón que representa el ESTADO ACTUAL
+   (cuando todas están activas o todas inactivas).
+   Usaremos el color primario (azul).
+*/
+.button-state-active {
+    background-color: var(--primary-color) !important; /* Azul primario */
+    color: white !important; /* Texto blanco */
+    border-color: var(--primary-color) !important;
+    /* Puedes añadir otros estilos si quieres, como un borde más grueso */
+}
+
+/*
+   Asegúrate de que tu botón secundario sea gris oscuro por defecto.
+   Si ya lo es, esta regla puede no ser necesaria o necesitar ajustes.
+*/
+.button.button-secondary {
+    background-color: var(--bg-secondary); /* Fondo gris/secundario */
+    color: var(--text-secondary);       /* Texto gris */
+    border-color: var(--border-color);
+}
+.button.button-secondary:hover { /* Estilo hover opcional */
+     background-color: var(--border-color);
+}
+
+
+/* === FIN SOLUCIÓN === */

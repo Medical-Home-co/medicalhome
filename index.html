@@ -11,7 +11,6 @@
 </head>
 <body class="hidden">
 
-    <!-- === MODAL DE BIENVENIDA === -->
     <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <img src="images/logo.png" alt="Logo de MedicalHome" class="modal-logo">
@@ -29,7 +28,6 @@
         </div>
     </div>
 
-    <!-- === MODAL "QUIÉNES SOMOS" === -->
     <div id="about-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <img src="images/marca.png" alt="Logo de VivirAplicaciones" class="modal-logo">
@@ -41,7 +39,6 @@
         </div>
     </div>
     
-    <!-- === MODAL "REPORTAR FALLO" === -->
     <div id="report-modal" class="modal-overlay hidden">
         <div class="modal-content">
              <i data-lucide="cog" class="modal-icon"></i>
@@ -55,18 +52,15 @@
         </div>
     </div>
     
-    <!-- === ESTRUCTURA PRINCIPAL DE LA APP === -->
     <div class="app-shell">
-        <!-- MENÚ LATERAL (ESCRITORIO) -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-profile">
-                    <img src="images/avatar.png" alt="Avatar de usuario" class="profile-avatar">
+                    <img src="images/avatar.png" alt="Avatar de usuario" class="profile-avatar" id="sidebar-avatar">
                     <div class="profile-info">
-                        <span class="profile-name">Hola, Invitado</span>
+                        <span class="profile-name" id="sidebar-username">Hola, Invitado</span>
                     </div>
                 </div>
-
                 <ul class="nav-links">
                     <li><a href="#dashboard" class="nav-link active"><i data-lucide="layout-grid"></i><span>Resumen</span></a></li>
                     <li><a href="#perfil" class="nav-link"><i data-lucide="user"></i><span>Perfil</span></a></li>
@@ -125,13 +119,10 @@
             </nav>
         </aside>
 
-        <!-- CONTENIDO PRINCIPAL -->
         <main id="app-content" class="main-content">
-            <!-- El contenido se cargará aquí vía JS -->
-        </main>
+            </main>
     </div>
 
-    <!-- === NAVEGACIÓN INFERIOR (MÓVIL) === -->
     <nav class="mobile-nav">
         <a href="#dashboard" class="mobile-nav-link active">
             <i data-lucide="layout-grid"></i>
@@ -151,13 +142,12 @@
         </button>
     </nav>
 
-    <!-- === MODAL MENÚ COMPLETO (MÓVIL) === -->
     <div id="mobile-menu-modal" class="modal-overlay hidden">
         <div class="mobile-menu-content">
-            <!-- Aquí se clonará el menú de escritorio -->
-        </div>
+            </div>
     </div>
     
    
     <script type="module" src="js/main.js"></script>
 </body>
+</html>
