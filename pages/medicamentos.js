@@ -1,6 +1,7 @@
-// --- Base de Datos Temporal (para el modo invitado) ---
-// La movemos fuera de init para que persista mientras navegas por la app.
-// Se reiniciará solo al recargar la página.
+// --- pages/medicamentos.js ---
+import { store } from '../store.js'; // <-- SOLUCIÓN: Importar el store
+
+// La DB ahora se carga desde el store en la función init()
 let tempMedsDB = [];
 
 // --- Función para renderizar la lista de medicamentos ---
@@ -14,11 +15,11 @@ function renderMedsList(formModal) {
     if (tempMedsDB.length === 0) {
         emptyState.classList.remove('hidden');
         listContainer.classList.add('hidden');
-        addMedMainBtn.classList.add('hidden'); // Ocultar el botón del encabezado si no hay meds
+        addMedMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
         listContainer.classList.remove('hidden');
-        addMedMainBtn.classList.remove('hidden'); // Mostrar el botón del encabezado
+        addMedMainBtn.classList.remove('hidden');
         
         tempMedsDB.forEach(med => {
             const medCard = document.createElement('div');
@@ -32,6 +33,7 @@ function renderMedsList(formModal) {
                 </div>
             `).join('');
 
+            // === SOLUCIÓN: El 'notify' del med se usa en el 'checked' ===
             medCard.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
@@ -47,7 +49,7 @@ function renderMedsList(formModal) {
                 <div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">Recordatorios</span>
                     <label class="switch">
-                        <input type="checkbox" ${med.reminders ? 'checked' : ''}>
+                        <input type="checkbox" class="notify-toggle" data-id="${med.id}" ${med.notify ? 'checked' : ''}>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -56,32 +58,50 @@ function renderMedsList(formModal) {
         });
     }
 
+    // --- Listeners de la Tarjeta (ahora guardan en el store) ---
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', (e) => {
-            const medId = e.currentTarget.dataset.id;
-            tempMedsDB = tempMedsDB.filter(m => m.id.toString() !== medId);
+            const medId = parseInt(e.currentTarget.dataset.id, 10);
+            tempMedsDB = tempMedsDB.filter(m => m.id !== medId);
+            store.saveMeds(tempMedsDB); // <-- SOLUCIÓN: Guardar en el store
             renderMedsList(formModal);
         });
     });
     
     document.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', (e) => {
-            const medId = e.currentTarget.dataset.id;
-            const medToEdit = tempMedsDB.find(m => m.id.toString() === medId);
+            const medId = parseInt(e.currentTarget.dataset.id, 10);
+            const medToEdit = tempMedsDB.find(m => m.id === medId);
             if (medToEdit) {
                 document.getElementById('form-title').textContent = 'Editar Medicamento';
                 document.getElementById('med-id').value = medToEdit.id;
                 document.getElementById('med-name').value = medToEdit.name;
                 document.getElementById('med-dose').value = medToEdit.dose;
                 document.getElementById('med-notes').value = medToEdit.notes;
-                // Lógica futura para rellenar frecuencia y horarios
+                // (Aquí faltaría rellenar la frecuencia y horarios, pero el ID se guarda)
                 formModal.classList.remove('hidden');
+            }
+        });
+    });
+
+    // === SOLUCIÓN: Listener para el toggle que guarda en el store ===
+    document.querySelectorAll('.notify-toggle').forEach(toggle => {
+        toggle.addEventListener('change', (e) => {
+            const medId = parseInt(e.currentTarget.dataset.id, 10);
+            const med = tempMedsDB.find(m => m.id === medId);
+            if(med) {
+                med.notify = e.currentTarget.checked;
+                store.saveMeds(tempMedsDB); // <-- Guardar cambio en el store
+                console.log(`Medicamento ${med.id} notify: ${med.notify}`);
             }
         });
     });
 }
 
 export function init() {
+    // === SOLUCIÓN: Cargar datos desde el store ===
+    tempMedsDB = store.getMeds();
+
     const formModal = document.getElementById('meds-form-modal');
     const addMedInitialBtn = document.getElementById('add-med-initial-btn');
     const addMedMainBtn = document.getElementById('add-med-main-btn');
@@ -124,33 +144,38 @@ export function init() {
         const formData = new FormData(medForm);
         const schedules = Array.from(schedulesContainer.querySelectorAll('input[type="time"]')).map(input => input.value);
         
+        // (ID se convierte a número)
+        const medId = parseInt(document.getElementById('med-id').value, 10) || Date.now();
+        
         const newMed = {
-            id: document.getElementById('med-id').value || Date.now(),
+            id: medId,
             name: formData.get('name'),
             dose: formData.get('dose'),
             frequencyValue: formData.get('frequency'),
             frequencyText: frequencySelect.options[frequencySelect.selectedIndex].text.split('(')[0].trim(),
-            schedules: schedules.filter(Boolean), // Filtra horarios vacíos
+            schedules: schedules.filter(Boolean),
             notes: formData.get('notes'),
-            reminders: true
+            notify: true // <-- SOLUCIÓN: Se guarda el estado del toggle
         };
 
-        const existingIndex = tempMedsDB.findIndex(m => m.id.toString() === newMed.id.toString());
+        const existingIndex = tempMedsDB.findIndex(m => m.id === newMed.id);
         if (existingIndex > -1) {
+            // (Al editar, mantener el estado 'notify' anterior si ya existía)
+            newMed.notify = tempMedsDB[existingIndex].notify;
             tempMedsDB[existingIndex] = newMed;
         } else {
             tempMedsDB.push(newMed);
         }
 
+        store.saveMeds(tempMedsDB); // <-- SOLUCIÓN: Guardar en el store
         closeFormModal();
         renderMedsList(formModal);
     });
 
     function updateScheduleInputs(count) {
-        // Primero, quita el label
         const label = schedulesContainer.querySelector('label');
         schedulesContainer.innerHTML = '';
-        schedulesContainer.appendChild(label); // Vuelve a poner el label
+        if (label) schedulesContainer.appendChild(label); // Vuelve a poner el label si existe
 
         for (let i = 1; i <= count; i++) {
             const timeInput = document.createElement('input');
@@ -162,7 +187,5 @@ export function init() {
         }
     }
 
-    // Renderizado inicial al cargar la página
     renderMedsList(formModal);
 }
-

@@ -1,4 +1,7 @@
-// --- Base de Datos Temporal para Terapias ---
+// --- pages/terapias.js ---
+import { store } from '../store.js'; // <-- Importar el store
+
+// La DB ahora se carga desde el store en init()
 let tempTerapiasDB = [];
 
 // --- Función para renderizar la lista de terapias ---
@@ -26,7 +29,8 @@ function renderTerapiasList() {
             const date = new Date(terapia.date + 'T00:00:00');
             const formattedDate = date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
-            const isChecked = terapia.reminders ? 'checked' : '';
+            // <-- Usa 'notify'
+            const isNotifyChecked = terapia.notify ? 'checked' : '';
             const locationInfo = terapia.type === 'ambulatorio' 
                 ? `${terapia.entity} - ${terapia.address}` 
                 : 'Domicilio';
@@ -53,7 +57,6 @@ function renderTerapiasList() {
                     </div>
                 </div>
                 <div class="card-footer" style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <!-- Asistió Group -->
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 0.9rem; font-weight: 600;">¿Asistió?</span>
                         <div class="attendance-buttons" data-id="${terapia.id}" style="display: flex; gap: 0.5rem;">
@@ -61,11 +64,10 @@ function renderTerapiasList() {
                             <button class="button attendance-btn ${terapia.attended === false ? 'attended-no' : ''}" data-action="no">No</button>
                         </div>
                     </div>
-                    <!-- Recordatorio Group -->
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                          <span style="font-size: 0.9rem; font-weight: 600;">Recordatorio</span>
                          <label class="switch">
-                            <input type="checkbox" class="reminder-toggle" data-id="${terapia.id}" ${isChecked}>
+                            <input type="checkbox" class="notify-toggle" data-id="${terapia.id}" ${isNotifyChecked}> {/* <-- Usa notify-toggle */}
                             <span class="slider"></span>
                          </label>
                     </div>
@@ -74,46 +76,63 @@ function renderTerapiasList() {
             listContainer.appendChild(terapiaCard);
         });
     }
-    attachEventListeners();
+    attachEventListeners(); // Re-attach listeners after rendering
 }
 
 // --- Función para manejar los eventos de la página ---
 function attachEventListeners() {
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const terapiaId = e.currentTarget.dataset.id;
-            tempTerapiasDB = tempTerapiasDB.filter(t => t.id.toString() !== terapiaId);
+    // Clonar para limpiar listeners
+    const listContainer = document.getElementById('terapias-list-container');
+    const newContainer = listContainer.cloneNode(true);
+    listContainer.parentNode.replaceChild(newContainer, listContainer);
+
+    // Listener general en el contenedor (delegación)
+    newContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const attendanceBtn = e.target.closest('.attendance-btn');
+
+        if (deleteBtn) {
+            const terapiaId = parseInt(deleteBtn.dataset.id, 10);
+            tempTerapiasDB = tempTerapiasDB.filter(t => t.id !== terapiaId);
+            store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
             renderTerapiasList();
-        });
+        } else if (attendanceBtn) {
+            const container = attendanceBtn.closest('.attendance-buttons');
+            const terapiaId = parseInt(container.dataset.id, 10);
+            const action = attendanceBtn.dataset.action;
+            const terapia = tempTerapiasDB.find(t => t.id === terapiaId);
+            if (terapia) {
+                terapia.attended = (action === 'yes');
+                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
+                // Actualizar UI del botón
+                container.querySelectorAll('.attendance-btn').forEach(btn => btn.classList.remove('attended-yes', 'attended-no'));
+                attendanceBtn.classList.add(action === 'yes' ? 'attended-yes' : 'attended-no');
+            }
+        }
     });
 
-    document.querySelectorAll('.attendance-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const container = e.currentTarget.closest('.attendance-buttons');
-            const terapiaId = container.dataset.id;
-            const action = e.currentTarget.dataset.action;
-            const terapiaIndex = tempTerapiasDB.findIndex(t => t.id.toString() === terapiaId);
-            if (terapiaIndex > -1) {
-                tempTerapiasDB[terapiaIndex].attended = (action === 'yes');
+    // Listener para el toggle (change event)
+    newContainer.addEventListener('change', (e) => {
+        const notifyToggle = e.target.closest('.notify-toggle');
+        if (notifyToggle) {
+            const terapiaId = parseInt(notifyToggle.dataset.id, 10);
+            const isChecked = notifyToggle.checked;
+            const terapia = tempTerapiasDB.find(t => t.id === terapiaId);
+            if (terapia) {
+                terapia.notify = isChecked; // <-- Usa 'notify'
+                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
+                console.log('Recordatorio terapia actualizado:', terapia);
             }
-            renderTerapiasList();
-        });
-    });
-
-    document.querySelectorAll('.reminder-toggle').forEach(toggle => {
-        toggle.addEventListener('change', (e) => {
-            const terapiaId = e.currentTarget.dataset.id;
-            const isChecked = e.currentTarget.checked;
-            const terapiaIndex = tempTerapiasDB.findIndex(t => t.id.toString() === terapiaId);
-            if (terapiaIndex > -1) {
-                tempTerapiasDB[terapiaIndex].reminders = isChecked;
-            }
-        });
+        }
     });
 }
 
+
 // --- Función principal que se ejecuta al cargar la página ---
 export function init() {
+    // <-- Cargar desde el store
+    tempTerapiasDB = store.getTerapias();
+
     const formModal = document.getElementById('terapias-form-modal');
     const addTerapiasInitialBtn = document.getElementById('add-terapia-initial-btn');
     const addTerapiasMainBtn = document.getElementById('add-terapia-main-btn');
@@ -159,17 +178,16 @@ export function init() {
             address: formData.get('address'),
             phone: formData.get('phone'),
             attended: null,
-            reminders: true
+            notify: true // <-- Usa 'notify', true por defecto
         };
         
-        // Determinar el lugar basado en el tipo
         newTerapia.location = newTerapia.type === 'ambulatorio' ? newTerapia.entity : 'Domicilio';
 
         tempTerapiasDB.push(newTerapia);
+        store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
         closeFormModal();
         renderTerapiasList();
     });
 
     renderTerapiasList();
 }
-

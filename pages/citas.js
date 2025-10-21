@@ -1,4 +1,7 @@
-// --- Base de Datos Temporal para Citas ---
+// --- pages/citas.js ---
+import { store } from '../store.js'; // <-- Importar el store
+
+// La DB ahora se carga desde el store en init()
 let tempCitasDB = [];
 
 // --- Función para renderizar la lista de citas ---
@@ -7,7 +10,7 @@ function renderCitasList() {
     const emptyState = document.getElementById('citas-empty-state');
     const addCitaMainBtn = document.getElementById('add-cita-main-btn');
 
-    listContainer.innerHTML = ''; // Limpiamos para evitar duplicados
+    listContainer.innerHTML = '';
 
     if (tempCitasDB.length === 0) {
         emptyState.classList.remove('hidden');
@@ -23,11 +26,11 @@ function renderCitasList() {
             citaCard.className = 'summary-card';
             citaCard.style.padding = '1rem';
 
-            const date = new Date(cita.date + 'T00:00:00'); // Corregir zona horaria
+            const date = new Date(cita.date + 'T00:00:00');
             const formattedDate = date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Determina si el interruptor de recordatorio debe estar activado
-            const isReminderChecked = cita.reminders ? 'checked' : '';
+            // <-- Usa 'notify'
+            const isNotifyChecked = cita.notify ? 'checked' : '';
 
             citaCard.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
@@ -56,7 +59,6 @@ function renderCitasList() {
                     </div>
                 </div>
                 <div class="card-footer" style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <!-- Asistió Group -->
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 0.9rem; font-weight: 600;">¿Asistió?</span>
                         <div class="attendance-buttons" data-id="${cita.id}" style="display: flex; gap: 0.5rem;">
@@ -64,11 +66,10 @@ function renderCitasList() {
                             <button class="button attendance-btn ${cita.attended === false ? 'attended-no' : ''}" data-action="no">No</button>
                         </div>
                     </div>
-                    <!-- Recordatorio Group -->
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                          <span style="font-size: 0.9rem; font-weight: 600;">Recordatorio</span>
                          <label class="switch">
-                            <input type="checkbox" class="reminder-toggle" data-id="${cita.id}" ${isReminderChecked}>
+                            <input type="checkbox" class="notify-toggle" data-id="${cita.id}" ${isNotifyChecked}> {/* <-- Usa notify-toggle */}
                             <span class="slider"></span>
                          </label>
                     </div>
@@ -77,50 +78,63 @@ function renderCitasList() {
             listContainer.appendChild(citaCard);
         });
     }
-    attachEventListeners();
+    attachEventListeners(); // Re-attach listeners after rendering
 }
 
 // --- Función para manejar los eventos de la página ---
 function attachEventListeners() {
-    // Listener para botones de eliminar
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const citaId = e.currentTarget.dataset.id;
-            tempCitasDB = tempCitasDB.filter(c => c.id.toString() !== citaId);
+    // Clonar para limpiar listeners
+    const listContainer = document.getElementById('citas-list-container');
+    const newContainer = listContainer.cloneNode(true);
+    listContainer.parentNode.replaceChild(newContainer, listContainer);
+
+    // Listener general en el contenedor (delegación)
+    newContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const attendanceBtn = e.target.closest('.attendance-btn');
+
+        if (deleteBtn) {
+            const citaId = parseInt(deleteBtn.dataset.id, 10);
+            tempCitasDB = tempCitasDB.filter(c => c.id !== citaId);
+            store.saveCitas(tempCitasDB); // <-- GUARDAR
             renderCitasList();
-        });
+        } else if (attendanceBtn) {
+            const container = attendanceBtn.closest('.attendance-buttons');
+            const citaId = parseInt(container.dataset.id, 10);
+            const action = attendanceBtn.dataset.action;
+            const cita = tempCitasDB.find(c => c.id === citaId);
+            if (cita) {
+                cita.attended = (action === 'yes');
+                store.saveCitas(tempCitasDB); // <-- GUARDAR
+                // Actualizar UI del botón
+                container.querySelectorAll('.attendance-btn').forEach(btn => btn.classList.remove('attended-yes', 'attended-no'));
+                attendanceBtn.classList.add(action === 'yes' ? 'attended-yes' : 'attended-no');
+            }
+        }
     });
 
-    // Listener para botones de asistencia (Sí/No)
-    document.querySelectorAll('.attendance-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const container = e.currentTarget.closest('.attendance-buttons');
-            const citaId = container.dataset.id;
-            const action = e.currentTarget.dataset.action;
-            const citaIndex = tempCitasDB.findIndex(c => c.id.toString() === citaId);
-            if (citaIndex > -1) {
-                tempCitasDB[citaIndex].attended = (action === 'yes');
+    // Listener para el toggle (change event)
+    newContainer.addEventListener('change', (e) => {
+        const notifyToggle = e.target.closest('.notify-toggle');
+        if (notifyToggle) {
+            const citaId = parseInt(notifyToggle.dataset.id, 10);
+            const isChecked = notifyToggle.checked;
+            const cita = tempCitasDB.find(c => c.id === citaId);
+            if (cita) {
+                cita.notify = isChecked; // <-- Usa 'notify'
+                store.saveCitas(tempCitasDB); // <-- GUARDAR
+                console.log('Recordatorio cita actualizado:', cita);
             }
-            renderCitasList();
-        });
-    });
-
-    // Listener para el interruptor de recordatorio
-    document.querySelectorAll('.reminder-toggle').forEach(toggle => {
-        toggle.addEventListener('change', (e) => {
-            const citaId = e.currentTarget.dataset.id;
-            const isChecked = e.currentTarget.checked;
-            const citaIndex = tempCitasDB.findIndex(c => c.id.toString() === citaId);
-            if (citaIndex > -1) {
-                tempCitasDB[citaIndex].reminders = isChecked;
-                console.log('Recordatorio actualizado:', tempCitasDB[citaIndex]);
-            }
-        });
+        }
     });
 }
 
+
 // --- Función principal que se ejecuta al cargar la página ---
 export function init() {
+    // <-- Cargar desde el store
+    tempCitasDB = store.getCitas();
+
     const formModal = document.getElementById('citas-form-modal');
     const addCitaInitialBtn = document.getElementById('add-cita-initial-btn');
     const addCitaMainBtn = document.getElementById('add-cita-main-btn');
@@ -153,13 +167,13 @@ export function init() {
             doctor: formData.get('doctor'),
             companion: formData.get('companion'),
             attended: null,
-            reminders: true // Por defecto, el recordatorio está activado
+            notify: true // <-- Usa 'notify', true por defecto
         };
         tempCitasDB.push(newCita);
+        store.saveCitas(tempCitasDB); // <-- GUARDAR
         closeFormModal();
         renderCitasList();
     });
 
     renderCitasList();
 }
-
