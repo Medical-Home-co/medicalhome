@@ -1,4 +1,67 @@
-<div class="page-header">
-    <div><h2 class="page-title">Seguimiento Cardiaco</h2><p class="page-subtitle">Registra tu presión arterial y pulso.</p></div>
-    <button id="add-cardiaco-btn" class="button button-primary"><i data-lucide="plus"></i> Nuevo Registro</button>
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE SEGUIMIENTO CARDIACO === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Seguimiento Cardiaco</h2>
+            <p class="page-subtitle">Registra y monitorea tu presión arterial y frecuencia cardiaca.</p>
+        </div>
+        <button id="add-cardiaco-main-btn" class="button button-primary hidden">
+            <span>+ Agregar Registro</span>
+        </button>
+    </div>
+
+    <!-- La lista de registros guardados aparecerá aquí -->
+    <div id="cardiaco-list-container" class="content-grid">
+        <!-- Las tarjetas de registros se generarán con JS -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
+    <div id="cardiaco-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Monitorea tu Presión Arterial</h2>
+        <img src="images/cardiaco.png" alt="Icono de Corazón" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 400px; margin: 0 auto 1.5rem;">Añade tus registros de presión para llevar un control detallado de tu salud cardiovascular.</p>
+        <button id="add-cardiaco-initial-btn" class="button button-primary">Agregar Primer Registro</button>
+    </div>
+</div>
+
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO CARDIACO === -->
+<div id="cardiaco-form-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2 id="cardiaco-form-title" class="modal-title">Agregar Registro de Presión</h2>
+        <form id="cardiaco-form" class="modal-form">
+            <input type="hidden" id="cardiaco-id">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label for="cardiaco-date">Fecha</label>
+                    <input type="date" id="cardiaco-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="cardiaco-time">Hora</label>
+                    <input type="time" id="cardiaco-time" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="form-group">
+                    <label for="cardiaco-systolic">Sistólica (SYS)</label>
+                    <input type="number" id="cardiaco-systolic" class="form-input" placeholder="Ej: 120" required>
+                </div>
+                <div class="form-group">
+                    <label for="cardiaco-diastolic">Diastólica (DIA)</label>
+                    <input type="number" id="cardiaco-diastolic" class="form-input" placeholder="Ej: 80" required>
+                </div>
+                 <div class="form-group">
+                    <label for="cardiaco-heartrate">Pulso (BPM)</label>
+                    <input type="number" id="cardiaco-heartrate" class="form-input" placeholder="Ej: 70" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cardiaco-notes">Notas (Opcional)</label>
+                <textarea id="cardiaco-notes" class="form-input" placeholder="Ej: Después de caminar, en reposo..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="cancel-cardiaco-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
 </div>
