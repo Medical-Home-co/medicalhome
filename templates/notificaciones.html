@@ -1,0 +1,181 @@
+<style>
+    /* Estilo para la tarjeta de "Control Principal" */
+    .notify-master-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .notify-master-card .icon-container {
+        grid-row: 1 / span 2;
+        padding: 0.75rem;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .notify-master-card .icon-container i {
+        width: 24px;
+        height: 24px;
+    }
+    .notify-master-card .control-info {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .notify-master-card .control-title {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    .notify-master-card .control-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .notify-master-card .switch {
+        grid-column: 3;
+        grid-row: 1;
+    }
+    .notify-master-card .control-buttons {
+        grid-column: 2 / span 2;
+        grid-row: 2;
+        display: flex;
+        gap: 0.75rem;
+    }
+    .control-buttons .button {
+        flex: 1; /* Hace que los botones ocupen el mismo espacio */
+    }
+
+    /* Estilo para el título "Notificaciones Programadas" */
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    /* Estilo para cada tarjeta de la lista */
+    .notification-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto; /* Icono, Info, Hora, Toggle */
+        gap: 0 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .notification-card .icon-container {
+        grid-row: 1 / span 2;
+        color: var(--text-secondary);
+    }
+    .notification-card .icon-container i {
+        width: 20px;
+        height: 20px;
+    }
+    .notification-card .notify-title {
+        grid-column: 2;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.15rem;
+    }
+    .notification-card .notify-subtitle {
+        grid-column: 2;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .notification-card .notify-time-info {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        text-align: right;
+    }
+    .notification-card .notify-time-info .time {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    .notification-card .notify-time-info .type {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    .notification-card .switch {
+        grid-column: 4;
+        grid-row: 1 / span 2;
+        padding-left: 1rem;
+    }
+
+    /* Estilo para la caja de información al final */
+    .info-box {
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .info-box-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .info-box ul {
+        padding-left: 1.25rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .info-box li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Configuración de Notificaciones</h2>
+            <p class="page-subtitle">Gestiona tus recordatorios y alertas</p>
+        </div>
+    </div>
+
+    <div class="notify-master-card">
+        <div class="icon-container">
+            <i data-lucide="bell"></i>
+        </div>
+        <div class="control-info">
+            <p class="control-title">Control Principal</p>
+            <p class="control-subtitle" id="notify-master-subtitle">...</p>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="notify-master-toggle">
+            <span class="slider"></span>
+        </label>
+        <div class="control-buttons">
+            <button id="notify-activate-all" class="button button-primary">Activar Todas</button>
+            <button id="notify-deactivate-all" class="button button-secondary">Desactivar Todas</button>
+        </div>
+    </div>
+
+    <h2 class="section-title">Notificaciones Programadas</h2>
+    <div id="notify-list-container">
+        </div>
+    
+    <div id="notify-empty-state" class="empty-state-container hidden" style="text-align: center; margin-top: 2rem;">
+        <h2 class="modal-title">No hay recordatorios activos</h2>
+        <img src="images/notificaciones.png" alt="Icono de Notificaciones" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 400px; margin: 0 auto 1.5rem;">Cuando agregues medicamentos o citas, sus recordatorios aparecerán aquí.</p>
+    </div>
+
+    <div class="info-box">
+        <h3 class="info-box-title"><i data-lucide="info"></i> Información sobre Notificaciones</h3>
+        <ul>
+            <li>Las notificaciones de medicamentos se envían 20 minutos antes de la hora programada.</li>
+            <li>Las citas médicas te recordarán 24 horas antes.</li>
+            <li>Las terapias envían 2 notificaciones: una 24h antes y otra 2h antes.</li>
+            <li>Las Citas de peso seco se recordarán 3 días antes y un día antes.</li>
+            <li>Para recibir notificaciones, asegúrate de tener habilitadas las notificaciones del navegador.</li>
+        </ul>
+    </div>
+</div>

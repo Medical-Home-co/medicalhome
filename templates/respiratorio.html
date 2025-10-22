@@ -1,0 +1,117 @@
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA RESPIRATORIA === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Seguimiento Respiratorio</h2>
+            <p class="page-subtitle">Registra tus síntomas y mediciones diarias.</p>
+        </div>
+        <button id="add-respiratorio-main-btn" class="button button-primary hidden">
+            <span>+ Nuevo Registro</span>
+        </button>
+    </div>
+
+    <!-- La lista de registros guardados aparecerá aquí -->
+    <div id="respiratorio-list-container" class="content-grid">
+        <!-- Las tarjetas se generarán con JS -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
+    <div id="respiratorio-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Monitorea tu Salud Respiratoria</h2>
+        <img src="images/respiratorio.png" alt="Icono Pulmones" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">Lleva un control de tus síntomas, como la tos o la dificultad para respirar, y el uso de tus medicamentos.</p>
+        <button id="add-respiratorio-initial-btn" class="button button-primary">Agregar Primer Registro</button>
+    </div>
+</div>
+
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO === -->
+<div id="respiratorio-form-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2 id="respiratorio-form-title" class="modal-title">Nuevo Registro Respiratorio</h2>
+        <p class="modal-subtitle">Completa la información de tus síntomas.</p>
+        
+        <form id="respiratorio-form" class="modal-form">
+            <input type="hidden" id="respiratorio-id">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="respiratorio-date">Fecha</label>
+                    <input type="date" id="respiratorio-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="respiratorio-time">Hora</label>
+                    <input type="time" id="respiratorio-time" class="form-input" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="respiratorio-severity">Nivel General de Síntomas</label>
+                <select id="respiratorio-severity" class="form-input">
+                    <option value="Leve">Leve</option>
+                    <option value="Moderado">Moderado</option>
+                    <option value="Severo">Severo</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Síntomas Presentes</label>
+                <div class="checkbox-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Tos"> Tos</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Falta de aire"> Falta de aire</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Sibilancias"> Sibilancias</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Opresión en el pecho"> Opresión en el pecho</label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="respiratorio-peakflow">Flujo Máximo (L/min) (Opcional)</label>
+                <input type="number" id="respiratorio-peakflow" placeholder="Ej: 450" class="form-input">
+            </div>
+
+            <!-- NUEVOS CAMPOS CONDICIONALES -->
+            <div class="form-section" style="margin-top: 1rem;">
+                <div class="form-group radio-group">
+                    <label>¿Usó inhalador de rescate?</label>
+                    <div>
+                        <input type="radio" id="inhaler-no" name="usedInhaler" value="no" checked> <label for="inhaler-no">No</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="inhaler-yes" name="usedInhaler" value="yes"> <label for="inhaler-yes">Sí</label>
+                    </div>
+                </div>
+                <div id="inhaler-dose-container" class="form-group hidden" style="margin-top: 0.5rem;">
+                    <label for="respiratorio-inhaler-dose">Dosis y Medicamento</label>
+                    <input type="text" id="respiratorio-inhaler-dose" placeholder="Ej: Salbutamol, 2 puffs" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top: 1rem;">
+                <div class="form-group radio-group">
+                    <label>¿Necesitó oxígeno suplementario?</label>
+                    <div>
+                        <input type="radio" id="oxygen-no" name="usedOxygen" value="no" checked> <label for="oxygen-no">No</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="oxygen-yes" name="usedOxygen" value="yes"> <label for="oxygen-yes">Sí</label>
+                    </div>
+                </div>
+                <div id="oxygen-details-container" class="form-group hidden" style="margin-top: 0.5rem;">
+                    <label for="respiratorio-oxygen-details">Método y Cantidad</label>
+                    <input type="text" id="respiratorio-oxygen-details" placeholder="Ej: Cánula nasal a 2 L/min" class="form-input">
+                </div>
+            </div>
+            <!-- FIN DE NUEVOS CAMPOS -->
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="respiratorio-notes">Notas Adicionales</label>
+                <textarea id="respiratorio-notes" class="form-input" rows="2" placeholder="Describe posibles desencadenantes..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-respiratorio-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+

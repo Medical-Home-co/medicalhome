@@ -1,0 +1,92 @@
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA GÁSTRICO === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Seguimiento Gástrico</h2>
+            <p class="page-subtitle">Registra tus síntomas digestivos diarios.</p>
+        </div>
+        <button id="add-gastrico-main-btn" class="button button-primary hidden">
+            <span>+ Nuevo Registro</span>
+        </button>
+    </div>
+
+    <!-- La lista de registros guardados aparecerá aquí -->
+    <div id="gastrico-list-container" class="content-grid">
+        <!-- Las tarjetas se generarán con JS -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
+    <div id="gastrico-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Tu Diario Digestivo</h2>
+        <img src="images/gastrico.png" alt="Icono de Estómago" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">Lleva un control de tus síntomas gástricos para identificar patrones y mejorar tu bienestar digestivo.</p>
+        <button id="add-gastrico-initial-btn" class="button button-primary">Agregar Primer Registro</button>
+    </div>
+</div>
+
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO === -->
+<div id="gastrico-form-modal" class="modal-overlay hidden">
+
+    <div class="modal-content">
+        <h2 id="gastrico-form-title" class="modal-title">Nuevo Registro Gástrico</h2>
+        
+        <form id="gastrico-form" class="modal-form">
+            <input type="hidden" id="gastrico-id">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="gastrico-date">Fecha</label>
+                    <input type="date" id="gastrico-date" name="date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="gastrico-time">Hora</label>
+                    <input type="time" id="gastrico-time" name="time" class="form-input" required>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top: 1rem;">
+                <label class="form-label" style="font-weight: 600; display: block; margin-bottom: 1rem;">Síntomas Registrados</label>
+                <div id="gastrico-symptoms-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div class="form-section" style="margin-top: 0.5rem;">
+                <div class="form-group">
+                    <label for="gastrico-symptom">Síntoma Principal *</label>
+                    <select id="gastrico-symptom" name="symptom" class="form-input" required>
+                        <option>Acidez / Reflujo</option>
+                        <option>Náuseas</option>
+                        <option>Dolor Abdominal</option>
+                        <option>Hinchazón / Gases</option>
+                        <option>Vómito</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="gastrico-severity">Nivel de Malestar *</label>
+                    <select id="gastrico-severity" name="severity" class="form-input" required>
+                        <option value="Leve">Leve</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Severo">Severo</option>
+                    </select>
+                </div>
+            </div>
+                </div>
+                <button type="button" id="add-symptom-btn" class="button button-secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Otro Síntoma</button>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="gastrico-food">Alimentos Consumidos (Opcional)</label>
+                <textarea id="gastrico-food" name="food" class="form-input" rows="2" placeholder="Describe lo que comiste antes del síntoma."></textarea>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="gastrico-meds">Medicación Tomada (Opcional)</label>
+                <input type="text" id="gastrico-meds" name="meds" class="form-input" placeholder="Ej: Omeprazol, 1 pastilla">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-gastrico-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+

@@ -1,0 +1,65 @@
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE CONTROL DE DIABETES === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Control de Diabetes</h2>
+            <p class="page-subtitle">Monitorea tus niveles de glucosa y medicación.</p>
+        </div>
+        <button id="add-diabetes-main-btn" class="button button-primary hidden">
+            <span>+ Nuevo Registro</span>
+        </button>
+    </div>
+
+    <!-- La lista de registros guardados aparecerá aquí -->
+    <div id="diabetes-list-container" class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <!-- Las tarjetas de registros se generarán con JS -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
+    <div id="diabetes-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Monitorea tu Glucosa</h2>
+        <img src="images/diabetes.png" alt="Icono de Diabetes" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 400px; margin: 0 auto 1.5rem;">Añade tus registros de glucosa para llevar un control detallado y entender mejor tus patrones.</p>
+        <button id="add-diabetes-initial-btn" class="button button-primary">Agregar Primer Registro</button>
+    </div>
+</div>
+
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO DE DIABETES === -->
+<div id="diabetes-form-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2 id="diabetes-form-title" class="modal-title">Nuevo Registro</h2>
+        <form id="diabetes-form" class="modal-form">
+            <input type="hidden" id="diabetes-id">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label for="diabetes-date">Fecha</label>
+                    <input type="date" id="diabetes-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="diabetes-time">Hora</label>
+                    <input type="time" id="diabetes-time" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="diabetes-glucose">Nivel de Glucosa (mg/dL) *</label>
+                <input type="number" id="diabetes-glucose" class="form-input" placeholder="Ej: 110" required>
+            </div>
+            <div class="form-group">
+                <label for="diabetes-hba1c">Hemoglobina Glicosilada (HbA1c) (Opcional)</label>
+                <input type="number" step="0.1" id="diabetes-hba1c" class="form-input" placeholder="Ej: 5.7">
+            </div>
+             <div class="form-group">
+                <label for="diabetes-insulin">Dosis de Insulina (unidades) (Opcional)</label>
+                <input type="number" id="diabetes-insulin" class="form-input" placeholder="Ej: 10">
+            </div>
+            <div class="form-group">
+                <label for="diabetes-notes">Notas (Opcional)</label>
+                <textarea id="diabetes-notes" class="form-input" placeholder="Ej: En ayunas, después del almuerzo..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="cancel-diabetes-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>

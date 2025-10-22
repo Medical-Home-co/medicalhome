@@ -1,0 +1,66 @@
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR CITA === -->
+<div id="citas-form-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align: left; max-width: 500px;">
+        <h2 id="cita-form-title" class="modal-title">Agregar Cita</h2>
+        <p class="modal-subtitle">Completa la información de la cita médica.</p>
+        
+        <form id="cita-form" class="modal-form" style="margin-top: 1.5rem;">
+            <input type="hidden" id="cita-id">
+            <div class="form-group">
+                <label for="cita-name">Nombre de la Cita *</label>
+                <input type="text" id="cita-name" name="name" class="form-input" placeholder="Ej: Control Cardiología" required>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cita-date">Fecha *</label>
+                    <input type="date" id="cita-date" name="date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="cita-time">Hora *</label>
+                    <input type="time" id="cita-time" name="time" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cita-location">Lugar *</label>
+                <input type="text" id="cita-location" name="location" placeholder="Ej: Hospital San José" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="cita-doctor">Profesional *</label>
+                <input type="text" id="cita-doctor" name="doctor" placeholder="Ej: Dr. García" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="cita-companion">Acompañante (Opcional)</label>
+                <input type="text" id="cita-companion" name="companion" class="form-input">
+            </div>
+            
+            <div class="modal-actions" style="justify-content: center; flex-direction: row; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" id="cancel-cita-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE CITAS === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Citas Médicas</h2>
+            <p class="page-subtitle">Gestiona tus citas y recordatorios</p>
+        </div>
+        <button id="add-cita-main-btn" class="button button-primary hidden">
+            <span>+ Agregar</span>
+        </button>
+    </div>
+
+    <div id="citas-list-container" class="content-grid">
+        <!-- Las tarjetas de citas se generarán aquí -->
+    </div>
+
+    <div id="citas-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Gestiona tus citas</h2>
+        <img src="images/cita.png" alt="Icono de Citas" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">Comienza agregando tus citas para recibir recordatorios y llevar un mejor control.</p>
+        <button id="add-cita-initial-btn" class="button button-primary">Agregar Cita</button>
+    </div>
+</div>

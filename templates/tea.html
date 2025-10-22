@@ -1,0 +1,155 @@
+<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE SEGUIMIENTO DE TEA === -->
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Seguimiento Diario de TEA</h2>
+            <p class="page-subtitle">Registra el estado de ánimo, interacciones y rutinas.</p>
+        </div>
+        <button id="add-tea-main-btn" class="button button-primary hidden">
+            <span>+ Nuevo Registro</span>
+        </button>
+    </div>
+
+    <!-- La lista de registros guardados aparecerá aquí -->
+    <div id="tea-list-container" class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+        <!-- Las tarjetas de registros se generarán con JS -->
+    </div>
+
+    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
+    <div id="tea-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Registro Diario Detallado</h2>
+        <img src="images/tea.png" alt="Icono de TEA" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">El seguimiento diario es una herramienta poderosa para entender patrones y comunicar avances a los terapeutas.</p>
+        <button id="add-tea-initial-btn" class="button button-primary">Agregar Primer Registro</button>
+    </div>
+</div>
+
+<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO DE TEA === -->
+<div id="tea-form-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2 id="tea-form-title" class="modal-title">Nuevo Registro Diario</h2>
+        <form id="tea-form" class="modal-form">
+            <input type="hidden" id="tea-id">
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label for="tea-date">Fecha</label>
+                    <input type="date" id="tea-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="tea-time">Hora</label>
+                    <input type="time" id="tea-time" class="form-input" required>
+                </div>
+            </div>
+            
+            <!-- 1. Estado de Ánimo y Emociones -->
+            <div class="form-section">
+                <h3 class="form-section-title">1. Estado de Ánimo y Emociones</h3>
+                <div class="form-group">
+                    <label>¿Cómo te sientes hoy?</label>
+                    <div id="tea-mood-container" class="emoji-selector">
+                        <!-- Emojis se generan con JS -->
+                    </div>
+                    <input type="hidden" id="tea-mood-value" name="mood">
+                </div>
+                <div class="form-group">
+                    <label for="anxiety-level">Nivel de Ansiedad (1-10)</label>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <input type="range" id="anxiety-level" name="anxietyLevel" min="1" max="10" value="5" class="form-range">
+                        <span id="anxiety-level-value" class="range-value">5</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas sobre Emociones</label>
+                    <textarea name="emotionNotes" class="form-input" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- 2. Interacciones Sociales -->
+            <div class="form-section">
+                 <h3 class="form-section-title">2. Interacciones Sociales</h3>
+                 <div class="form-group">
+                    <label>Interacciones Sociales Hoy</label>
+                    <div id="tea-social-container" class="tags-selector"></div>
+                 </div>
+                 <div class="form-group">
+                    <label>Notas Sociales</label>
+                    <textarea name="socialNotes" class="form-input" rows="2"></textarea>
+                 </div>
+            </div>
+
+            <!-- 3. Sensibilidad Sensorial -->
+            <div class="form-section">
+                <h3 class="form-section-title">3. Sensibilidad Sensorial</h3>
+                <div class="form-group">
+                    <label>¿Sobrecarga sensorial?</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="sensoryOverload" value="Sí"> Sí</label>
+                        <label class="radio-label"><input type="radio" name="sensoryOverload" value="No" checked> No</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Disparadores Sensoriales Notados</label>
+                    <div id="tea-sensory-triggers-container" class="tags-selector"></div>
+                </div>
+            </div>
+
+            <!-- 4. Rutinas y Flexibilidad -->
+            <div class="form-section">
+                <h3 class="form-section-title">4. Rutinas y Flexibilidad</h3>
+                <div class="form-group">
+                    <label>¿Cambios en la rutina?</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="routineChange" value="Sí"> Sí</label>
+                        <label class="radio-label"><input type="radio" name="routineChange" value="No" checked> No</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>¿Cómo se manejó el cambio?</label>
+                    <select name="changeHandling" class="form-input">
+                        <option>No aplica</option>
+                        <option>Muy bien</option>
+                        <option>Con dificultad</option>
+                        <option>Generó estrés</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 5. Alimentación y Sueño -->
+            <div class="form-section">
+                <h3 class="form-section-title">5. Alimentación y Sueño</h3>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label>Calidad del Sueño</label>
+                        <select name="sleepQuality" class="form-input">
+                            <option>Excelente</option>
+                            <option>Regular</option>
+                            <option>Mala</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Apetito Hoy</label>
+                        <select name="appetite" class="form-input">
+                            <option>Bueno</option>
+                            <option>Regular</option>
+                            <option>Bajo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Logros y Momentos Positivos -->
+            <div class="form-section" style="background-color: #E8F5E9; border-radius: 8px; padding: 1rem;">
+                <h3 class="form-section-title" style="color: #2E7D32;">6. ¡Algo Genial que Pasó Hoy!</h3>
+                <div class="form-group">
+                    <textarea name="positiveMoment" class="form-input" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-tea-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar Registro</button>
+            </div>
+        </form>
+    </div>
+</div>
