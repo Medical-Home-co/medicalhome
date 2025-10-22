@@ -1,0 +1,23 @@
+{
+    "name": "MedicalHome",
+    "short_name": "MedicalHome",
+    "description": "Asistente médico para gestionar tu salud en casa.",
+    "start_url": "/",
+    "display": "fullscreen",
+    "background_color": "#FFFFFF",
+    "theme_color": "#3A86FF",
+    "icons": [
+        {
+            "src": "images/icono.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "images/icono.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
