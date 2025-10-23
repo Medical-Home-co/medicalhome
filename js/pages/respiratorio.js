@@ -1,192 +1,152 @@
-// --- Base de Datos Temporal ---
-let tempRespiratorioDB = [];
+/* --- pages/respiratorio.js --- */
+import { store } from '../store.js';
 
-// --- Funciones de Renderizado ---
+let currentRespiratorioData = [];
+let formModal, form; // Variables para elementos del modal
 
+/* --- (Opcional: Inyectar Estilos) --- */
+/*
+function injectRespiratorioStyles() {
+    // ... si necesitas estilos específicos para las tarjetas ...
+}
+*/
+
+/* --- Renderizar Lista --- */
 function renderRespiratorioList() {
     const listContainer = document.getElementById('respiratorio-list-container');
     const emptyState = document.getElementById('respiratorio-empty-state');
     const addMainBtn = document.getElementById('add-respiratorio-main-btn');
-
-    if (!listContainer || !emptyState || !addMainBtn) return;
+    if (!listContainer || !emptyState || !addMainBtn) { console.error("Elementos UI Respiratorio faltan."); return; }
     listContainer.innerHTML = '';
 
-    if (tempRespiratorioDB.length === 0) {
-        emptyState.classList.remove('hidden');
-        addMainBtn.classList.add('hidden');
+    if (currentRespiratorioData.length === 0) {
+        emptyState.classList.remove('hidden'); listContainer.classList.add('hidden'); addMainBtn.classList.add('hidden');
     } else {
-        emptyState.classList.add('hidden');
-        addMainBtn.classList.remove('hidden');
-        tempRespiratorioDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        emptyState.classList.add('hidden'); listContainer.classList.remove('hidden'); addMainBtn.classList.remove('hidden');
+        
+        const sortedData = [...currentRespiratorioData].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        tempRespiratorioDB.forEach(rec => {
+        sortedData.forEach(rec => {
             const card = document.createElement('div');
-            card.className = 'summary-card';
-            
-            let severityClass = 'level-low';
-            if (rec.severity === 'Moderado') severityClass = 'level-medium';
-            if (rec.severity === 'Severo') severityClass = 'level-high';
-
-            const symptomsHTML = rec.symptoms.map(symptom => `<span class="tag">${symptom}</span>`).join('');
+            card.className = 'summary-card'; card.style.padding = '1rem';
+            let formattedDate = 'Fecha no registrada';
+            try { if(rec.date) formattedDate = new Date(rec.date + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }); } catch(e) {}
 
             card.innerHTML = `
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <p class="card-title">${new Date(rec.date + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })} - ${rec.time}</p>
+                        <h3 class="card-title" style="border: none; padding: 0; margin-bottom: 0.25rem;">${rec.type || 'Registro'} - ${formattedDate}</h3>
+                        <p style="font-size: 1rem; font-weight: 500; color: var(--primary-blue);">${rec.value || 'N/A'}</p>
                     </div>
-                    <div class="card-actions">
+                    <div class="card-actions" style="display: flex; gap: 0.5rem;">
                         <button class="icon-button edit-btn" data-id="${rec.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="symptom-row">
-                        <span>Nivel General</span>
-                        <span class="level-indicator ${severityClass}">${rec.severity}</span>
-                    </div>
-                    ${rec.peakFlow ? `<div class="symptom-row"><span>Flujo Máximo</span><span style="font-weight: 600;">${rec.peakFlow} L/min</span></div>` : ''}
-                    ${rec.symptoms.length > 0 ? `<div class="tags-container" style="margin-top: 0.75rem;">${symptomsHTML}</div>` : ''}
-                    ${rec.inhalerDose ? `<p class="info-row"><strong>Inhalador Rescate:</strong> ${rec.inhalerDose}</p>` : ''}
-                    ${rec.oxygenDetails ? `<p class="info-row"><strong>Oxígeno Suplementario:</strong> ${rec.oxygenDetails}</p>` : ''}
-                </div>
+                ${rec.notes ? `<div class="card-body" style="padding-top: 1rem; border-top: 1px solid var(--border-color); margin-top: 1rem;"><p style="font-size: 0.9rem;">${rec.notes.replace(/\n/g, '<br>')}</p></div>` : ''}
             `;
             listContainer.appendChild(card);
         });
     }
+    attachEventListeners();
 }
 
-function injectRespiratorioStyles() {
-    const styleId = 'respiratory-dynamic-styles';
-    if (document.getElementById(styleId)) return;
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.innerHTML = `
-        .level-low { background-color: #E8F5E9; color: #2E7D32; }
-        .level-medium { background-color: #FFF3E0; color: #E65100; }
-        .level-high { background-color: #FFEBEE; color: #C62828; }
-        .symptom-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
-        .level-indicator { font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.9rem; }
-        .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-        .tag { background-color: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem; }
-        .info-row { margin-top: 0.75rem; font-size: 0.9rem; padding: 0.5rem; background-color: var(--bg-secondary); border-radius: 6px; }
-        .form-section { border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; }
-        .radio-group { display: flex; justify-content: space-between; align-items: center; }
-    `;
-    document.head.appendChild(style);
+/* --- Funciones del Modal --- */
+function openFormModal(record = null) {
+    if (!form || !formModal) return;
+    form.reset();
+    document.getElementById('respiratorio-id').value = '';
+    document.getElementById('respiratorio-form-title').textContent = 'Nuevo Registro Respiratorio';
+    document.getElementById('respiratorio-date').valueAsDate = new Date();
+
+    if (record) { // Modo Edición
+        document.getElementById('respiratorio-form-title').textContent = 'Editar Registro';
+        document.getElementById('respiratorio-id').value = record.id;
+        form.elements['date'].value = record.date;
+        form.elements['type'].value = record.type; // Asumiendo campo 'type'
+        form.elements['value'].value = record.value; // Asumiendo campo 'value'
+        form.elements['notes'].value = record.notes || '';
+    }
+    formModal.classList.remove('hidden');
 }
+function closeFormModal() { formModal?.classList.add('hidden'); }
 
-export function init() {
-    injectRespiratorioStyles();
-
-    const formModal = document.getElementById('respiratorio-form-modal');
-    const form = document.getElementById('respiratorio-form');
-    const listContainer = document.getElementById('respiratorio-list-container');
+/* --- Listener Envío Formulario --- */
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const idValue = document.getElementById('respiratorio-id').value;
+    const id = idValue ? parseInt(idValue, 10) : Date.now();
     
-    // --- Lógica para campos condicionales ---
-    const inhalerYes = document.getElementById('inhaler-yes');
-    const inhalerNo = document.getElementById('inhaler-no');
-    const inhalerDoseContainer = document.getElementById('inhaler-dose-container');
+    const record = {
+        id: id,
+        date: form.elements['date'].value,
+        type: form.elements['type'].value, // Asumiendo campo 'type'
+        value: form.elements['value'].value, // Asumiendo campo 'value'
+        notes: form.elements['notes'].value
+    };
+
+    if (idValue) { // Editando
+        const index = currentRespiratorioData.findIndex(rec => rec.id === id);
+        if (index > -1) currentRespiratorioData[index] = record;
+    } else { // Agregando
+        currentRespiratorioData.push(record);
+    }
     
-    const oxygenYes = document.getElementById('oxygen-yes');
-    const oxygenNo = document.getElementById('oxygen-no');
-    const oxygenDetailsContainer = document.getElementById('oxygen-details-container');
-
-    inhalerYes?.addEventListener('change', () => inhalerDoseContainer.classList.remove('hidden'));
-    inhalerNo?.addEventListener('change', () => inhalerDoseContainer.classList.add('hidden'));
-    oxygenYes?.addEventListener('change', () => oxygenDetailsContainer.classList.remove('hidden'));
-    oxygenNo?.addEventListener('change', () => oxygenDetailsContainer.classList.add('hidden'));
-
-
-    function openFormModal(record = null) {
-        if (!form) return;
-        form.reset();
-        inhalerDoseContainer.classList.add('hidden');
-        oxygenDetailsContainer.classList.add('hidden');
-
-        const now = new Date();
-        document.getElementById('respiratorio-date').valueAsDate = now;
-        document.getElementById('respiratorio-time').value = now.toTimeString().slice(0, 5);
-        document.getElementById('respiratorio-id').value = '';
-        document.getElementById('respiratorio-form-title').textContent = 'Nuevo Registro Respiratorio';
-
-        if (record) {
-            document.getElementById('respiratorio-form-title').textContent = 'Editar Registro';
-            document.getElementById('respiratorio-id').value = record.id;
-            document.getElementById('respiratorio-date').value = record.date;
-            document.getElementById('respiratorio-time').value = record.time;
-            document.getElementById('respiratorio-severity').value = record.severity;
-            record.symptoms.forEach(s => {
-                const el = form.querySelector(`input[name="symptoms"][value="${s}"]`);
-                if(el) el.checked = true;
-            });
-            document.getElementById('respiratorio-peakflow').value = record.peakFlow || '';
-            document.getElementById('respiratorio-notes').value = record.notes || '';
-
-            if (record.inhalerDose) {
-                if(inhalerYes) inhalerYes.checked = true;
-                inhalerDoseContainer.classList.remove('hidden');
-                document.getElementById('respiratorio-inhaler-dose').value = record.inhalerDose;
-            }
-             if (record.oxygenDetails) {
-                if(oxygenYes) oxygenYes.checked = true;
-                oxygenDetailsContainer.classList.remove('hidden');
-                document.getElementById('respiratorio-oxygen-details').value = record.oxygenDetails;
-            }
-        }
-        formModal?.classList.remove('hidden');
-    }
-
-    function closeFormModal() {
-        formModal?.classList.add('hidden');
-    }
-
-    document.getElementById('add-respiratorio-initial-btn')?.addEventListener('click', () => openFormModal());
-    document.getElementById('add-respiratorio-main-btn')?.addEventListener('click', () => openFormModal());
-    document.getElementById('cancel-respiratorio-btn')?.addEventListener('click', closeFormModal);
-
-    form?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('respiratorio-id').value;
-        const symptoms = Array.from(form.querySelectorAll('input[name="symptoms"]:checked')).map(el => el.value);
-        
-        const record = {
-            id: id || Date.now(),
-            date: document.getElementById('respiratorio-date').value,
-            time: document.getElementById('respiratorio-time').value,
-            severity: document.getElementById('respiratorio-severity').value,
-            symptoms,
-            peakFlow: document.getElementById('respiratorio-peakflow').value || null,
-            inhalerDose: form.elements.usedInhaler.value === 'yes' ? document.getElementById('respiratorio-inhaler-dose').value : null,
-            oxygenDetails: form.elements.usedOxygen.value === 'yes' ? document.getElementById('respiratorio-oxygen-details').value : null,
-            notes: document.getElementById('respiratorio-notes').value
-        };
-
-        if (id) {
-            const index = tempRespiratorioDB.findIndex(rec => rec.id.toString() === id);
-            if (index > -1) tempRespiratorioDB[index] = record;
-        } else {
-            tempRespiratorioDB.push(record);
-        }
-        
-        closeFormModal();
-        renderRespiratorioList();
-    });
-
-    listContainer?.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        const editBtn = e.target.closest('.edit-btn');
-        if (deleteBtn) {
-            if (confirm('¿Estás seguro?')) {
-                tempRespiratorioDB = tempRespiratorioDB.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
-                renderRespiratorioList();
-            }
-        }
-        if (editBtn) {
-            const record = tempRespiratorioDB.find(rec => rec.id.toString() === editBtn.dataset.id);
-            if (record) openFormModal(record);
-        }
-    });
-
+    store.saveRespiratorioData(currentRespiratorioData); // <-- GUARDAR
+    
+    closeFormModal();
     renderRespiratorioList();
 }
 
+/* --- Listeners Tarjetas (Editar/Eliminar) --- */
+function attachEventListeners() {
+    const listContainer = document.getElementById('respiratorio-list-container');
+    if (!listContainer) return;
+    const newContainer = listContainer.cloneNode(true);
+    listContainer.parentNode.replaceChild(newContainer, listContainer);
+
+    newContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const editBtn = e.target.closest('.edit-btn');
+        const recordIdStr = deleteBtn?.dataset.id || editBtn?.dataset.id;
+        if (!recordIdStr) return;
+        
+        const recordId = parseInt(recordIdStr, 10);
+        if (deleteBtn) {
+            if (confirm('¿Eliminar este registro?')) {
+                currentRespiratorioData = currentRespiratorioData.filter(rec => rec.id !== recordId);
+                store.saveRespiratorioData(currentRespiratorioData); // <-- GUARDAR
+                renderRespiratorioList();
+            }
+        } else if (editBtn) {
+            const record = currentRespiratorioData.find(rec => rec.id === recordId);
+            if (record) openFormModal(record);
+        }
+    });
+}
+
+/* --- Función Principal --- */
+export function init() {
+    currentRespiratorioData = store.getRespiratorioData() || []; // <-- Cargar datos
+    console.log("Cargado js/pages/respiratorio.js");
+    // injectRespiratorioStyles(); // Opcional
+
+    formModal = document.getElementById('respiratorio-form-modal');
+    form = document.getElementById('respiratorio-form');
+    const addInitialBtn = document.getElementById('add-respiratorio-initial-btn');
+    const addMainBtn = document.getElementById('add-respiratorio-main-btn');
+    const cancelBtn = document.getElementById('cancel-respiratorio-btn');
+
+    if (!formModal || !form || !addInitialBtn || !addMainBtn || !cancelBtn) {
+         console.error("Faltan elementos HTML esenciales en respiratorio.html");
+         document.getElementById('respiratorio-empty-state')?.classList.remove('hidden');
+         return;
+    }
+
+    addInitialBtn.addEventListener('click', () => openFormModal());
+    addMainBtn.addEventListener('click', () => openFormModal());
+    cancelBtn.addEventListener('click', closeFormModal);
+    form.addEventListener('submit', handleFormSubmit);
+
+    renderRespiratorioList(); // Renderizado inicial
+}

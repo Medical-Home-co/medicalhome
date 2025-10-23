@@ -1,17 +1,21 @@
-// --- Base de Datos Temporal ---
-let tempAgendaDB = [];
+/* --- pages/agenda.js --- */
+import { store } from '../store.js'; // Importar store
 
-// --- Funciones de Renderizado ---
+let currentAgendaData = []; // Variable local para datos
 
+/* --- Función para renderizar la lista de contactos --- */
 function renderAgendaList() {
     const listContainer = document.getElementById('agenda-list-container');
     const emptyState = document.getElementById('agenda-empty-state');
     const addMainBtn = document.getElementById('add-agenda-main-btn');
 
-    if (!listContainer || !emptyState || !addMainBtn) return;
+    if (!listContainer || !emptyState || !addMainBtn) {
+        console.error("Elementos de la UI de Agenda no encontrados.");
+        return;
+    }
     listContainer.innerHTML = '';
 
-    if (tempAgendaDB.length === 0) {
+    if (currentAgendaData.length === 0) {
         emptyState.classList.remove('hidden');
         listContainer.classList.add('hidden');
         addMainBtn.classList.add('hidden');
@@ -20,154 +24,146 @@ function renderAgendaList() {
         listContainer.classList.remove('hidden');
         addMainBtn.classList.remove('hidden');
 
-        tempAgendaDB.forEach(contact => {
+        currentAgendaData.forEach(contact => {
             const card = document.createElement('div');
             card.className = 'summary-card';
+            card.style.padding = '1rem';
             
-            // Limpiar número de teléfono para los enlaces de WhatsApp
-            const cleanPhone = contact.phone.replace(/[^0-9]/g, '');
+            /* Indicador visual si es de emergencia */
+            const emergencyBadge = contact.isEmergency ? 
+                '<span class="tag" style="background-color: var(--danger-light); color: var(--danger-color); border: 1px solid var(--danger-color); font-weight: 500;">Emergencia</span>' : '';
 
             card.innerHTML = `
-                <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <h3 class="card-title">${contact.name} ${contact.isEmergency ? '<span class="emergency-tag">★ Emergencia</span>' : ''}</h3>
-                            <p class="card-subtitle">${contact.relation}</p>
-                        </div>
-                        <div class="card-actions">
-                            <button class="icon-button edit-btn" data-id="${contact.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                            <button class="icon-button delete-btn" data-id="${contact.id}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
-                        </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 600;">${contact.name}</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">${contact.relation}</p>
+                        <p style="font-size: 1rem; font-weight: 500; margin-top: 0.5rem; color: var(--primary-blue);">${contact.phone}</p>
                     </div>
-                    <div class="contact-actions-footer">
-                        <a href="tel:${cleanPhone}" class="button button-secondary contact-action-btn">
-                            <img src="images/icons/phone.svg" alt="Llamar">
-                            <span>Llamar</span>
-                        </a>
-                        <a href="https://wa.me/${cleanPhone}" target="_blank" class="button button-secondary contact-action-btn">
-                            <img src="images/icons/whatsapp.svg" alt="WhatsApp">
-                            <span>Mensaje</span>
-                        </a>
+                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                         <button class="icon-button edit-contact-btn" data-id="${contact.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
+                         <button class="icon-button delete-contact-btn" data-id="${contact.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
                     </div>
                 </div>
+                ${emergencyBadge ? `<div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem;">${emergencyBadge}</div>` : ''}
             `;
             listContainer.appendChild(card);
         });
     }
+    attachEventListeners(); // Re-asignar listeners
 }
 
-// --- Lógica de Estilos Dinámicos ---
-function injectAgendaStyles() {
-    const styleId = 'agenda-dynamic-styles';
-    if (document.getElementById(styleId)) return;
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.innerHTML = `
-        .emergency-tag {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #E65100; /* Naranja */
-            background-color: #FFF3E0;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            margin-left: 0.5rem;
-        }
-        .contact-actions-footer {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-        .contact-action-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .contact-action-btn img {
-            width: 16px;
-            height: 16px;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// --- Función Principal ---
-export function init() {
-    injectAgendaStyles();
-
+/* --- Funciones del Modal --- */
+function openFormModal(contact = null) {
     const formModal = document.getElementById('agenda-form-modal');
     const form = document.getElementById('agenda-form');
-    const addInitialBtn = document.getElementById('add-agenda-initial-btn');
-    const addMainBtn = document.getElementById('add-agenda-main-btn');
-    const cancelBtn = document.getElementById('cancel-contact-btn');
+    const formTitle = document.getElementById('agenda-form-title');
+    const entryIdInput = document.getElementById('contact-id');
+
+    if (!formModal || !form || !formTitle || !entryIdInput) {
+        console.error("Elementos del modal de Agenda no encontrados.");
+        return;
+    }
+    
+    form.reset();
+    entryIdInput.value = '';
+
+    if (contact) { // Modo Edición
+        formTitle.textContent = 'Editar Contacto';
+        entryIdInput.value = contact.id;
+        form.elements['name'].value = contact.name || '';
+        form.elements['relation'].value = contact.relation || '';
+        form.elements['phone'].value = contact.phone || '';
+        form.elements['isEmergency'].checked = contact.isEmergency || false;
+    } else { // Modo Agregar
+        formTitle.textContent = 'Agregar Contacto';
+    }
+    formModal.classList.remove('hidden');
+}
+
+function closeFormModal() {
+    document.getElementById('agenda-form-modal')?.classList.add('hidden');
+}
+
+/* --- Listener de Envío de Formulario --- */
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const entryId = document.getElementById('contact-id').value;
+
+    const data = {
+        name: formData.get('name'),
+        relation: formData.get('relation'),
+        phone: formData.get('phone'),
+        isEmergency: formData.get('isEmergency') === 'on' // 'on' si está marcado
+    };
+
+    if (entryId) { // Editar
+        const index = currentAgendaData.findIndex(c => c.id.toString() === entryId);
+        if (index > -1) {
+            currentAgendaData[index] = { ...data, id: parseInt(entryId) }; // Mantener ID
+        } else { return; }
+    } else { // Agregar
+        data.id = Date.now();
+        currentAgendaData.push(data);
+    }
+    
+    store.saveAgenda(currentAgendaData); // Guardar en store
+    closeFormModal();
+    renderAgendaList();
+}
+
+/* --- Asignar Listeners (Editar/Eliminar) --- */
+function attachEventListeners() {
     const listContainer = document.getElementById('agenda-list-container');
+    if (!listContainer) return;
+    const newContainer = listContainer.cloneNode(true);
+    listContainer.parentNode.replaceChild(newContainer, listContainer);
 
-    function openFormModal(contact = null) {
-        if (!form) return;
-        form.reset();
-        document.getElementById('contact-id').value = '';
-        document.getElementById('agenda-form-title').textContent = 'Agregar Contacto';
-
-        if (contact) {
-            document.getElementById('agenda-form-title').textContent = 'Editar Contacto';
-            document.getElementById('contact-id').value = contact.id;
-            document.getElementById('contact-name').value = contact.name;
-            document.getElementById('contact-relation').value = contact.relation;
-            document.getElementById('contact-phone').value = contact.phone;
-            document.getElementById('contact-emergency').checked = contact.isEmergency;
-        }
-        formModal?.classList.remove('hidden');
-    }
-
-    function closeFormModal() {
-        formModal?.classList.add('hidden');
-    }
-
-    addInitialBtn?.addEventListener('click', () => openFormModal());
-    addMainBtn?.addEventListener('click', () => openFormModal());
-    cancelBtn?.addEventListener('click', closeFormModal);
-
-    form?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('contact-id').value;
-        const formData = new FormData(form);
+    newContainer.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-contact-btn');
+        const deleteBtn = e.target.closest('.delete-contact-btn');
         
-        const contactData = {
-            id: id || Date.now(),
-            name: formData.get('name'),
-            relation: formData.get('relation'),
-            phone: formData.get('phone'),
-            isEmergency: formData.get('isEmergency') === 'on'
-        };
-
-        if (id) {
-            const index = tempAgendaDB.findIndex(c => c.id.toString() === id);
-            if (index > -1) tempAgendaDB[index] = contactData;
-        } else {
-            tempAgendaDB.push(contactData);
-        }
-        
-        closeFormModal();
-        renderAgendaList();
-    });
-
-    listContainer?.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        const editBtn = e.target.closest('.edit-btn');
-        if (deleteBtn) {
-            if (confirm('¿Estás seguro de que quieres eliminar este contacto?')) {
-                tempAgendaDB = tempAgendaDB.filter(c => c.id.toString() !== deleteBtn.dataset.id);
+        if (editBtn) {
+            const entryId = parseInt(editBtn.dataset.id, 10);
+            const contactToEdit = currentAgendaData.find(c => c.id === entryId);
+            if (contactToEdit) openFormModal(contactToEdit);
+        } else if (deleteBtn) {
+            const entryId = parseInt(deleteBtn.dataset.id, 10);
+            if (confirm("¿Eliminar este contacto?")) {
+                currentAgendaData = currentAgendaData.filter(c => c.id !== entryId);
+                store.saveAgenda(currentAgendaData);
                 renderAgendaList();
             }
         }
-        if (editBtn) {
-            const contact = tempAgendaDB.find(c => c.id.toString() === editBtn.dataset.id);
-            if (contact) openFormModal(contact);
-        }
     });
+}
 
-    renderAgendaList();
+/* --- Función Principal --- */
+export function init() {
+    console.log("Cargado js/pages/agenda.js");
+    currentAgendaData = store.getAgenda() || []; // Cargar datos del store
+
+    const formModal = document.getElementById('agenda-form-modal');
+    const addInitialBtn = document.getElementById('add-agenda-initial-btn');
+    const addMainBtn = document.getElementById('add-agenda-main-btn');
+    const cancelBtn = document.getElementById('cancel-contact-btn');
+    const form = document.getElementById('agenda-form');
+
+    if (!formModal || !addInitialBtn || !addMainBtn || !cancelBtn || !form) {
+        console.error("Elementos clave para Agenda no encontrados.");
+        document.getElementById('agenda-list-container')?.classList.add('hidden');
+        document.getElementById('agenda-empty-state')?.classList.remove('hidden');
+        return;
+    }
+
+    /* Asignar Listeners */
+    addInitialBtn.addEventListener('click', () => openFormModal());
+    addMainBtn.addEventListener('click', () => openFormModal());
+    cancelBtn.addEventListener('click', closeFormModal);
+    form.addEventListener('submit', handleFormSubmit);
+
+    attachEventListeners(); // Listeners para tarjetas
+    renderAgendaList(); // Renderizado inicial
 }

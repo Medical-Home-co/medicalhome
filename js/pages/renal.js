@@ -1,17 +1,20 @@
-// === INICIO DE LA SOLUCIÓN ===
-import { store } from '../store.js'; // Importar el store (ruta corregida)
-// === FIN DE LA SOLUCIÓN ===
+/* --- pages/renal.js --- */
+// 1. Importar el store
+import { store } from '../store.js';
 
-// La DB ahora se carga desde el store en la función init()
+// 2. La variable se inicializa en null; se cargará en init()
 let tempBcmDB = null;
 
-// --- (renderBcmData, renderWeightCard, renderLiquidCard no cambian) ---
+/* --- Funciones de Renderizado (sin cambios en su lógica interna) --- */
+/* (Usan tempBcmDB, que ahora se carga desde el store) */
+
 function renderBcmData() {
+    /* ... (código idéntico de tu archivo) ... */
     const dataContainer = document.getElementById('bcm-data-container');
     const emptyState = document.getElementById('bcm-empty-state');
     const addBcmMainBtn = document.getElementById('add-bcm-main-btn');
 
-    if (tempBcmDB.currentWeight === null) {
+    if (!tempBcmDB || tempBcmDB.currentWeight === null) { // Comprobación más segura
         if (dataContainer) dataContainer.classList.add('hidden');
         if (emptyState) emptyState.classList.remove('hidden');
         if (addBcmMainBtn) addBcmMainBtn.classList.add('hidden');
@@ -26,13 +29,17 @@ function renderBcmData() {
         attachActionListeners();
     }
 }
+
 function renderWeightCard() {
+    /* ... (código idéntico de tu archivo) ... */
     const liquidGain = (tempBcmDB.currentWeight - tempBcmDB.dryWeight).toFixed(2);
     document.getElementById('bcm-display-current').textContent = `${tempBcmDB.currentWeight} kg`;
     document.getElementById('bcm-display-dry').textContent = `${tempBcmDB.dryWeight} kg`;
     document.getElementById('bcm-display-gain').textContent = `${liquidGain} kg`;
 }
+
 function renderLiquidCard() {
+    /* ... (código idéntico de tu archivo) ... */
     const liquidCard = document.getElementById('bcm-liquid-card');
     if (!liquidCard) return;
     const liquidGain = (tempBcmDB.currentWeight - tempBcmDB.dryWeight);
@@ -54,28 +61,33 @@ function renderLiquidCard() {
     }
 }
 
-// --- (renderAppointmentsCard no cambia) ---
 function renderAppointmentsCard() {
+    /* ... (código idéntico de tu archivo, incluyendo el toggle de 'notify') ... */
     const appointmentsList = document.getElementById('bcm-appointments-list');
     const noAppointmentsMsg = document.getElementById('bcm-no-appointments-msg');
     if (!appointmentsList || !noAppointmentsMsg) return;
 
     appointmentsList.innerHTML = '';
-    if (tempBcmDB.dryWeightAppointments.length === 0) {
+    // Asegurarse que dryWeightAppointments exista
+    const appointments = tempBcmDB.dryWeightAppointments || [];
+    if (appointments.length === 0) {
         appointmentsList.appendChild(noAppointmentsMsg);
         noAppointmentsMsg.classList.remove('hidden');
     } else {
         noAppointmentsMsg.classList.add('hidden');
-        tempBcmDB.dryWeightAppointments.forEach(app => {
+        appointments.forEach(app => {
             const card = document.createElement('div');
+            /* Reutilizar summary-card para consistencia */
             card.className = 'summary-card'; 
+            card.style.padding = '1rem'; 
+            
             const attendedYesClass = app.attended === 'yes' ? 'attended-yes' : '';
             const attendedNoClass = app.attended === 'no' ? 'attended-no' : '';
-
+            
             card.innerHTML = `
                 <div class="appointment-info-top">
                     <div class="appointment-info">
-                        <p>${new Date(app.date + 'T' + app.time).toLocaleDateString('es-ES', { month: 'long', day: 'numeric' })} - ${app.time}</p>
+                        <p>${new Date(app.date + 'T' + (app.time || '00:00')).toLocaleDateString('es-ES', { month: 'long', day: 'numeric' })} - ${app.time || ''}</p>
                         <p class="appointment-detail">Nuevo P. Seco: ${app.newWeight} kg</p>
                     </div>
                     <div class="appointment-actions">
@@ -90,10 +102,7 @@ function renderAppointmentsCard() {
                 <div class="appointment-notify-row">
                     <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">Recordatorios</span>
                     <label class="switch">
-                        <input type="checkbox" 
-                               class="notify-toggle-input" 
-                               data-id="${app.id}" 
-                               ${app.notify ? 'checked' : ''}>
+                        <input type="checkbox" class="notify-toggle-bcm" data-id="${app.id}" ${app.notify ? 'checked' : ''}>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -103,64 +112,54 @@ function renderAppointmentsCard() {
     }
 }
 
-// --- (attachActionListeners no cambia) ---
+/* --- 3. Listeners (Guardar en store en cada acción) --- */
 function attachActionListeners() {
     const appointmentContainer = document.getElementById('bcm-appointments-list');
-    if (!appointmentContainer) return;
+    if (appointmentContainer) {
+        const newContainer = appointmentContainer.cloneNode(true);
+        appointmentContainer.parentNode.replaceChild(newContainer, appointmentContainer);
+        
+        newContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('.attendance-btn');
+            if (target) {
+                const appointmentId = parseInt(target.dataset.id, 10);
+                const action = target.dataset.action;
+                const appointment = tempBcmDB.dryWeightAppointments.find(a => a.id === appointmentId);
 
-    const newContainer = appointmentContainer.cloneNode(true);
-    appointmentContainer.parentNode.replaceChild(newContainer, appointmentContainer);
-    
-    newContainer.addEventListener('click', (e) => {
-        const attendanceBtn = e.target.closest('.attendance-btn');
-        if (!attendanceBtn) return;
-        const appointmentId = attendanceBtn.dataset.id;
-        const action = attendanceBtn.dataset.action;
-        const appointment = tempBcmDB.dryWeightAppointments.find(a => a.id.toString() === appointmentId);
-
-        if (appointment && appointment.attended !== action) {
-            appointment.attended = action;
-            store.saveBcmData(tempBcmDB); // <-- GUARDAR EN STORE
-            
-            const buttonGroup = attendanceBtn.closest('.attendance-buttons');
-            buttonGroup.querySelectorAll('.attendance-btn').forEach(btn => {
-                btn.classList.remove('attended-yes', 'attended-no');
-            });
-            if (action === 'yes') {
-                attendanceBtn.classList.add('attended-yes');
-            } else {
-                attendanceBtn.classList.add('attended-no');
+                if (appointment && appointment.attended !== action) {
+                    appointment.attended = action;
+                    store.saveBcmData(tempBcmDB); // <-- GUARDAR CAMBIO
+                    renderAppointmentsCard(); // Re-renderizar solo esta tarjeta
+                    attachActionListeners(); // Volver a asignar
+                }
             }
-        }
-    });
+        });
 
-    newContainer.addEventListener('change', (e) => {
-        const notifyToggle = e.target.closest('.notify-toggle-input');
-        if (!notifyToggle) return;
-        
-        const appointmentId = notifyToggle.dataset.id;
-        const appointment = tempBcmDB.dryWeightAppointments.find(a => a.id.toString() === appointmentId);
-        
-        if (appointment) {
-            appointment.notify = notifyToggle.checked;
-            store.saveBcmData(tempBcmDB); // <-- GUARDAR EN STORE
-            console.log(`Cita ${appointmentId} notificación: ${appointment.notify}`);
-        }
-    });
+        // Listener para el toggle
+        newContainer.addEventListener('change', (e) => {
+            const toggle = e.target.closest('.notify-toggle-bcm');
+            if(toggle) {
+                const appointmentId = parseInt(toggle.dataset.id, 10);
+                const appointment = tempBcmDB.dryWeightAppointments.find(a => a.id === appointmentId);
+                if (appointment) {
+                    appointment.notify = toggle.checked;
+                    store.saveBcmData(tempBcmDB); // <-- GUARDAR CAMBIO
+                }
+            }
+        });
+    }
 }
 
-// --- (injectBcmStyles no cambia) ---
-function injectBcmStyles() {
-    const styleId = 'bcm-dynamic-styles';
-    if (document.getElementById(styleId)) return;
-    const style = document.createElement('style');
-    style.id = styleId;
+
+function injectBcmStyles() { /* ... (código idéntico de tu archivo) ... */
+    const styleId = 'bcm-dynamic-styles'; if (document.getElementById(styleId)) return; const style = document.createElement('style'); style.id = styleId;
     style.innerHTML = `
         .liquid-log-entry { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); padding: 0.25rem 0; border-bottom: 1px solid var(--border-color); }
-        .summary-card.limit-exceeded { background-color: #FFEBEE !important; border-color: #C62828 !important; }
-        body.dark-theme .summary-card.limit-exceeded { background-color: #4b2222 !important; border-color: #ef9a9a !important; }
-        .summary-card.limit-exceeded, .summary-card.limit-exceeded * { color: #C62828 !important; }
-        body.dark-theme .summary-card.limit-exceeded, body.dark-theme .summary-card.limit-exceeded * { color: #ffcdd2 !important; }
+        .summary-card.limit-exceeded { background-color: var(--danger-light, #FFEBEE) !important; border-color: var(--danger-color, #C62828) !important; }
+        body.dark-theme .summary-card.limit-exceeded { background-color: var(--danger-light, #4b2222) !important; border-color: var(--danger-color, #ef9a9a) !important; }
+        .summary-card.limit-exceeded, .summary-card.limit-exceeded * { color: var(--danger-color, #C62828) !important; }
+        body.dark-theme .summary-card.limit-exceeded, body.dark-theme .summary-card.limit-exceeded * { color: var(--danger-color, #ffcdd2) !important; }
+        /* .appointment-card-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 12px; } */
         .appointment-info-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .appointment-info .appointment-detail { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem; }
         .appointment-actions { display: flex; align-items: center; gap: 0.75rem; }
@@ -172,9 +171,11 @@ function injectBcmStyles() {
     document.head.appendChild(style);
 }
 
-// --- (init() no cambia) ---
 export function init() {
-    tempBcmDB = store.getBcmData(); // Cargar datos del store
+    // 4. Cargar datos del store
+    tempBcmDB = store.getBcmData();
+    console.log("Cargado js/pages/renal.js (conectado a store)");
+
     injectBcmStyles();
     
     const weightModal = document.getElementById('bcm-weight-modal');
@@ -187,47 +188,26 @@ export function init() {
     function openModal(modal) { if (modal) modal.classList.remove('hidden'); }
     function closeModal(modal) { if (modal) modal.classList.add('hidden'); }
     
-    document.getElementById('add-bcm-initial-btn')?.addEventListener('click', () => {
-        if (weightForm) weightForm.reset();
-        openModal(weightModal);
-    });
-    document.getElementById('add-bcm-main-btn')?.addEventListener('click', () => {
-        if (weightForm && tempBcmDB.currentWeight !== null) {
-            document.getElementById('bcm-current-weight').value = tempBcmDB.currentWeight;
-            document.getElementById('bcm-dry-weight').value = tempBcmDB.dryWeight;
-        }
-        openModal(weightModal);
-    });
-     document.getElementById('update-weight-btn')?.addEventListener('click', () => {
-        if (weightForm && tempBcmDB.currentWeight !== null) {
-            document.getElementById('bcm-current-weight').value = tempBcmDB.currentWeight;
-            document.getElementById('bcm-dry-weight').value = tempBcmDB.dryWeight;
-        }
-        openModal(weightModal);
-    });
-    document.getElementById('add-liquid-btn')?.addEventListener('click', () => {
-        if (liquidForm) liquidForm.reset();
-        openModal(liquidModal);
-    });
-    document.getElementById('add-appointment-btn')?.addEventListener('click', () => {
-        if (appointmentForm) appointmentForm.reset();
-        openModal(appointmentModal);
-    });
-
+    // Botones de apertura
+    document.getElementById('add-bcm-initial-btn')?.addEventListener('click', () => { /* ... (código idéntico) ... */ if (weightForm) weightForm.reset(); openModal(weightModal); });
+    document.getElementById('add-bcm-main-btn')?.addEventListener('click', () => { if (weightForm && tempBcmDB.currentWeight !== null) { document.getElementById('bcm-current-weight').value = tempBcmDB.currentWeight; document.getElementById('bcm-dry-weight').value = tempBcmDB.dryWeight; } openModal(weightModal); });
+    document.getElementById('update-weight-btn')?.addEventListener('click', () => { if (weightForm && tempBcmDB.currentWeight !== null) { document.getElementById('bcm-current-weight').value = tempBcmDB.currentWeight; document.getElementById('bcm-dry-weight').value = tempBcmDB.dryWeight; } openModal(weightModal); });
+    document.getElementById('add-liquid-btn')?.addEventListener('click', () => { if (liquidForm) liquidForm.reset(); openModal(liquidModal); });
+    document.getElementById('add-appointment-btn')?.addEventListener('click', () => { if (appointmentForm) appointmentForm.reset(); openModal(appointmentModal); });
     document.getElementById('cancel-weight-btn')?.addEventListener('click', () => closeModal(weightModal));
     document.getElementById('cancel-liquid-btn')?.addEventListener('click', () => closeModal(liquidModal));
     document.getElementById('cancel-appointment-btn')?.addEventListener('click', () => closeModal(appointmentModal));
 
+    // Formularios (Guardar en store)
     if (weightForm) weightForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        tempBcmDB.currentWeight = parseFloat(document.getElementById('bcm-current-weight').value);
-        tempBcmDB.dryWeight = parseFloat(document.getElementById('bcm-dry-weight').value);
-        if (tempBcmDB.dryWeight > tempBcmDB.currentWeight) {
-            alert('Error: El Peso Seco no puede ser mayor que el Peso Actual.');
-            return;
-        }
+        const currentWeight = parseFloat(document.getElementById('bcm-current-weight').value);
+        const dryWeight = parseFloat(document.getElementById('bcm-dry-weight').value);
+        if (dryWeight > currentWeight) { alert('Error: El Peso Seco no puede ser mayor que el Peso Actual.'); return; }
+        tempBcmDB.currentWeight = currentWeight;
+        tempBcmDB.dryWeight = dryWeight;
         if(tempBcmDB.liquids.length === 0) tempBcmDB.liquids = [];
-        store.saveBcmData(tempBcmDB); // <-- GUARDAR EN STORE
+        store.saveBcmData(tempBcmDB); // <-- GUARDAR
         closeModal(weightModal);
         renderBcmData();
     });
@@ -236,7 +216,7 @@ export function init() {
         const amount = parseInt(document.getElementById('bcm-liquid-amount').value);
         const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         if (amount > 0) tempBcmDB.liquids.push({ time, amount });
-        store.saveBcmData(tempBcmDB); // <-- GUARDAR EN STORE
+        store.saveBcmData(tempBcmDB); // <-- GUARDAR
         closeModal(liquidModal);
         renderBcmData();
     });
@@ -247,14 +227,14 @@ export function init() {
             date: document.getElementById('bcm-appointment-date').value,
             time: document.getElementById('bcm-appointment-time').value,
             newWeight: parseFloat(document.getElementById('bcm-appointment-new-weight').value),
-            notify: true, 
+            notify: true, // <-- Mantener 'notify' (del toggle anterior)
             attended: null
         };
         tempBcmDB.dryWeightAppointments.push(newAppointment);
-        store.saveBcmData(tempBcmDB); // <-- GUARDAR EN STORE
+        store.saveBcmData(tempBcmDB); // <-- GUARDAR
         closeModal(appointmentModal);
         renderBcmData();
     });
 
-    renderBcmData();
+    renderBcmData(); // Renderizado inicial
 }
