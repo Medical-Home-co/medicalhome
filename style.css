@@ -401,3 +401,41 @@ input:checked + .slider:before {
 
 
 /* === FIN SOLUCIÓN === */
+
+/* === INICIO SOLUCIÓN: Estilos específicos Ocular === */
+/* Caja informativa Snellen */
+.info-box-ocular {
+    background-color: var(--primary-light); /* Fondo azul claro */
+    border-left: 4px solid var(--primary-blue);
+    color: var(--text-primary); /* Texto principal */
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+body.dark-theme .info-box-ocular {
+    background-color: var(--primary-light); /* Usa la misma variable (azul oscuro) */
+    color: var(--text-primary-dark); /* Texto claro */
+}
+
+/* Fila para agregar fechas de examen */
+.examen-date-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.examen-date-row input {
+    flex-grow: 1; /* Input ocupa el espacio restante */
+}
+/* No es necesario estilo específico para remove-examen-btn si usa button-secondary */
+
+/* Grid para checkboxes de síntomas */
+.checkbox-grid-ocular {
+    display: grid;
+    /* Ajusta minmax según necesites para el ancho */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+/* === FIN SOLUCIÓN === */
