@@ -1,0 +1,85 @@
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Evaluación Ocular</h2>
+            <p class="page-subtitle">Registro de agudeza visual y salud ocular.</p>
+        </div>
+        <button id="add-ocular-main-btn" class="button button-primary hidden">
+            <span>+ Agregar Evaluación</span>
+        </button>
+    </div>
+
+    <div id="ocular-list-container" class="content-grid hidden">
+        </div>
+
+    <div id="ocular-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
+        <h2 class="modal-title">Registra tu Evaluación Ocular</h2>
+        <img src="images/ocular.png" alt="Icono de ocular" style="width: 128px; height: 128px; margin: 1.5rem auto;">
+        <p class="modal-subtitle" style="max-width: 450px; margin: 0 auto 1.5rem;">Guarda los resultados de tus exámenes de agudeza visual y otros datos relevantes.</p>
+        <button id="add-ocular-initial-btn" class="button button-primary">Primera Evaluación</button>
+    </div>
+</div>
+
+<div id="ocular-form-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 650px;"> <h2 id="ocular-form-title" class="modal-title">Agregar Evaluación Ocular</h2>
+
+        <form id="ocular-form" class="modal-form" style="margin-top: 1.5rem;">
+            <input type="hidden" id="ocular-entry-id">
+
+            <div class="info-box info-box-ocular"> <p><strong>Escala Snellen:</strong> Mide la agudeza visual usando letras o símbolos de distintos tamaños.
+                    Un resultado como <em>6/12</em> indica que la persona ve a 6 m lo que una visión normal vería a 12 m.</p>
+            </div>
+
+            <h2 class="form-section-title">Agudeza visual (Escala Snellen)</h2>
+            <div class="form-grid">
+                <div class="form-group"> <label for="ocular-od">Ojo derecho</label> <input type="text" id="ocular-od" name="ojo_derecho" placeholder="Ej. 6/12" class="form-input"> </div>
+                <div class="form-group"> <label for="ocular-oi">Ojo izquierdo</label> <input type="text" id="ocular-oi" name="ojo_izquierdo" placeholder="Ej. 6/9" class="form-input"> </div>
+                <div class="form-group"> <label for="ocular-binocular">Binocular</label> <input type="text" id="ocular-binocular" name="binocular" placeholder="Ej. 6/6" class="form-input"> </div>
+            </div>
+
+            <h2 class="form-section-title">Clasificación según agudeza visual</h2>
+            <div class="form-group">
+                <select id="ocular-clasificacion" name="clasificacion" class="form-input form-select"> <option value="">Seleccione</option> <option value="leve">Leve (&lt; 6/12)</option> <option value="moderada">Moderada (&lt; 6/18)</option> <option value="grave">Grave (&lt; 6/60)</option> <option value="ceguera">Ceguera (&lt; 3/60)</option> </select>
+            </div>
+
+            <h2 class="form-section-title">Historial</h2>
+            <div class="form-group">
+                <label for="ocular-anio-inicio">Año de inicio/evolución</label>
+                <select id="ocular-anio-inicio" name="anio_inicio" class="form-input form-select"></select> </div>
+            <div class="form-group">
+                <label>Corrección óptica</label>
+                <div class="radio-grid"> <label class="radio-label"><input type="radio" name="correccion" value="gafas"> Gafas</label>
+                    <label class="radio-label"><input type="radio" name="correccion" value="lentes_contacto"> Lentes</label>
+                    <label class="radio-label"><input type="radio" name="correccion" value="protesis"> Prótesis</label>
+                    <label class="radio-label"><input type="radio" name="correccion" value="ninguna"> Ninguna</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Último(s) examen(es) visual(es)</label>
+                <div id="ocular-examen-container">
+                    <div class="examen-date-row"> <input type="date" name="ultimo_examen[]" class="form-input"> <button type="button" id="add-examen-btn" class="button button-secondary button-small">+ Agregar</button> </div>
+                </div>
+            </div>
+
+            <h2 class="form-section-title">Tratamientos y Síntomas</h2>
+            
+            <div class="form-group">
+                <label>Síntomas adicionales</label>
+                <div class="checkbox-grid checkbox-grid-ocular"> <label class="checkbox-label"><input type="checkbox" name="sintomas" value="vision_borrosa">V. borrosa</label>
+                    <label class="checkbox-label"><input type="checkbox" name="sintomas" value="destellos">Destellos</label>
+                    <label class="checkbox-label"><input type="checkbox" name="sintomas" value="dolor_ocular">Dolor</label>
+                    <label class="checkbox-label"><input type="checkbox" name="sintomas" value="ojo_seco">Ojo seco</label>
+                    <label class="checkbox-label"><input type="checkbox" name="sintomas" value="lagrimeo">Lagrimeo</label>
+                    <label class="checkbox-label"><input type="checkbox" name="sintomas" value="vision_doble">V. doble</label>
+                </div>
+            </div>
+            <div class="form-group"> <label for="ocular-observaciones">Observaciones</label> <textarea id="ocular-observaciones" name="observaciones" rows="3" placeholder="Notas adicionales..." class="form-input form-textarea"></textarea> </div>
+
+            <div class="modal-actions row" style="margin-top: 1.5rem;">
+                <button type="button" id="cancel-ocular-btn" class="button button-secondary">Cancelar</button>
+                <button type="submit" class="button button-primary">Guardar Evaluación</button>
+            </div>
+        </form>
+
+    </div>
+</div>
