@@ -1,9 +1,8 @@
-// --- ¡SOLUCIÓN PROBLEMA 3 (Parte 1)! ---
+// --- js/perfil.js ---
+
 import { store } from './store.js';
 
-// --- Base de Datos Temporal del Perfil ---
-// Se inicializa cargando desde el store
-let tempProfileData = store.getProfile(); 
+let tempProfileData = null; 
 let avatarDataUrl = null;
 
 // --- Funciones de Renderizado y UI ---
@@ -13,7 +12,10 @@ function renderProfileSummary() {
     const emptyState = document.getElementById('profile-empty-state');
     const editBtn = document.getElementById('edit-profile-main-btn');
 
-    if (!summaryContainer || !emptyState || !editBtn) return;
+    if (!summaryContainer || !emptyState || !editBtn) {
+        console.warn("Elementos principales del resumen de perfil no encontrados.");
+        return;
+    }
     
     if (tempProfileData === null) {
         summaryContainer.classList.add('hidden');
@@ -24,26 +26,45 @@ function renderProfileSummary() {
         emptyState.classList.add('hidden');
         editBtn.classList.remove('hidden');
         
-        document.getElementById('summary-avatar').src = tempProfileData.avatar || 'images/avatar.png';
-        document.getElementById('summary-name').textContent = tempProfileData.fullName || 'N/A';
-        document.getElementById('summary-email').textContent = tempProfileData.email || 'N/A';
+        const avatarEl = document.getElementById('summary-avatar');
+        const nameEl = document.getElementById('summary-name');
+        const emailEl = document.getElementById('summary-email');
+        const personalDataEl = document.getElementById('personal-data-summary');
+        const contactDataEl = document.getElementById('contact-data-summary');
+        const medicalDataEl = document.getElementById('medical-data-summary');
 
-        document.getElementById('personal-data-summary').innerHTML = `
-            <div class="profile-item"><span class="profile-item-label">Edad</span><span class="profile-item-value">${tempProfileData.age || 'N/A'}</span></div>
-        `;
+        if (avatarEl) {
+            avatarEl.src = tempProfileData.avatar || 'images/avatar.png';
+        }
+        if (nameEl) {
+            nameEl.textContent = tempProfileData.fullName || 'N/A';
+        }
+        if (emailEl) {
+            emailEl.textContent = tempProfileData.email || 'N/A';
+        }
 
-        document.getElementById('contact-data-summary').innerHTML = `
-            <div class="profile-item"><span class="profile-item-label">EPS</span><span class="profile-item-value">${tempProfileData.eps || 'N/A'}</span></div>
-            <div class="profile-item"><span class="profile-item-label">Teléfono EPS</span><span class="profile-item-value">${tempProfileData.epsPhone || 'N/A'}</span></div>
-            <div class="profile-item"><span class="profile-item-label">Contacto Emergencia</span><span class="profile-item-value">${tempProfileData.emergencyContactName || 'N/A'}</span></div>
-            <div class="profile-item"><span class="profile-item-label">Teléfono Emergencia</span><span class="profile-item-value">${tempProfileData.emergencyContactPhone || 'N/A'}</span></div>
-        `;
+        if (personalDataEl) {
+            personalDataEl.innerHTML = `
+                <div class="profile-item"><span class="profile-item-label">Edad</span><span class="profile-item-value">${tempProfileData.age || 'N/A'}</span></div>
+            `;
+        }
+
+        if (contactDataEl) {
+            contactDataEl.innerHTML = `
+                <div class="profile-item"><span class="profile-item-label">EPS</span><span class="profile-item-value">${tempProfileData.eps || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Teléfono EPS</span><span class="profile-item-value">${tempProfileData.epsPhone || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Contacto Emergencia</span><span class="profile-item-value">${tempProfileData.emergencyContactName || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Teléfono Emergencia</span><span class="profile-item-value">${tempProfileData.emergencyContactPhone || 'N/A'}</span></div>
+            `;
+        }
 
         const conditionsHTML = (tempProfileData.conditions && tempProfileData.conditions.length > 0)
             ? tempProfileData.conditions.map(c => `<span class="tag">${c.charAt(0).toUpperCase() + c.slice(1)}</span>`).join('')
             : '<span class="profile-item-label">No hay condiciones seleccionadas.</span>';
         
-        document.getElementById('medical-data-summary').innerHTML = `<div class="tags-container">${conditionsHTML}</div>`;
+        if (medicalDataEl) {
+            medicalDataEl.innerHTML = `<div class="tags-container">${conditionsHTML}</div>`;
+        }
     }
 }
 
@@ -72,19 +93,101 @@ function updateMainMenu(conditions = []) {
     }
 }
 
-
-export function init() {
+function openFormModal() {
     const form = document.getElementById('profile-form');
-    if (!form) {
-        console.warn("Formulario de perfil aún no disponible. Se esperará a que el DOM cargue completamente.");
-        document.addEventListener("DOMContentLoaded", () => {
-            const formAfterLoad = document.getElementById('profile-form');
-            if (formAfterLoad) init();
-        }, { once: true });
-        return;
-    }
+    if (!form) return; 
 
     const formModal = document.getElementById('profile-form-modal');
+    const renalInfoContainer = document.getElementById('renal-info-container');
+    const fistulaLocationContainer = document.getElementById('fistula-location-container');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const renalCheckbox = form.querySelector('input[name="conditions"][value="renal"]');
+    
+    form.reset();
+    avatarDataUrl = null;
+    if(renalInfoContainer) renalInfoContainer.classList.add('hidden');
+    if(fistulaLocationContainer) fistulaLocationContainer.classList.add('hidden');
+    if(avatarPreview) avatarPreview.src = 'images/avatar.png';
+    
+    // Deshabilitar los checkboxes de días (si es que la lógica aplicara, 
+    // pero como ahora son radios, esta línea es solo de seguridad)
+    form.querySelectorAll('input[name="hemodialysisDays"]').forEach(cb => cb.disabled = false);
+
+    
+    if (tempProfileData) {
+        document.getElementById('profile-form-title').textContent = 'Editar Perfil';
+        
+        Object.keys(tempProfileData).forEach(key => {
+            const element = form.elements[key];
+            if (element && typeof element !== 'undefined' && !element.length) {
+                if (element.type !== 'file') {
+                    element.value = tempProfileData[key];
+                }
+            }
+        });
+
+        if (tempProfileData.conditions) {
+            form.querySelectorAll('input[name="conditions"]').forEach(check => {
+                check.checked = tempProfileData.conditions.includes(check.value);
+            });
+        }
+        
+        if (tempProfileData.conditions && tempProfileData.conditions.includes('renal')) {
+            const renalAccessRadio = form.querySelector(`input[name="renalAccess"][value="${tempProfileData.renalAccess}"]`);
+            if(renalAccessRadio) renalAccessRadio.checked = true;
+
+            // --- ¡CORRECCIÓN DEL ERROR! ---
+            // Esta lógica maneja datos antiguos (string) y nuevos (array)
+            if (tempProfileData.hemodialysisDays) {
+                // Si es un array (método nuevo, ej: ["L-M-V"]), usa el primer valor.
+                // Si es un string (método antiguo, ej: "L-M-V"), úsalo directamente.
+                const dayValue = Array.isArray(tempProfileData.hemodialysisDays) 
+                    ? tempProfileData.hemodialysisDays[0] 
+                    : tempProfileData.hemodialysisDays;
+
+                if (dayValue) {
+                    const radio = form.querySelector(`input[name="hemodialysisDays"][value="${dayValue}"]`);
+                    if(radio) radio.checked = true;
+                }
+            }
+            // --- FIN DE LA CORRECCIÓN ---
+        }
+        
+        if(tempProfileData.avatar && avatarPreview) {
+            avatarPreview.src = tempProfileData.avatar;
+            avatarDataUrl = tempProfileData.avatar;
+        }
+
+        renalCheckbox?.dispatchEvent(new Event('change'));
+        const checkedAccess = form.querySelector('input[name="renalAccess"]:checked');
+        if(checkedAccess) checkedAccess.dispatchEvent(new Event('change'));
+
+    } else {
+         document.getElementById('profile-form-title').textContent = 'Crear Perfil';
+    }
+    formModal?.classList.remove('hidden');
+}
+
+function closeFormModal() {
+    const formModal = document.getElementById('profile-form-modal');
+    formModal?.classList.add('hidden');
+}
+
+// Esta es la función principal que se exporta
+export function init() {
+    
+    const form = document.getElementById('profile-form');
+    
+    if (!form) {
+        console.warn("Formulario de perfil (profile-form) no encontrado. Reintentando en 10ms...");
+        setTimeout(init, 10); // Reintenta la función 'init' completa
+        return;
+    }
+    
+    console.log("Perfil DOM listo. Inicializando...");
+    
+    tempProfileData = store.getProfile();
+
     const addInitialBtn = document.getElementById('add-profile-initial-btn');
     const editBtn = document.getElementById('edit-profile-main-btn');
     const cancelBtn = document.getElementById('cancel-profile-btn');
@@ -95,8 +198,12 @@ export function init() {
     const renalInfoContainer = document.getElementById('renal-info-container');
     const fistulaRadio = form.querySelector('input[name="renalAccess"][value="fistula"]');
     const fistulaLocationContainer = document.getElementById('fistula-location-container');
-    const hemodialysisDaysCheckboxes = form.querySelectorAll('input[name="hemodialysisDays"]');
 
+    // --- ¡CÓDIGO ELIMINADO! ---
+    // Se eliminó el "const hemodialysisDaysCheckboxes" y su .forEach,
+    // ya que esa lógica era para checkboxes y tu HTML usa radios.
+
+    // Asignación de eventos
     avatarUpload?.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -119,80 +226,6 @@ export function init() {
         });
     });
 
-    hemodialysisDaysCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('click', () => {
-            const checkedCount = form.querySelectorAll('input[name="hemodialysisDays"]:checked').length;
-            if (checkedCount >= 3) {
-                hemodialysisDaysCheckboxes.forEach(cb => {
-                    if (!cb.checked) cb.disabled = true;
-                });
-            } else {
-                hemodialysisDaysCheckboxes.forEach(cb => cb.disabled = false);
-            }
-        });
-    });
-
-    function openFormModal() {
-        form.reset();
-        avatarDataUrl = null;
-        if(renalInfoContainer) renalInfoContainer.classList.add('hidden');
-        if(fistulaLocationContainer) fistulaLocationContainer.classList.add('hidden');
-        hemodialysisDaysCheckboxes.forEach(cb => cb.disabled = false);
-        if(avatarPreview) avatarPreview.src = 'images/avatar.png';
-        
-        if (tempProfileData) {
-            document.getElementById('profile-form-title').textContent = 'Editar Perfil';
-            
-            Object.keys(tempProfileData).forEach(key => {
-                const element = form.elements[key]; // Definimos element
-                if (element && typeof element !== 'undefined' && !element.length) {
-                    
-                    // --- ¡SOLUCIÓN ERROR 2! ---
-                    // Evitamos asignar valor a los campos tipo 'file'
-                    if (element.type !== 'file') {
-                        element.value = tempProfileData[key];
-                    }
-                    // --- FIN SOLUCIÓN ---
-                }
-            });
-
-            if (tempProfileData.conditions) {
-                form.querySelectorAll('input[name="conditions"]').forEach(check => {
-                    check.checked = tempProfileData.conditions.includes(check.value);
-                });
-            }
-            
-            if (tempProfileData.conditions && tempProfileData.conditions.includes('renal')) {
-                const renalAccessRadio = form.querySelector(`input[name="renalAccess"][value="${tempProfileData.renalAccess}"]`);
-                if(renalAccessRadio) renalAccessRadio.checked = true;
-
-                if (tempProfileData.hemodialysisDays) {
-                    tempProfileData.hemodialysisDays.forEach(day => {
-                        const check = form.querySelector(`input[name="hemodialysisDays"][value="${day}"]`);
-                        if(check) check.checked = true;
-                    });
-                }
-            }
-            
-            if(tempProfileData.avatar) {
-                avatarPreview.src = tempProfileData.avatar;
-                avatarDataUrl = tempProfileData.avatar;
-            }
-
-            renalCheckbox?.dispatchEvent(new Event('change'));
-            const checkedAccess = form.querySelector('input[name="renalAccess"]:checked');
-            if(checkedAccess) checkedAccess.dispatchEvent(new Event('change'));
-
-        } else {
-             document.getElementById('profile-form-title').textContent = 'Crear Perfil';
-        }
-        formModal?.classList.remove('hidden');
-    }
-
-    function closeFormModal() {
-        formModal?.classList.add('hidden');
-    }
-
     addInitialBtn?.addEventListener('click', openFormModal);
     editBtn?.addEventListener('click', openFormModal);
     cancelBtn?.addEventListener('click', closeFormModal);
@@ -209,16 +242,16 @@ export function init() {
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        
+        // Sobrescribir con .getAll() para asegurar que sean arrays
         data.conditions = formData.getAll('conditions');
-        data.hemodialysisDays = formData.getAll('hemodialysisDays');
+        data.hemodialysisDays = formData.getAll('hemodialysisDays'); // Esto guardará ["L-M-V"]
+        
         data.avatar = avatarDataUrl || tempProfileData?.avatar;
 
         tempProfileData = data;
         
-        // --- ¡SOLUCIÓN PROBLEMA 3 (Parte 2)! ---
-        // Guardamos los datos en el store
         store.saveProfile(tempProfileData);
-        // --- FIN SOLUCIÓN ---
 
         closeFormModal();
         renderProfileSummary();
@@ -226,11 +259,16 @@ export function init() {
     });
 
     // --- Renderizado y actualización inicial ---
-    // Esto se ejecuta CADA VEZ que se carga la página de perfil
     renderProfileSummary();
     if(tempProfileData && tempProfileData.conditions) {
         updateMainMenu(tempProfileData.conditions);
     } else {
-        updateMainMenu(); // Ocultará el menú si no hay perfil
+        updateMainMenu();
+    }
+
+    // --- Lógica del Welcome Modal ---
+    if (sessionStorage.getItem('openProfileModal') === 'true') {
+        sessionStorage.removeItem('openProfileModal');
+        openFormModal(); 
     }
 }
