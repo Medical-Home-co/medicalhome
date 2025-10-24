@@ -4,6 +4,17 @@
     .profile-card { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; }
     .profile-card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
     .profile-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; padding: 0.5rem 0; }
+    
+    /* SOLUCIÓN: Estilo para la imagen de resumen con sombra azul */
+    .profile-summary-avatar-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        /* Sombra azul claro (usando la variable --primary-blue con transparencia) */
+        box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
+    }
+    
     .profile-item-avatar { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
     .profile-item-avatar img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
     .profile-item-avatar span { font-size: 1.25rem; font-weight: 600; }
@@ -28,23 +39,21 @@
         </button>
     </div>
 
-    <!-- Contenedor del Resumen -->
     <div id="profile-summary-container" class="profile-grid hidden">
         <div class="profile-card">
             <h3 class="profile-card-title">Datos Personales</h3>
-            <div id="personal-data-summary"><!-- Contenido generado por JS --></div>
+            <div id="personal-data-summary"></div>
         </div>
         <div class="profile-card">
             <h3 class="profile-card-title">Información Médica</h3>
-            <div id="medical-data-summary"><!-- Contenido generado por JS --></div>
+            <div id="medical-data-summary"></div>
         </div>
         <div class="profile-card">
             <h3 class="profile-card-title">Contacto y Seguridad</h3>
-            <div id="emergency-data-summary"><!-- Contenido generado por JS --></div>
+            <div id="emergency-data-summary"></div>
         </div>
     </div>
 
-    <!-- Estado Vacío -->
     <div id="profile-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
         <h2 class="modal-title">Crea tu Perfil</h2>
         <img src="images/perfil.png" alt="Icono de Perfil" style="width: 128px; height: 128px; margin: 1.5rem auto;">
@@ -58,7 +67,6 @@
         <h2 id="profile-form-title" class="modal-title">Crear Perfil</h2>
         <form id="profile-form" class="modal-form">
 
-            <!-- Avatar -->
             <div class="form-group" style="grid-column: 1 / -1; text-align: center;">
                 <img src="images/avatar.png" id="avatar-preview" alt="Avatar Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); margin-bottom: 1rem;">
                 <label for="avatar-upload" class="button button-secondary" style="cursor: pointer;">
@@ -67,16 +75,15 @@
                 </label>
             </div>
 
-            <!-- Información Personal -->
             <h2 class="form-section-title">Información Personal</h2>
-            <div class="form-grid">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group" style="grid-column: span 2;"><label for="fullName">Nombre Completo *</label><input type="text" id="fullName" name="fullName" placeholder="Nombre completo" class="form-input" required></div>
                 <div class="form-group"><label for="age">Edad *</label><input type="number" id="age" name="age" placeholder="Edad" class="form-input" required></div>
                 <div class="form-group"><label for="bloodType">Tipo de Sangre *</label><select id="bloodType" name="bloodType" class="form-input form-select" required><option value="">Seleccionar</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
                 <div class="form-group"><label for="weight">Peso (Kg) *</label><input type="number" id="weight" name="weight" pattern="[0-9]*" inputmode="numeric" placeholder="Peso en Kg" class="form-input" required></div>
+                <div class="form-group"><label for="height">Estatura (cm) *</label><input type="number" id="height" name="height" pattern="[0-9]*" inputmode="numeric" placeholder="Estatura en cm" class="form-input" required></div>
             </div>
 
-            <!-- Seguridad -->
             <h2 class="form-section-title">Seguridad de la Cuenta</h2>
             <div class="form-grid">
                 <div class="form-group" style="grid-column: span 2;"><label for="email">Correo Electrónico *</label><input type="email" id="email" name="email" placeholder="tu@correo.com" class="form-input" required></div>
@@ -84,13 +91,12 @@
                 <div class="form-group"><label for="confirmPassword">Confirmar Contraseña *</label><input type="password" id="confirmPassword" name="confirmPassword" inputmode="numeric" pattern="[0-9]*" class="form-input" required></div>
             </div>
 
-            <!-- Información Médica -->
             <h2 class="form-section-title">Información Médica</h2>
             <div class="form-group">
                 <label>Condiciones Médicas</label>
                 <div class="checkbox-grid">
                     <label class="checkbox-label"><input type="checkbox" name="conditions" value="renal"> Renal</label>
-                    <label class="checkbox-label"><input type="checkbox" name="conditions" value="ocular"> Ocular</label> <!-- <-- Checkbox Ocular -->
+                    <label class="checkbox-label"><input type="checkbox" name="conditions" value="ocular"> Ocular</label>
                     <label class="checkbox-label"><input type="checkbox" name="conditions" value="cardiaco"> Cardiaco</label>
                     <label class="checkbox-label"><input type="checkbox" name="conditions" value="tea"> TEA</label>
                     <label class="checkbox-label"><input type="checkbox" name="conditions" value="diabetes"> Diabetes</label>
@@ -101,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- Sección Renal Condicional -->
             <div id="renal-info-container" class="form-section-conditional hidden">
                 <h3 class="form-subsection-title">Información Renal</h3>
                 <div class="form-group"><label>Tipo de Acceso *</label><div class="radio-grid"><label class="radio-label"><input type="radio" name="renalAccess" value="cateter" required> Catéter</label><label class="radio-label"><input type="radio" name="renalAccess" value="fistula" required> Fístula</label></div></div>
@@ -110,17 +115,15 @@
                 <div class="form-grid" style="margin-top: 1rem;"><div class="form-group"><label for="hemodialysisTime">Hora *</label><input type="time" id="hemodialysisTime" name="hemodialysisTime" class="form-input" required></div><div class="form-group"><label for="clinicName">Clínica *</label><input type="text" id="clinicName" name="clinicName" class="form-input" required></div></div>
             </div>
 
-            <!-- Alergias -->
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label for="alergias-input">Alergias (Opcional)</label>
                 <div class="input-with-button">
                      <input type="text" id="alergias-input" placeholder="Escribir alergia" class="form-input">
-                     <button type="button" id="add-alergia-btn" class="button button-secondary button-small">+ Agregar</button> <!-- Estilo de botón ajustado -->
+                     <button type="button" id="add-alergia-btn" class="button button-secondary button-small">+ Agregar</button>
                 </div>
-                <div id="alergias-list" class="tags-container" style="margin-top: 1rem;"><!-- Usar clase tags-container --></div>
+                <div id="alergias-list" class="tags-container" style="margin-top: 1rem;"></div>
             </div>
 
-            <!-- Contacto -->
             <h2 class="form-section-title">Contacto y Seguridad</h2>
             <div class="form-grid">
                 <div class="form-group"><label for="eps">EPS *</label><input type="text" id="eps" name="eps" class="form-input" required></div>
@@ -129,8 +132,7 @@
                 <div class="form-group"><label for="emergencyContactPhone">Teléfono de Emergencia *</label><input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" class="form-input" required></div>
             </div>
 
-            <!-- Acciones del Modal -->
-            <div class="modal-actions row" style="margin-top: 2rem;"> <!-- Usar clase row para alinear botones -->
+            <div class="modal-actions" style="margin-top: 2rem; flex-direction: row; justify-content: center; gap: 1rem;">
                 <button type="button" id="cancel-profile-btn" class="button button-secondary">Cancelar</button>
                 <button type="submit" class="button button-primary">Guardar Perfil</button>
             </div>
