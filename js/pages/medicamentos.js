@@ -3,32 +3,24 @@ import { store } from '../store.js'; // <-- 1. Importar store
 
 // 2. Variable local para los datos
 let currentMedsData = [];
-let formModal, form, frequencySelect, schedulesContainer, customFrequencyContainer; // Elementos del modal
+let formModal, form, frequencySelect, schedulesContainer, customFrequencyContainer; // Elementos
 
-/* --- Función para renderizar la lista de medicamentos --- */
 function renderMedsList() {
     const listContainer = document.getElementById('meds-list-container');
     const emptyState = document.getElementById('meds-empty-state');
     const addMedMainBtn = document.getElementById('add-med-main-btn');
+    if (!listContainer || !emptyState || !addMedMainBtn) { console.warn("Elementos UI Meds faltan."); return; }
     
-    if (!listContainer || !emptyState || !addMedMainBtn) {
-        console.error("Elementos UI de Medicamentos faltan.");
-        return;
-    }
     listContainer.innerHTML = '';
 
     // 3. Usar la variable cargada del store
     if (currentMedsData.length === 0) {
-        emptyState.classList.remove('hidden');
-        listContainer.classList.add('hidden');
-        addMedMainBtn.classList.add('hidden');
+        emptyState.classList.remove('hidden'); listContainer.classList.add('hidden'); addMedMainBtn.classList.add('hidden');
     } else {
-        emptyState.classList.add('hidden');
-        listContainer.classList.remove('hidden');
-        addMedMainBtn.classList.remove('hidden');
+        emptyState.classList.add('hidden'); listContainer.classList.remove('hidden'); addMedMainBtn.classList.remove('hidden');
         
         currentMedsData.forEach(med => {
-            const medCard = document.createElement('div');
+            const medCard = document.createElement('div'); // 'medCard' definido aquí
             medCard.className = 'summary-card';
             medCard.style.padding = '1rem';
 
@@ -54,26 +46,25 @@ function renderMedsList() {
                 <div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">Recordatorios</span>
                     <label class="switch">
-                        <input type="checkbox" class="notify-toggle" data-id="${med.id}" ${med.notify ? 'checked' : ''}>
+                        <input type="checkbox" class="notify-toggle" data-id="${med.id}" ${med.notify ? 'checked' : ''}> 
                         <span class="slider"></span>
                     </label>
                 </div>
             `;
-            listContainer.appendChild(card);
+            // SOLUCIÓN: Usar medCard, no card.
+            listContainer.appendChild(medCard); 
         });
     }
-    // 4. Llamar a listeners después de renderizar
-    attachEventListeners();
+    attachEventListeners(); // 4. Llamar a listeners
 }
 
-/* --- Funciones del Modal --- */
 function openFormModal(medToEdit = null) {
     if (!form || !formModal) return;
     form.reset();
     document.getElementById('form-title').textContent = 'Agregar Medicamento';
     document.getElementById('med-id').value = '';
     customFrequencyContainer.classList.add('hidden');
-    updateScheduleInputs(1); // Resetear a 1 campo de hora
+    updateScheduleInputs(1);
 
     if (medToEdit) {
         document.getElementById('form-title').textContent = 'Editar Medicamento';
@@ -82,42 +73,28 @@ function openFormModal(medToEdit = null) {
         document.getElementById('med-dose').value = medToEdit.dose;
         document.getElementById('med-notes').value = medToEdit.notes || '';
         document.getElementById('med-frequency').value = medToEdit.frequencyValue || '1';
-        
-        // Disparar evento change para mostrar/ocultar campos personalizados
         frequencySelect.dispatchEvent(new Event('change'));
-        
-        // Rellenar horarios
         if (medToEdit.schedules && medToEdit.schedules.length > 0) {
             updateScheduleInputs(medToEdit.schedules.length);
             const scheduleInputs = schedulesContainer.querySelectorAll('input[type="time"]');
-            scheduleInputs.forEach((input, index) => {
-                input.value = medToEdit.schedules[index] || '';
-            });
+            scheduleInputs.forEach((input, index) => { input.value = medToEdit.schedules[index] || ''; });
         }
     }
     formModal.classList.remove('hidden');
 }
 
-function closeFormModal() {
-    formModal?.classList.add('hidden');
-}
+function closeFormModal() { formModal?.classList.add('hidden'); }
 
 function updateScheduleInputs(count) {
     const label = schedulesContainer.querySelector('label');
-    schedulesContainer.innerHTML = ''; // Limpiar
-    if (label) schedulesContainer.appendChild(label); // Volver a poner el label
-
+    schedulesContainer.innerHTML = '';
+    if (label) schedulesContainer.appendChild(label);
     for (let i = 1; i <= count; i++) {
-        const timeInput = document.createElement('input');
-        timeInput.type = 'time';
-        timeInput.className = 'form-input';
-        timeInput.required = true;
-        timeInput.style.marginTop = '0.5rem';
+        const timeInput = document.createElement('input'); timeInput.type = 'time'; timeInput.className = 'form-input'; timeInput.required = true; timeInput.style.marginTop = '0.5rem';
         schedulesContainer.appendChild(timeInput);
     }
 }
 
-/* --- Listener de Envío de Formulario (Guarda en store) --- */
 function handleFormSubmit(e) {
     e.preventDefault();
     const formData = new FormData(form);
@@ -126,32 +103,23 @@ function handleFormSubmit(e) {
     const id = medIdValue ? parseInt(medIdValue, 10) : Date.now();
     
     const newMed = {
-        id: id,
-        name: formData.get('name'),
-        dose: formData.get('dose'),
-        frequencyValue: formData.get('frequency'),
-        frequencyText: frequencySelect.options[frequencySelect.selectedIndex].text.split('(')[0].trim(),
-        schedules: schedules,
-        notes: formData.get('notes'),
-        notify: true // Por defecto 'true' al crear
+        id: id, name: formData.get('name'), dose: formData.get('dose'),
+        frequencyValue: formData.get('frequency'), frequencyText: frequencySelect.options[frequencySelect.selectedIndex].text.split('(')[0].trim(),
+        schedules: schedules, notes: formData.get('notes'),
+        notify: true // Default 'notify' a true
     };
 
-    if (medIdValue) { // Editando
+    if (medIdValue) {
         const index = currentMedsData.findIndex(m => m.id === id);
-        if (index > -1) {
-            newMed.notify = currentMedsData[index].notify; // Mantener estado de notificación anterior
-            currentMedsData[index] = newMed;
-        }
-    } else { // Agregando
+        if (index > -1) { newMed.notify = currentMedsData[index].notify; currentMedsData[index] = newMed; } // Mantener estado de notify
+    } else {
         currentMedsData.push(newMed);
     }
-
     store.saveMeds(currentMedsData); // <-- 5. GUARDAR
     closeFormModal();
     renderMedsList();
 }
 
-/* --- Listeners Tarjetas (Editar/Eliminar/Toggle, guarda en store) --- */
 function attachEventListeners() {
     const listContainer = document.getElementById('meds-list-container');
     if (!listContainer) return;
@@ -159,22 +127,19 @@ function attachEventListeners() {
     listContainer.parentNode.replaceChild(newContainer, listContainer);
 
     newContainer.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        const editBtn = e.target.closest('.edit-btn');
+        const deleteBtn = e.target.closest('.delete-btn'); const editBtn = e.target.closest('.edit-btn');
         const medIdStr = deleteBtn?.dataset.id || editBtn?.dataset.id;
-        
-        if (medIdStr) {
-            const medId = parseInt(medIdStr, 10);
-            if (deleteBtn) {
-                if (confirm('¿Eliminar este medicamento?')) {
-                    currentMedsData = currentMedsData.filter(m => m.id !== medId);
-                    store.saveMeds(currentMedsData); // <-- 5. GUARDAR
-                    renderMedsList();
-                }
-            } else if (editBtn) {
-                const medToEdit = currentMedsData.find(m => m.id === medId);
-                if (medToEdit) openFormModal(medToEdit);
+        if (!medIdStr) return;
+        const medId = parseInt(medIdStr, 10);
+        if (deleteBtn) {
+            if (confirm('¿Eliminar este medicamento?')) {
+                currentMedsData = currentMedsData.filter(m => m.id !== medId);
+                store.saveMeds(currentMedsData); // <-- 5. GUARDAR
+                renderMedsList();
             }
+        } else if (editBtn) {
+            const medToEdit = currentMedsData.find(m => m.id === medId);
+            if (medToEdit) openFormModal(medToEdit);
         }
     });
 
@@ -184,19 +149,13 @@ function attachEventListeners() {
             const medId = parseInt(notifyToggle.dataset.id, 10);
             const isChecked = notifyToggle.checked;
             const med = currentMedsData.find(m => m.id === medId);
-            if (med) {
-                med.notify = isChecked;
-                store.saveMeds(currentMedsData); // <-- 5. GUARDAR
-                console.log('Recordatorio med actualizado:', med);
-            }
+            if (med) { med.notify = isChecked; store.saveMeds(currentMedsData); /* <-- 5. GUARDAR */ }
         }
     });
 }
 
-/* --- Función Principal --- */
 export function init() {
-    // 6. Cargar datos del store
-    currentMedsData = store.getMeds() || [];
+    currentMedsData = store.getMeds() || []; // <-- 6. Cargar desde store
     console.log("Cargado js/pages/medicamentos.js (conectado a store)");
 
     formModal = document.getElementById('meds-form-modal');
@@ -208,10 +167,11 @@ export function init() {
     schedulesContainer = document.getElementById('med-schedules-container');
     customFrequencyContainer = document.getElementById('custom-frequency-container');
 
+    // SOLUCIÓN: Comprobación de elementos
     if (!formModal || !form || !addInitialBtn || !addMainBtn || !cancelMedBtn || !frequencySelect || !schedulesContainer || !customFrequencyContainer) {
-        console.error("Faltan elementos HTML esenciales en medicamentos.html");
-        document.getElementById('meds-empty-state')?.classList.remove('hidden');
-        return;
+        console.error("Faltan elementos HTML esenciales en medicamentos.html.");
+        document.getElementById('meds-empty-state')?.classList.remove('hidden'); // Mostrar estado vacío
+        return; // Detener ejecución
     }
 
     addInitialBtn.addEventListener('click', () => openFormModal());
@@ -219,15 +179,10 @@ export function init() {
     cancelMedBtn.addEventListener('click', closeFormModal);
     frequencySelect.addEventListener('change', () => {
         const value = frequencySelect.value;
-        if (value === 'custom') {
-            customFrequencyContainer.classList.remove('hidden');
-            updateScheduleInputs(1);
-        } else {
-            customFrequencyContainer.classList.add('hidden');
-            updateScheduleInputs(parseInt(value));
-        }
+        if (value === 'custom') { customFrequencyContainer.classList.remove('hidden'); updateScheduleInputs(1); }
+        else { customFrequencyContainer.classList.add('hidden'); updateScheduleInputs(parseInt(value)); }
     });
     form.addEventListener('submit', handleFormSubmit);
 
-    renderMedsList(); // Renderizado inicial
+    renderMedsList();
 }

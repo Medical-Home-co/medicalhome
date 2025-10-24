@@ -1,149 +1,130 @@
-/* --- pages/cardiaco.js --- */
-import { store } from '../store.js';
+// --- Base de Datos Temporal ---
+let tempCardiacoDB = [];
 
-let currentCardiacoData = [];
-let formModal, form; // Variables globales del módulo
+// --- Funciones de Renderizado ---
 
-/* --- Estilos (opcional, si necesita) --- */
-function injectCardiacoStyles() {
-    const styleId = 'cardiaco-dynamic-styles'; if (document.getElementById(styleId)) return;
-    const style = document.createElement('style'); style.id = styleId;
-    style.innerHTML = `
-        /* Colores para presión arterial */
-        .level-low { background-color: var(--success-light, #E8F5E9); color: var(--success-color, #2E7D32); } /* Normal */
-        .level-medium { background-color: #FFF3E0; color: #E65100; } /* Elevada */
-        .level-high { background-color: var(--danger-light, #FFEBEE); color: var(--danger-color, #C62828); } /* Alta */
-        .symptom-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
-        .symptom-row:last-of-type { border-bottom: none; }
-        .level-indicator { font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.9rem; }
-    `;
-    document.head.appendChild(style);
-}
-
-/* --- Renderizar Lista --- */
 function renderCardiacoList() {
     const listContainer = document.getElementById('cardiaco-list-container');
     const emptyState = document.getElementById('cardiaco-empty-state');
     const addMainBtn = document.getElementById('add-cardiaco-main-btn');
+
     if (!listContainer || !emptyState || !addMainBtn) return;
+
     listContainer.innerHTML = '';
 
-    if (currentCardiacoData.length === 0) {
-        emptyState.classList.remove('hidden'); addMainBtn.classList.add('hidden'); listContainer.classList.add('hidden');
+    if (tempCardiacoDB.length === 0) {
+        emptyState.classList.remove('hidden');
+        listContainer.classList.add('hidden');
+        addMainBtn.classList.add('hidden');
     } else {
-        emptyState.classList.add('hidden'); addMainBtn.classList.remove('hidden'); listContainer.classList.remove('hidden');
-        
-        const sortedData = [...currentCardiacoData].sort((a, b) => {
-             const dateA = new Date(`${a.date}T${a.time || '00:00'}`);
-             const dateB = new Date(`${b.date}T${b.time || '00:00'}`);
-             return dateB - dateA;
-        });
+        emptyState.classList.add('hidden');
+        listContainer.classList.remove('hidden');
+        addMainBtn.classList.remove('hidden');
 
-        sortedData.forEach(rec => {
+        // Ordenar por fecha y hora más reciente primero
+        tempCardiacoDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+
+        tempCardiacoDB.forEach(rec => {
             const card = document.createElement('div');
-            card.className = 'summary-card'; card.style.padding = '1rem';
+            card.className = 'summary-card';
             
-            // Clasificación de presión (ejemplo)
-            let levelClass = 'level-low'; // Normal
-            if ((rec.systolic >= 130 && rec.systolic <= 139) || (rec.diastolic >= 80 && rec.diastolic <= 89)) levelClass = 'level-medium'; // Elevada
-            if (rec.systolic >= 140 || rec.diastolic >= 90) levelClass = 'level-high'; // Alta
-
-            let formattedDate = 'Fecha no registrada';
-            try { if(rec.date) formattedDate = new Date(rec.date + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long' }); } catch(e) {}
+            // Lógica para clasificar la presión
+            let pressureClass = 'pressure-normal';
+            let pressureText = 'Normal';
+            if (rec.systolic >= 140 || rec.diastolic >= 90) {
+                pressureClass = 'pressure-high';
+                pressureText = 'Alta';
+            } else if (rec.systolic < 90 || rec.diastolic < 60) {
+                 pressureClass = 'pressure-low';
+                 pressureText = 'Baja';
+            }
 
             card.innerHTML = `
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div><p class="card-title" style="border: none; padding: 0; margin-bottom: 0.5rem;">${formattedDate} - ${rec.time || ''}</p></div>
-                    <div class="card-actions" style="display: flex; gap: 0.5rem;">
+                    <div>
+                        <p class="card-title" style="margin-bottom: 0.25rem;">${new Date(rec.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })} - ${rec.time}</p>
+                        <p class="card-subtitle">${rec.notes || 'Sin notas adicionales'}</p>
+                    </div>
+                    <div class="card-actions">
                         <button class="icon-button edit-btn" data-id="${rec.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="symptom-row">
-                        <span>Presión Arterial</span>
-                        <span class="level-indicator ${levelClass}">${rec.systolic || '-'}/${rec.diastolic || '-'}</span>
+                <div class="card-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; margin-top: 1rem;">
+                    <div>
+                        <p class="data-label">Sistólica</p>
+                        <p class="data-value">${rec.systolic} <span class="data-unit">mmHg</span></p>
                     </div>
-                    <div class="symptom-row">
-                        <span>Pulso</span>
-                        <span style="font-weight: 500; font-size: 0.9rem;">${rec.pulse || '-'} lpm</span>
+                    <div>
+                        <p class="data-label">Diastólica</p>
+                        <p class="data-value">${rec.diastolic} <span class="data-unit">mmHg</span></p>
                     </div>
-                    ${rec.notes ? `<p class="data-label" style="margin-top: 0.75rem; font-weight: 500; color: var(--text-secondary); font-size: 0.9rem;">Notas:</p><p style="font-size: 0.9rem;">${rec.notes}</p>` : ''}
+                    <div>
+                        <p class="data-label">Pulso</p>
+                        <p class="data-value">${rec.heartRate} <span class="data-unit">BPM</span></p>
+                    </div>
+                </div>
+                <div class="card-footer ${pressureClass}" style="text-align: center; margin-top: 1rem; padding: 0.5rem; border-radius: 8px;">
+                    <span style="font-weight: 600;">Presión ${pressureText}</span>
                 </div>
             `;
             listContainer.appendChild(card);
         });
     }
-    attachEventListeners();
 }
 
-/* --- Funciones del Modal --- */
-function openFormModal(record = null) {
-    if (!form || !formModal) return;
-    form.reset();
-    const now = new Date();
-    document.getElementById('cardiaco-date').valueAsDate = now;
-    document.getElementById('cardiaco-time').value = now.toTimeString().slice(0, 5);
-    document.getElementById('cardiaco-id').value = '';
-    document.getElementById('cardiaco-form-title').textContent = 'Nuevo Registro de Presión';
-
-    if (record) {
-        document.getElementById('cardiaco-form-title').textContent = 'Editar Registro';
-        document.getElementById('cardiaco-id').value = record.id;
-        document.getElementById('cardiaco-date').value = record.date;
-        document.getElementById('cardiaco-time').value = record.time;
-        document.getElementById('systolic').value = record.systolic;
-        document.getElementById('diastolic').value = record.diastolic;
-        document.getElementById('pulse').value = record.pulse;
-        document.getElementById('cardiaco-notes').value = record.notes || '';
-    }
-    formModal?.classList.remove('hidden');
-}
-function closeFormModal() { formModal?.classList.add('hidden'); }
-
-/* --- Listeners (Editar/Eliminar) --- */
-function attachEventListeners() {
-    const listContainer = document.getElementById('cardiaco-list-container');
-    if (!listContainer) return;
-    const newContainer = listContainer.cloneNode(true);
-    listContainer.parentNode.replaceChild(newContainer, listContainer);
-
-    newContainer.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.delete-btn');
-        const editBtn = e.target.closest('.edit-btn');
-        const recordIdStr = deleteBtn?.dataset.id || editBtn?.dataset.id;
-        if (!recordIdStr) return;
-        
-        const recordId = parseInt(recordIdStr, 10);
-        if (deleteBtn) {
-            if (confirm('¿Eliminar este registro?')) {
-                currentCardiacoData = currentCardiacoData.filter(rec => rec.id !== recordId);
-                store.saveCardiacoData(currentCardiacoData); // GUARDAR
-                renderCardiacoList();
-            }
-        } else if (editBtn) {
-            const record = currentCardiacoData.find(rec => rec.id === recordId);
-            if (record) openFormModal(record);
-        }
-    });
+// --- Lógica de Estilos Dinámicos ---
+function injectCardiacoStyles() {
+    const styleId = 'cardiaco-dynamic-styles';
+    if (document.getElementById(styleId)) return;
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `
+        .pressure-normal { background-color: #E8F5E9; color: #2E7D32; } /* Verde claro */
+        .pressure-high { background-color: #FFEBEE; color: #C62828; } /* Rojo claro */
+        .pressure-low { background-color: #F4F7F9; color: var(--text-secondary); border: 1px solid var(--border-color); } /* Gris claro */
+        .data-label { font-size: 0.8rem; color: var(--text-secondary); }
+        .data-value { font-size: 1.5rem; font-weight: 600; }
+        .data-unit { font-size: 0.9rem; font-weight: 400; color: var(--text-secondary); }
+    `;
+    document.head.appendChild(style);
 }
 
-/* --- Función Principal --- */
+// --- Función Principal ---
 export function init() {
-    currentCardiacoData = store.getCardiacoData() || [];
-    console.log("Cargado js/pages/cardiaco.js (conectado a store)");
     injectCardiacoStyles();
 
-    formModal = document.getElementById('cardiaco-form-modal');
-    form = document.getElementById('cardiaco-form');
+    const formModal = document.getElementById('cardiaco-form-modal');
+    const form = document.getElementById('cardiaco-form');
     const addInitialBtn = document.getElementById('add-cardiaco-initial-btn');
     const addMainBtn = document.getElementById('add-cardiaco-main-btn');
     const cancelBtn = document.getElementById('cancel-cardiaco-btn');
+    const listContainer = document.getElementById('cardiaco-list-container');
 
-    if (!formModal || !form || !addInitialBtn || !addMainBtn || !cancelBtn) {
-         console.error("Faltan elementos HTML esenciales en cardiaco.html");
-         document.getElementById('cardiaco-empty-state')?.classList.remove('hidden');
-         return;
+    function openFormModal(record = null) {
+        if (!form) return;
+        form.reset();
+        const now = new Date();
+        document.getElementById('cardiaco-date').valueAsDate = now;
+        document.getElementById('cardiaco-time').value = now.toTimeString().slice(0, 5);
+        document.getElementById('cardiaco-id').value = '';
+        document.getElementById('cardiaco-form-title').textContent = 'Agregar Registro de Presión';
+
+        if (record) {
+            document.getElementById('cardiaco-form-title').textContent = 'Editar Registro de Presión';
+            document.getElementById('cardiaco-id').value = record.id;
+            document.getElementById('cardiaco-date').value = record.date;
+            document.getElementById('cardiaco-time').value = record.time;
+            document.getElementById('cardiaco-systolic').value = record.systolic;
+            document.getElementById('cardiaco-diastolic').value = record.diastolic;
+            document.getElementById('cardiaco-heartrate').value = record.heartRate;
+            document.getElementById('cardiaco-notes').value = record.notes;
+        }
+        if(formModal) formModal.classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+        if(formModal) formModal.classList.add('hidden');
     }
 
     addInitialBtn?.addEventListener('click', () => openFormModal());
@@ -152,31 +133,48 @@ export function init() {
 
     form?.addEventListener('submit', (e) => {
         e.preventDefault();
-        const idValue = document.getElementById('cardiaco-id').value;
-        const id = idValue ? parseInt(idValue, 10) : Date.now();
-        
+        const id = document.getElementById('cardiaco-id').value;
         const record = {
-            id: id,
+            id: id || Date.now(),
             date: document.getElementById('cardiaco-date').value,
             time: document.getElementById('cardiaco-time').value,
-            systolic: parseInt(document.getElementById('systolic').value, 10),
-            diastolic: parseInt(document.getElementById('diastolic').value, 10),
-            pulse: parseInt(document.getElementById('pulse').value, 10),
+            systolic: parseInt(document.getElementById('cardiaco-systolic').value),
+            diastolic: parseInt(document.getElementById('cardiaco-diastolic').value),
+            heartRate: parseInt(document.getElementById('cardiaco-heartrate').value),
             notes: document.getElementById('cardiaco-notes').value
         };
 
-        if (idValue) { // Editando
-            const index = currentCardiacoData.findIndex(rec => rec.id === id);
-            if (index > -1) currentCardiacoData[index] = record;
-        } else { // Agregando
-            currentCardiacoData.push(record);
+        if (id) {
+            const index = tempCardiacoDB.findIndex(rec => rec.id.toString() === id);
+            if (index > -1) tempCardiacoDB[index] = record;
+        } else {
+            tempCardiacoDB.push(record);
         }
-        
-        store.saveCardiacoData(currentCardiacoData); // GUARDAR
         
         closeFormModal();
         renderCardiacoList();
     });
 
-    renderCardiacoList(); // Renderizado inicial
+    listContainer?.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const editBtn = e.target.closest('.edit-btn');
+
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
+            // Usamos un modal custom en lugar de confirm()
+            if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
+                tempCardiacoDB = tempCardiacoDB.filter(rec => rec.id.toString() !== id);
+                renderCardiacoList();
+            }
+        }
+
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            const record = tempCardiacoDB.find(rec => rec.id.toString() === id);
+            if(record) openFormModal(record);
+        }
+    });
+
+    renderCardiacoList();
 }
+

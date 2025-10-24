@@ -1,113 +1,99 @@
-/* --- pages/asistente.js --- */
-import { store } from '../store.js'; // Importar store
+// --- Base de Datos Temporal para la Conversación ---
+let chatHistory = [];
 
-// --- Función para simular una respuesta del asistente ---
-function getAssistantResponse(message) {
-    const profile = store.getProfile(); // Leer perfil
-    const meds = store.getMeds(); // Leer medicamentos
-    
-    let response = "No entiendo esa pregunta. Intenta preguntar sobre tu perfil o medicamentos.";
-    message = message.toLowerCase();
+// --- Funciones de la Interfaz ---
 
-    if (message.includes("hola") || message.includes("saludos")) {
-        const name = profile ? `, ${profile.fullName}` : '';
-        response = `¡Hola${name}! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?`;
-    } 
-    else if (message.includes("perfil") || message.includes("nombre")) {
-        if (profile) {
-            response = `Tu nombre registrado es ${profile.fullName} y tienes ${profile.age} años.`;
-        } else {
-            response = "Aún no has creado un perfil. Ve a la sección 'Perfil' para empezar.";
-        }
-    }
-    else if (message.includes("medicamentos") || message.includes("medicina")) {
-        if (meds.length > 0) {
-            response = `Tienes ${meds.length} medicamentos registrados. El primero es ${meds[0].name}. ¿Quieres saber más?`;
-        } else {
-            response = "No tienes medicamentos registrados. Ve a la sección 'Medicamentos' para añadirlos.";
-        }
-    }
-    else if (message.includes("condiciones")) {
-        if (profile && profile.conditions && profile.conditions.length > 0) {
-            response = `Según tu perfil, tus condiciones médicas incluyen: ${profile.conditions.join(', ')}.`;
-        } else {
-            response = "No has registrado ninguna condición médica en tu perfil.";
-        }
-    }
-    
-    return response;
+function addMessageToChat(sender, message) {
+    const chatWindow = document.getElementById('chat-window');
+    if (!chatWindow) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}-message`;
+    messageDiv.textContent = message;
+
+    chatWindow.appendChild(messageDiv);
+    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll hacia el final
 }
 
-/* --- Función para añadir mensajes al chat --- */
-function addMessageToChat(message, sender) {
-    const chatMessages = document.getElementById('asistente-chat-messages');
-    if (!chatMessages) return;
+function showTypingIndicator(show) {
+    const chatWindow = document.getElementById('chat-window');
+    let indicator = document.getElementById('typing-indicator');
 
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-message ${sender}`; // 'user' o 'assistant'
-    
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    bubble.textContent = message;
-    
-    msgDiv.appendChild(bubble);
-    chatMessages.appendChild(msgDiv);
-    
-    // Auto-scroll al fondo
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-/* --- Inyectar Estilos --- */
-function injectAsistenteStyles() {
-    const styleId = 'asistente-dynamic-styles'; if (document.getElementById(styleId)) return;
-    const style = document.createElement('style'); style.id = styleId;
-    style.innerHTML = `
-        .chat-container { display: flex; flex-direction: column; height: 70vh; max-height: 600px; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
-        .chat-messages { flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-        .chat-message { display: flex; }
-        .chat-message.user { justify-content: flex-end; }
-        .chat-message.assistant { justify-content: flex-start; }
-        .chat-bubble { max-width: 80%; padding: 0.75rem 1rem; border-radius: 18px; line-height: 1.4; }
-        .chat-message.user .chat-bubble { background-color: var(--primary-blue); color: white; border-bottom-right-radius: 4px; }
-        .chat-message.assistant .chat-bubble { background-color: var(--bg-secondary); color: var(--text-primary); border-bottom-left-radius: 4px; }
-        .chat-input-area { display: flex; gap: 0.5rem; padding: 1rem; border-top: 1px solid var(--border-color); background-color: var(--bg-primary); }
-        .chat-input-area .form-input { flex-grow: 1; }
-        .chat-input-area .button-primary { flex-shrink: 0; }
-    `;
-    document.head.appendChild(style);
-}
-
-/* --- Función Principal --- */
-export function init() {
-    console.log("Cargado js/pages/asistente.js (leyendo de store)");
-    injectAsistenteStyles();
-
-    const form = document.getElementById('asistente-form');
-    const input = document.getElementById('asistente-input');
-
-    if (!form || !input) {
-        console.error("Elementos clave de Asistente no encontrados.");
-        return;
+    if (show) {
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'typing-indicator';
+            indicator.className = 'chat-message assistant-message';
+            indicator.textContent = 'Escribiendo...';
+            chatWindow.appendChild(indicator);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+    } else {
+        if (indicator) {
+            indicator.remove();
+        }
     }
+}
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const userMessage = input.value.trim();
-        if (userMessage === '') return;
-        
-        // 1. Mostrar mensaje del usuario
-        addMessageToChat(userMessage, 'user');
-        input.value = ''; // Limpiar input
-        
-        // 2. Simular respuesta del asistente (leyendo del store)
+// --- Simulación de la Llamada a la IA (Firebase Cloud Function) ---
+async function getAIResponse(userMessage) {
+    // AÑADIR A LA HISTORIA PARA CONTEXTO FUTURO
+    chatHistory.push({ role: 'user', text: userMessage });
+
+    // En el futuro, aquí irá la llamada a la Cloud Function:
+    // const response = await fetch('URL_DE_TU_CLOUD_FUNCTION', { ... });
+    // const data = await response.json();
+    // const aiMessage = data.reply;
+
+    // POR AHORA, SIMULAMOS UNA RESPUESTA CON UN RETRASO
+    return new Promise(resolve => {
         setTimeout(() => {
-            const assistantMessage = getAssistantResponse(userMessage);
-            addMessageToChat(assistantMessage, 'assistant');
-        }, 800); // Pequeño retraso para simular respuesta
+            const simulatedResponse = `Has preguntado sobre "${userMessage}". Como asistente virtual, te recuerdo que solo puedo proporcionar información general y no consejo médico. Te recomiendo consultar a un profesional de la salud.`;
+            chatHistory.push({ role: 'assistant', text: simulatedResponse });
+            resolve(simulatedResponse);
+        }, 2000);
+    });
+}
+
+
+// --- Función Principal ---
+export function init() {
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-chat-btn');
+
+    const handleSendMessage = async () => {
+        const message = chatInput.value.trim();
+        if (message) {
+            addMessageToChat('user', message);
+            chatInput.value = '';
+            chatInput.style.height = 'auto'; // Resetear altura del textarea
+
+            showTypingIndicator(true);
+
+            const aiResponse = await getAIResponse(message);
+
+            showTypingIndicator(false);
+            addMessageToChat('assistant', aiResponse);
+        }
+    };
+    
+    sendBtn?.addEventListener('click', handleSendMessage);
+    chatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+
+    // Auto-ajustar altura del textarea
+    chatInput?.addEventListener('input', () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = (chatInput.scrollHeight) + 'px';
     });
     
-    // Mensaje inicial de bienvenida
-    const profile = store.getProfile();
-    const name = profile ? `, ${profile.fullName}` : '';
-    addMessageToChat(`¡Hola${name}! Soy tu asistente virtual. Pregúntame sobre tu perfil o medicamentos.`, 'assistant');
+    // Inicializar historial de la sesión
+    chatHistory = [{
+        role: 'assistant',
+        text: 'Hola, soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'
+    }];
 }
