@@ -25,7 +25,6 @@ function renderAlergiaTag(alergia, listContainer) {
 
 // --- Función 'renderProfileSummary' actualizada ---
 function renderProfileSummary() {
-    // ... (El contenido de esta función es el de la respuesta anterior, no ha cambiado)
     const summaryContainer = document.getElementById('profile-summary-container');
     const emptyState = document.getElementById('profile-empty-state');
     const editBtn = document.getElementById('edit-profile-main-btn');
@@ -45,7 +44,7 @@ function renderProfileSummary() {
             personalDataEl.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
                     <div style="flex-shrink: 0;">
-                        <img src="${tempProfileData.avatar || 'images/avatar.png'}" alt="Avatar" class="profile-summary-avatar-img">
+                        <img src="${tempProfileData.avatar || 'images/avatar.png'}" alt="Avatar" class="profile-avatar">
                     </div>
                     <div style="flex-grow: 1;">
                         <h4 style="font-size: 1.25rem; font-weight: 600; margin: 0; color: var(--text-primary);">${tempProfileData.fullName || 'N/A'}</h4>
@@ -87,7 +86,6 @@ function renderProfileSummary() {
 
 
 function updateMainMenu(conditions = []) {
-    // ... (El contenido de esta función es el de la respuesta anterior, no ha cambiado)
     const allConditions = ['renal', 'cardiaco', 'diabetes', 'artritis', 'tea', 'respiratorio', 'gastrico', 'ocular', 'general'];
     const accordion = document.querySelector('.nav-item-accordion');
     let hasVisibleConditions = false;
@@ -111,7 +109,6 @@ function updateMainMenu(conditions = []) {
 }
 
 function openFormModal() {
-    // ... (El contenido de esta función es el de la respuesta anterior, no ha cambiado)
     const form = document.getElementById('profile-form');
     if (!form) return; 
     const formModal = document.getElementById('profile-form-modal');
@@ -186,7 +183,6 @@ export function init() {
     console.log("Perfil DOM listo. Inicializando...");
     tempProfileData = store.getProfile();
 
-    // ... (Declaraciones de variables: addInitialBtn, editBtn, etc. sin cambios)
     const addInitialBtn = document.getElementById('add-profile-initial-btn');
     const editBtn = document.getElementById('edit-profile-main-btn');
     const cancelBtn = document.getElementById('cancel-profile-btn');
@@ -200,7 +196,6 @@ export function init() {
     const alergiasInput = document.getElementById('alergias-input');
     const alergiasList = document.getElementById('alergias-list');
 
-    // ... (Event listeners de alergias y avatar sin cambios)
     addAlergiaBtn?.addEventListener('click', () => {
         const alergia = alergiasInput.value.trim();
         if (alergia) {
@@ -234,12 +229,10 @@ export function init() {
         });
     });
 
-    // ... (Event listeners de botones del modal sin cambios)
     addInitialBtn?.addEventListener('click', openFormModal);
     editBtn?.addEventListener('click', openFormModal);
     cancelBtn?.addEventListener('click', closeFormModal);
 
-    // --- Evento Submit del Formulario (MODIFICADO) ---
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -268,7 +261,6 @@ export function init() {
         
         store.saveProfile(tempProfileData);
 
-        // --- SOLUCIÓN: Actualizar Sidebar Inmediatamente ---
         try {
             const sidebarAvatar = document.getElementById('sidebar-avatar');
             const sidebarUsername = document.getElementById('sidebar-username');
@@ -276,21 +268,18 @@ export function init() {
                 sidebarAvatar.src = tempProfileData.avatar || 'images/avatar.png';
             }
             if (sidebarUsername) {
-                // Limitar el nombre si es muy largo
                 const name = tempProfileData.fullName ? tempProfileData.fullName.split(' ')[0] : 'Invitado';
                 sidebarUsername.textContent = `Hola, ${name}`;
             }
         } catch (e) {
             console.error("Error al actualizar sidebar en perfil.js:", e);
         }
-        // --- FIN SOLUCIÓN ---
 
         closeFormModal();
         renderProfileSummary();
         updateMainMenu(tempProfileData.conditions);
     });
 
-    // ... (Resto del código sin cambios)
     renderProfileSummary();
     if(tempProfileData && tempProfileData.conditions) {
         updateMainMenu(tempProfileData.conditions);

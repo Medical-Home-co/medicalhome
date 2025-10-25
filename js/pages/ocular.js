@@ -1,209 +1,355 @@
-/* --- pages/ocular.js --- */
-import { store } from '../store.js'; // Importar store desde carpeta superior (js/)
+// js/pages/ocular.js
+import { store } from '../store.js';
 
-let currentOcularData = []; // Array para guardar múltiples evaluaciones
+const snellenOptions = [
+    '6/6 (20/20)', '6/9 (20/30)', '6/12 (20/40)', '6/15 (20/50)',
+    '6/18 (20/60)', '6/24 (20/80)', '6/30 (20/100)', '6/60 (20/200)',
+    '3/60 (20/400)', '< 3/60 (< 20/400)',
+    'Cuenta Dedos (CD)', 'Movimiento Manos (MM)', 'Percepción Luz (PL)', 'No Percepción Luz (NPL)',
+    'Otro'
+];
 
-/* --- Función para rellenar el select de años --- */
-function populateYearSelect() {
-    const select = document.getElementById("ocular-anio-inicio");
-    if (!select) return;
-    select.innerHTML = '<option value="">Seleccionar año</option>'; // Opción por defecto
-    const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= 1930; year--) {
-        const option = document.createElement("option");
-        option.value = year; option.textContent = year; select.appendChild(option);
-    }
-}
+const currentYear = new Date().getFullYear();
+const yearOptions = [''].concat(Array.from({ length: currentYear - 1949 }, (_, i) => currentYear - i));
 
-/* --- Función para renderizar campos de fecha de examen --- */
-function renderExamenDates(container, dates = ['']) { // Siempre mostrar al menos uno vacío
-     if (!container) return;
-     container.innerHTML = '';
-     // Asegurar que siempre haya al menos un campo
-     const datesToRender = dates && dates.length > 0 ? dates : [''];
-
-     datesToRender.forEach((dateValue, index) => {
-         const row = document.createElement('div'); row.className = 'examen-date-row';
-         const input = document.createElement('input'); input.type = 'date'; input.name = 'ultimo_examen[]'; input.className = 'form-input'; input.value = dateValue || ''; row.appendChild(input);
-         if (index === 0) {
-             /* El primer botón siempre es "Agregar" */
-             const addButton = document.createElement('button'); addButton.type = 'button'; addButton.id = 'add-examen-btn'; addButton.className = 'button button-secondary button-small'; addButton.textContent = '+ Agregar'; row.appendChild(addButton);
-         } else {
-             /* Los siguientes tienen botón "Eliminar" */
-             const removeButton = document.createElement('button'); removeButton.type = 'button'; removeButton.className = 'button button-secondary button-small remove-examen-btn'; removeButton.textContent = 'Eliminar'; row.appendChild(removeButton);
-         }
-         container.appendChild(row);
-     });
-}
-
-/* --- Función para renderizar la lista de tarjetas de resumen --- */
-function renderOcularList() {
+// --- Funciones de Renderizado ---
+function renderOcularList(data) {
     const listContainer = document.getElementById('ocular-list-container');
     const emptyState = document.getElementById('ocular-empty-state');
-    const addOcularMainBtn = document.getElementById('add-ocular-main-btn');
-    if (!listContainer || !emptyState || !addOcularMainBtn) { return; }
-    listContainer.innerHTML = '';
+    const addMainBtn = document.getElementById('add-ocular-main-btn');
 
-    if (currentOcularData.length === 0) {
-        emptyState.classList.remove('hidden'); listContainer.classList.add('hidden'); addOcularMainBtn.classList.add('hidden');
+    if (!listContainer || !emptyState || !addMainBtn) return;
+    listContainer.innerHTML = ''; // Limpiar antes de renderizar
+
+    if (!data || data.length === 0) {
+        emptyState.classList.remove('hidden');
+        listContainer.classList.add('hidden');
+        addMainBtn.classList.add('hidden');
     } else {
-        emptyState.classList.add('hidden'); listContainer.classList.remove('hidden'); addOcularMainBtn.classList.remove('hidden');
-        currentOcularData.forEach(entry => {
-            const card = document.createElement('div');
-            card.className = 'summary-card'; // Clase base
-            card.style.padding = '1rem';
+        emptyState.classList.add('hidden');
+        listContainer.classList.remove('hidden');
+        addMainBtn.classList.remove('hidden');
 
-            /* Aplicar clases de color (level-low, etc.) al indicador */
-            let levelClass = '';
-            switch (entry.clasificacion) {
-                case 'leve': levelClass = 'level-low'; break;
-                case 'moderada': levelClass = 'level-medium'; break;
-                case 'grave': case 'ceguera': levelClass = 'level-high'; break;
+        const sortedData = [...data].sort((a, b) => {
+            const dateA = a.ultimo_examen && a.ultimo_examen.length > 0 ? new Date(a.ultimo_examen[a.ultimo_examen.length - 1]) : new Date(0);
+            const dateB = b.ultimo_examen && b.ultimo_examen.length > 0 ? new Date(b.ultimo_examen[b.ultimo_examen.length - 1]) : new Date(0);
+            return dateB - dateA;
+        });
+
+        sortedData.forEach(entry => {
+            const card = document.createElement('div');
+            card.className = 'summary-card';
+
+            const lastExamDate = entry.ultimo_examen && entry.ultimo_examen.length > 0
+                ? new Date(entry.ultimo_examen[entry.ultimo_examen.length - 1] + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
+                : 'N/A';
+
+            let symptomsHTML = '<span style="font-size: 0.9rem; color: var(--text-secondary);">Sin síntomas</span>';
+            if (entry.sintomas && entry.sintomas.length > 0) {
+                symptomsHTML = '• ' + entry.sintomas.map(s => {
+                    let formattedSymptom = s.replace(/_/g, ' ');
+                    return formattedSymptom.charAt(0).toUpperCase() + formattedSymptom.slice(1);
+                }).join(' • ');
             }
 
-            const entryDate = entry.id ? new Date(entry.id).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year:'numeric' }) : 'Fecha desconocida';
-            const clasificacionText = entry.clasificacion ? entry.clasificacion.charAt(0).toUpperCase() + entry.clasificacion.slice(1) : '-';
+            let severityClass = 'level-unknown';
+            let severityText = entry.clasificacion ? entry.clasificacion.charAt(0).toUpperCase() + entry.clasificacion.slice(1) : 'No clasificado';
+            switch (entry.clasificacion) {
+                case 'leve': severityClass = 'level-low'; break;
+                case 'moderada': severityClass = 'level-medium'; break;
+                case 'grave': severityClass = 'level-high'; break;
+                case 'ceguera': severityClass = 'level-ceguera'; break;
+            }
+
+            // Asegurarse de que el ID se pasa como string si es numérico
+            const entryId = entry.id.toString();
 
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 600;">Evaluación Ocular</h3>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">Registrada: ${entryDate}</p>
-                        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
-                            Agudeza: OD: ${entry.ojo_derecho || '-'} / OI: ${entry.ojo_izquierdo || '-'} / Binoc: ${entry.binocular || '-'}
-                        </p>
-                         <div class="symptom-row" style="padding: 0.5rem 0 0 0; border: none;">
-                            <span>Clasificación</span>
-                            <span class="level-indicator ${levelClass}">${clasificacionText}</span>
-                         </div>
+                        <p class="card-title">Evaluación Ocular</p>
+                        <p class="card-subtitle">Último examen: ${lastExamDate}</p>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                         <button class="icon-button edit-ocular-btn" data-id="${entry.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                         <button class="icon-button delete-ocular-btn" data-id="${entry.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
-                     </div>
-                 </div>`;
+                    <div class="card-actions">
+                        <button class="icon-button edit-btn" data-id="${entryId}"><img src="images/icons/edit.svg" alt="Editar"></button>
+                        <button class="icon-button delete-btn" data-id="${entryId}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
+                    </div>
+                </div>
+                <div class="card-body" style="margin-top: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; margin-bottom: 1rem;">
+                        <div><p class="data-label">OD</p><p class="data-value-small">${entry.ojo_derecho || 'N/A'}</p></div>
+                        <div><p class="data-label">OI</p><p class="data-value-small">${entry.ojo_izquierdo || 'N/A'}</p></div>
+                        <div><p class="data-label">Binocular</p><p class="data-value-small">${entry.binocular || 'N/A'}</p></div>
+                    </div>
+                     <p style="margin-top: 0.75rem; font-size: 0.9rem;"><strong>Síntomas:</strong></p>
+                     <p class="symptom-summary" style="margin-top: 0.5rem; font-size: 0.9rem;">${symptomsHTML}</p>
+                     ${entry.observaciones ? `<p class="notes-row" style="margin-top: 1rem;">${entry.observaciones}</p>` : ''}
+                </div>
+                <div class="card-footer ${severityClass}" style="text-align: center; margin-top: 1rem; padding: 0.5rem; border-radius: 8px;">
+                    <span style="font-weight: 600;">Clasificación: ${severityText}</span>
+                </div>
+            `;
             listContainer.appendChild(card);
         });
     }
-    attachCardActionListeners(); // Volver a asignar listeners para botones Editar/Eliminar
 }
 
-/* --- Función para rellenar el formulario (Modo Edición) --- */
-function populateForm(form, entryData) {
-    if (!form || !entryData) return;
-    Object.keys(entryData).forEach(key => {
-        if (key === 'sintomas' || key === 'ultimo_examen') return; // Arrays se manejan aparte
-        const element = form.elements[key]; if (!element) return;
-        if (element instanceof RadioNodeList) { element.forEach(radio => radio.checked = (radio.value === entryData[key])); }
-        else if ('value' in element) { element.value = entryData[key] || ''; }
+function injectOcularStyles() {
+    const styleId = 'ocular-dynamic-styles';
+    if (document.getElementById(styleId)) return;
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `
+        .data-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
+        .data-value-small { font-size: 1rem; font-weight: 600; margin-top: 0.25rem; }
+        .notes-row { margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-secondary); background-color: var(--bg-secondary); padding: 0.5rem; border-radius: 6px; }
+        .examen-date-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .examen-date-row input { flex-grow: 1; }
+        .level-low { background-color: #E8F5E9; color: #2E7D32; }
+        .level-medium { background-color: #FFF3E0; color: #E65100; }
+        .level-high { background-color: #FFEBEE; color: #C62828; }
+        .level-ceguera { background-color: #4A5568; color: #F7FAFC; }
+        body.dark-theme .level-ceguera { background-color: #E53E3E; color: #1A202C; }
+        .level-unknown { background-color: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .symptom-summary { color: var(--text-primary); }
+    `;
+    document.head.appendChild(style);
+}
+
+function populateSelect(selectId, optionsArray) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const currentValue = select.value;
+    // Limpiar opciones EXCEPTO el placeholder si existe
+    const placeholder = select.querySelector('option[value=""]');
+    select.innerHTML = '';
+    if (placeholder) select.appendChild(placeholder); // Volver a añadir el placeholder
+
+    optionsArray.forEach(optionValue => {
+        const option = document.createElement('option');
+        option.value = option.textContent = optionValue;
+        select.appendChild(option);
     });
-    const sintomasGuardados = entryData.sintomas || []; form.querySelectorAll('input[name="sintomas"]').forEach(checkbox => checkbox.checked = sintomasGuardados.includes(checkbox.value));
-    const examenContainer = document.getElementById('ocular-examen-container'); renderExamenDates(examenContainer, entryData.ultimo_examen || []);
-}
+    // Intentar restaurar valor, si no, dejar el placeholder
+    if (optionsArray.includes(currentValue)) {
+       select.value = currentValue;
+    } else if (placeholder) {
+       select.value = ""; // Valor del placeholder
+    }
+ }
 
-/* --- Funciones del Modal --- */
-function openFormModal(entryData = null) {
-    const formModal = document.getElementById('ocular-form-modal'); const form = document.getElementById('ocular-form'); const formTitle = document.getElementById('ocular-form-title'); const entryIdInput = document.getElementById('ocular-entry-id'); const examenContainer = document.getElementById('ocular-examen-container');
-    if (!formModal || !form || !formTitle || !entryIdInput || !examenContainer) return;
-    form.reset(); entryIdInput.value = ''; renderExamenDates(examenContainer); // Renderizar campo vacío inicial
-    if (entryData) { formTitle.textContent = 'Editar Evaluación Ocular'; entryIdInput.value = entryData.id; populateForm(form, entryData); }
-    else { formTitle.textContent = 'Agregar Evaluación Ocular'; }
-    formModal.classList.remove('hidden');
-}
-function closeFormModal() { document.getElementById('ocular-form-modal')?.classList.add('hidden'); }
 
-/* --- Funciones de Eventos del Formulario (Agregar/Eliminar Fecha) --- */
-function handleAddExamen() {
-    const container = document.getElementById('ocular-examen-container');
+function addExamenDateRow(container, dateValue = '') {
     if (!container) return;
-    const row = document.createElement('div'); row.className = 'examen-date-row';
-    row.innerHTML = `<input type="date" name="ultimo_examen[]" class="form-input"><button type="button" class="button button-secondary button-small remove-examen-btn">Eliminar</button>`;
+
+    const row = document.createElement('div');
+    row.className = 'examen-date-row';
+
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.name = 'ultimo_examen[]';
+    input.className = 'form-input';
+    input.value = dateValue;
+
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'button button-secondary button-small';
+
+    // Ahora SÓLO el botón "Agregar" tiene ID
+    if (!container.querySelector('#add-examen-btn')) {
+        actionBtn.id = 'add-examen-btn';
+        actionBtn.textContent = 'Agregar';
+        actionBtn.onclick = () => addExamenDateRow(container);
+    } else {
+        actionBtn.textContent = 'Quitar';
+        actionBtn.onclick = () => row.remove();
+    }
+
+    row.appendChild(input);
+    row.appendChild(actionBtn);
     container.appendChild(row);
 }
-function handleRemoveExamen(button) { button.closest('.examen-date-row')?.remove(); }
 
-/* --- Función de Envío del Formulario (Guardar) --- */
-function handleFormSubmit(e) {
-    e.preventDefault(); const form = e.target; const formData = new FormData(form); const entryId = document.getElementById('ocular-entry-id').value;
-    const data = {
-        ojo_derecho: formData.get('ojo_derecho'), ojo_izquierdo: formData.get('ojo_izquierdo'), binocular: formData.get('binocular'),
-        clasificacion: formData.get('clasificacion'), anio_inicio: formData.get('anio_inicio'), correccion: formData.get('correccion'),
-        medicaciones: formData.get('medicaciones'), campo_visual: formData.get('campo_visual'), observaciones: formData.get('observaciones'),
-        sintomas: formData.getAll('sintomas'), ultimo_examen: formData.getAll('ultimo_examen[]').filter(date => date) // Filtrar vacíos
-    };
-    if (entryId) { // Editar
-        const index = currentOcularData.findIndex(entry => entry.id.toString() === entryId);
-        if (index > -1) { currentOcularData[index] = { ...currentOcularData[index], ...data, id: parseInt(entryId) }; } // Mantener ID numérico
-        else { console.error("ID Editar no encontrado:", entryId); return; }
-    } else { // Agregar
-        data.id = Date.now(); currentOcularData.push(data);
-    }
-    store.saveOcularData(currentOcularData); // Guardar array en store
-    closeFormModal(); renderOcularList();
+
+function handleSnellenChange(selectId, containerId) {
+    const select = document.getElementById(selectId);
+    const container = document.getElementById(containerId);
+    if (!select || !container) return;
+    container.classList.toggle('hidden', select.value !== 'Otro');
 }
 
-/* --- Asignar Listeners a Tarjetas (Editar/Eliminar) --- */
-function attachCardActionListeners() {
-     const listContainer = document.getElementById('ocular-list-container');
-     if (!listContainer) return;
-     const newContainer = listContainer.cloneNode(true); // Clonar para limpiar
-     listContainer.parentNode.replaceChild(newContainer, listContainer);
 
-     newContainer.addEventListener('click', (e) => {
-         const editBtn = e.target.closest('.edit-ocular-btn');
-         const deleteBtn = e.target.closest('.delete-ocular-btn');
-         if (editBtn) {
-             const entryId = parseInt(editBtn.dataset.id, 10);
-             const entryToEdit = currentOcularData.find(entry => entry.id === entryId);
-             if (entryToEdit) openFormModal(entryToEdit);
-         } else if (deleteBtn) {
-             const entryId = parseInt(deleteBtn.dataset.id, 10);
-             if (confirm("¿Eliminar esta evaluación ocular?")) {
-                 currentOcularData = currentOcularData.filter(entry => entry.id !== entryId);
-                 store.saveOcularData(currentOcularData);
-                 renderOcularList();
-             }
-         }
-     });
-}
-
-/* --- Función Principal --- */
+// --- Función Principal ---
 export function init() {
-    console.log("Cargado js/pages/ocular.js (vStore)");
-    currentOcularData = store.getOcularData() || []; // Cargar datos del store
-    if (!Array.isArray(currentOcularData)) { currentOcularData = []; store.saveOcularData(currentOcularData); } // Asegurar que sea array
-
-    populateYearSelect(); // Generar años
+    injectOcularStyles();
+    let currentData = store.getOcularData();
 
     const formModal = document.getElementById('ocular-form-modal');
-    const addOcularInitialBtn = document.getElementById('add-ocular-initial-btn');
-    const addOcularMainBtn = document.getElementById('add-ocular-main-btn');
-    const cancelOcularBtn = document.getElementById('cancel-ocular-btn');
-    const ocularForm = document.getElementById('ocular-form');
-    const examenContainer = document.getElementById('ocular-examen-container'); // Contenedor para fechas
+    const form = document.getElementById('ocular-form');
+    const addInitialBtn = document.getElementById('add-ocular-initial-btn');
+    const addMainBtn = document.getElementById('add-ocular-main-btn');
+    const cancelBtn = document.getElementById('cancel-ocular-btn');
+    const listContainer = document.getElementById('ocular-list-container');
+    const examenContainer = document.getElementById('ocular-examen-container');
 
-    if (!formModal || !addOcularInitialBtn || !addOcularMainBtn || !cancelOcularBtn || !ocularForm || !examenContainer) {
-        console.error("Elementos clave para Ocular no encontrados.");
-        document.getElementById('ocular-list-container')?.classList.add('hidden');
-        document.getElementById('ocular-empty-state')?.classList.remove('hidden');
-        return;
+    populateSelect('ocular-od', snellenOptions);
+    populateSelect('ocular-oi', snellenOptions);
+    populateSelect('ocular-binocular', snellenOptions);
+    populateSelect('ocular-anio-inicio', yearOptions);
+
+    document.getElementById('ocular-od')?.addEventListener('change', () => handleSnellenChange('ocular-od', 'ocular-od-otro-container'));
+    document.getElementById('ocular-oi')?.addEventListener('change', () => handleSnellenChange('ocular-oi', 'ocular-oi-otro-container'));
+    document.getElementById('ocular-binocular')?.addEventListener('change', () => handleSnellenChange('ocular-binocular', 'ocular-binocular-otro-container'));
+
+
+    function openFormModal(record = null) {
+        if (!form) return;
+        form.reset();
+
+        examenContainer.innerHTML = '';
+        addExamenDateRow(examenContainer); // Siempre añadir la primera fila
+
+        document.getElementById('ocular-od-otro-container')?.classList.add('hidden');
+        document.getElementById('ocular-oi-otro-container')?.classList.add('hidden');
+        document.getElementById('ocular-binocular-otro-container')?.classList.add('hidden');
+        document.getElementById('ocular-entry-id').value = '';
+        document.getElementById('ocular-form-title').textContent = 'Agregar Evaluación Ocular';
+
+        if (record) {
+            document.getElementById('ocular-form-title').textContent = 'Editar Evaluación';
+            document.getElementById('ocular-entry-id').value = record.id;
+
+            ['ojo_derecho', 'ojo_izquierdo', 'binocular'].forEach(key => {
+                 const selectId = `ocular-${key === 'ojo_derecho' ? 'od' : (key === 'ojo_izquierdo' ? 'oi' : key)}`;
+                 const select = document.getElementById(selectId);
+                 const otroContainerId = `${selectId}-otro-container`;
+                 const otroInput1 = document.getElementById(`${selectId}-otro1`);
+                 const otroInput2 = document.getElementById(`${selectId}-otro2`);
+                 if (select) {
+                     const value = record[key];
+                     // Primero, intentar encontrar el valor exacto en las opciones
+                     const optionExists = Array.from(select.options).some(opt => opt.value === value);
+                     if (optionExists) {
+                         select.value = value;
+                     } else if (value && value.includes('/')) { // Si no existe y tiene '/', asumir "Otro"
+                         select.value = 'Otro';
+                         const parts = value.split('/');
+                         if (otroInput1) otroInput1.value = parts[0] || '';
+                         if (otroInput2) otroInput2.value = parts[1] || '';
+                     } else {
+                          select.value = value || ''; // Valor por defecto o vacío
+                     }
+                      select.dispatchEvent(new Event('change')); // Actualizar visibilidad de "Otro"
+                 }
+            });
+
+
+            form.elements.clasificacion.value = record.clasificacion || '';
+            form.elements.anio_inicio.value = record.anio_inicio || '';
+            form.querySelectorAll('input[name="correccion"]').forEach(cb => cb.checked = (record.correccion && record.correccion.includes(cb.value)));
+            form.querySelectorAll('input[name="sintomas"]').forEach(cb => cb.checked = (record.sintomas && record.sintomas.includes(cb.value)));
+
+            // Llenar fechas de examen (sin re-añadir listener aquí)
+            if (record.ultimo_examen && record.ultimo_examen.length > 0) {
+                 examenContainer.innerHTML = ''; // Limpiar primero
+                 record.ultimo_examen.forEach(date => addExamenDateRow(examenContainer, date));
+                 if (!examenContainer.querySelector('#add-examen-btn')) {
+                     addExamenDateRow(examenContainer);
+                 }
+            } // Si no hay fechas, la fila inicial ya tiene el botón
+
+            form.elements.observaciones.value = record.observaciones || '';
+        }
+
+        formModal?.classList.remove('hidden');
     }
 
-    /* --- Asignar Listeners --- */
-    addOcularInitialBtn.addEventListener('click', () => openFormModal());
-    addOcularMainBtn.addEventListener('click', () => openFormModal());
-    cancelOcularBtn.addEventListener('click', closeFormModal);
-    ocularForm.addEventListener('submit', handleFormSubmit);
+    function closeFormModal() {
+        formModal?.classList.add('hidden');
+    }
 
-    /* Listener único con delegación para botones de fecha (+ Agregar / Eliminar) */
-    examenContainer.addEventListener('click', (e) => {
-        if (e.target.id === 'add-examen-btn') {
-            handleAddExamen();
-        } else if (e.target.classList.contains('remove-examen-btn')) {
-            handleRemoveExamen(e.target);
+    // --- Listeners Principales ---
+    addInitialBtn?.addEventListener('click', () => openFormModal());
+    addMainBtn?.addEventListener('click', () => openFormModal());
+    cancelBtn?.addEventListener('click', closeFormModal);
+
+    // SOLUCIÓN: Listener de 'Agregar Fecha' movido a examenContainer (delegación)
+    // El listener onclick dentro de addExamenDateRow se encarga de añadir nuevas filas
+    examenContainer?.addEventListener('click', (e) => {
+        // Añadir lógica para 'Quitar' si es necesario, usando closest()
+        const removeBtn = e.target.closest('.remove-examen-btn'); // Asumiendo que añades esta clase
+        if (removeBtn) {
+            removeBtn.closest('.examen-date-row')?.remove();
         }
     });
 
-    attachCardActionListeners(); // Listeners para tarjetas (Editar/Eliminar)
-    renderOcularList(); // Renderizado inicial
+
+    form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('ocular-entry-id').value;
+        const formData = new FormData(form);
+        const data = {};
+
+        ['ojo_derecho', 'ojo_izquierdo', 'binocular'].forEach(key => {
+            const selectId = `ocular-${key === 'ojo_derecho' ? 'od' : (key === 'ojo_izquierdo' ? 'oi' : key)}`;
+            const select = document.getElementById(selectId);
+            if(select.value === 'Otro') {
+                 const otroInput1 = document.getElementById(`${selectId}-otro1`);
+                 const otroInput2 = document.getElementById(`${selectId}-otro2`);
+                 // Validar que los inputs "Otro" tengan valor si "Otro" está seleccionado
+                 if (!otroInput1.value || !otroInput2.value) {
+                     alert(`Por favor, especifica el valor para ${select.previousElementSibling.textContent} o selecciona una opción válida.`);
+                     e.preventDefault(); // Detener envío
+                     // Podrías enfocar el input problemático aquí
+                     return; 
+                 }
+                 data[key] = `${otroInput1.value}/${otroInput2.value}`;
+            } else {
+                 data[key] = select.value;
+            }
+        });
+        
+        // Si el formulario fue detenido por validación, salir
+        if (e.defaultPrevented) return; 
+
+        data.id = id ? parseInt(id) : Date.now();
+        data.clasificacion = formData.get('clasificacion');
+        data.anio_inicio = formData.get('anio_inicio');
+        data.correccion = formData.getAll('correccion');
+        data.ultimo_examen = formData.getAll('ultimo_examen[]').filter(date => date);
+        data.sintomas = formData.getAll('sintomas');
+        data.observaciones = formData.get('observaciones');
+
+
+        if (id) {
+            const index = currentData.findIndex(rec => rec.id.toString() === id);
+            if (index > -1) currentData[index] = data;
+        } else {
+            currentData.push(data);
+        }
+
+        store.saveOcularData(currentData);
+        closeFormModal();
+        renderOcularList(currentData);
+    });
+
+    listContainer?.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const editBtn = e.target.closest('.edit-btn');
+        // Asegurarse de que el ID se lee correctamente
+        const targetId = deleteBtn?.dataset.id || editBtn?.dataset.id; 
+
+        if (deleteBtn) {
+            if (confirm('¿Estás seguro?')) {
+                currentData = currentData.filter(rec => rec.id.toString() !== targetId);
+                store.saveOcularData(currentData);
+                renderOcularList(currentData);
+            }
+        } else if (editBtn) {
+            const record = currentData.find(rec => rec.id.toString() === targetId);
+            if (record) openFormModal(record);
+        }
+    });
+
+    renderOcularList(currentData);
 }

@@ -1,9 +1,9 @@
-// --- Base de Datos Temporal ---
-let tempDiabetesDB = [];
+// SOLUCIÓN: Importar el store
+import { store } from '../store.js';
 
 // --- Funciones de Renderizado ---
-
-function renderDiabetesList() {
+// SOLUCIÓN: Aceptar datos como argumento
+function renderDiabetesList(data) {
     const listContainer = document.getElementById('diabetes-list-container');
     const emptyState = document.getElementById('diabetes-empty-state');
     const addMainBtn = document.getElementById('add-diabetes-main-btn');
@@ -12,7 +12,8 @@ function renderDiabetesList() {
 
     listContainer.innerHTML = '';
 
-    if (tempDiabetesDB.length === 0) {
+    // SOLUCIÓN: Usar la longitud de los datos pasados
+    if (data.length === 0) {
         emptyState.classList.remove('hidden');
         listContainer.classList.add('hidden');
         addMainBtn.classList.add('hidden');
@@ -21,22 +22,19 @@ function renderDiabetesList() {
         listContainer.classList.remove('hidden');
         addMainBtn.classList.remove('hidden');
 
-        // Ordenar por fecha y hora más reciente primero
-        tempDiabetesDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        // SOLUCIÓN: Usar los datos pasados
+        const sortedData = [...data].sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
-        tempDiabetesDB.forEach(rec => {
+        sortedData.forEach(rec => {
             const card = document.createElement('div');
             card.className = 'summary-card';
             
-            // Lógica para clasificar la glucosa (rangos de ejemplo, no es diagnóstico médico)
             let glucoseClass = 'glucose-normal';
             let glucoseText = 'Normal';
             if (rec.glucose >= 180) {
-                glucoseClass = 'glucose-high';
-                glucoseText = 'Alta';
+                glucoseClass = 'glucose-high'; glucoseText = 'Alta';
             } else if (rec.glucose < 70) {
-                 glucoseClass = 'glucose-low';
-                 glucoseText = 'Baja';
+                 glucoseClass = 'glucose-low'; glucoseText = 'Baja';
             }
 
             card.innerHTML = `
@@ -68,15 +66,15 @@ function renderDiabetesList() {
 }
 
 // --- Lógica de Estilos Dinámicos ---
-function injectDiabetesStyles() {
+function injectDiabetesStyles() { /* ... (Sin cambios aquí) ... */ 
     const styleId = 'diabetes-dynamic-styles';
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
     style.id = styleId;
     style.innerHTML = `
-        .glucose-normal { background-color: #E8F5E9; color: #2E7D32; } /* Verde claro */
-        .glucose-high { background-color: #FFEBEE; color: #C62828; } /* Rojo claro */
-        .glucose-low { background-color: #F4F7F9; color: var(--text-secondary); border: 1px solid var(--border-color); } /* Gris claro */
+        .glucose-normal { background-color: #E8F5E9; color: #2E7D32; } 
+        .glucose-high { background-color: #FFEBEE; color: #C62828; } 
+        .glucose-low { background-color: #F4F7F9; color: var(--text-secondary); border: 1px solid var(--border-color); } 
         .data-label { font-size: 0.8rem; color: var(--text-secondary); }
         .data-value { font-weight: 700; color: var(--primary-blue); }
         .data-unit { font-weight: 400; color: var(--text-secondary); }
@@ -88,6 +86,9 @@ function injectDiabetesStyles() {
 export function init() {
     injectDiabetesStyles();
 
+    // SOLUCIÓN: Cargar datos del store
+    let currentData = store.getDiabetesData();
+
     const formModal = document.getElementById('diabetes-form-modal');
     const form = document.getElementById('diabetes-form');
     const addInitialBtn = document.getElementById('add-diabetes-initial-btn');
@@ -95,7 +96,7 @@ export function init() {
     const cancelBtn = document.getElementById('cancel-diabetes-btn');
     const listContainer = document.getElementById('diabetes-list-container');
 
-    function openFormModal(record = null) {
+    function openFormModal(record = null) { /* ... (Sin cambios aquí, solo llena el form) ... */ 
         if (!form) return;
         form.reset();
         const now = new Date();
@@ -110,9 +111,9 @@ export function init() {
             document.getElementById('diabetes-date').value = record.date;
             document.getElementById('diabetes-time').value = record.time;
             document.getElementById('diabetes-glucose').value = record.glucose;
-            document.getElementById('diabetes-hba1c').value = record.hba1c;
-            document.getElementById('diabetes-insulin').value = record.insulin;
-            document.getElementById('diabetes-notes').value = record.notes;
+            document.getElementById('diabetes-hba1c').value = record.hba1c || ''; // Corregido null
+            document.getElementById('diabetes-insulin').value = record.insulin || ''; // Corregido null
+            document.getElementById('diabetes-notes').value = record.notes || ''; // Corregido null
         }
         if(formModal) formModal.classList.remove('hidden');
     }
@@ -129,7 +130,7 @@ export function init() {
         e.preventDefault();
         const id = document.getElementById('diabetes-id').value;
         const record = {
-            id: id || Date.now(),
+            id: id ? parseInt(id) : Date.now(),
             date: document.getElementById('diabetes-date').value,
             time: document.getElementById('diabetes-time').value,
             glucose: parseInt(document.getElementById('diabetes-glucose').value),
@@ -139,14 +140,18 @@ export function init() {
         };
 
         if (id) {
-            const index = tempDiabetesDB.findIndex(rec => rec.id.toString() === id);
-            if (index > -1) tempDiabetesDB[index] = record;
+            const index = currentData.findIndex(rec => rec.id.toString() === id);
+            if (index > -1) currentData[index] = record;
         } else {
-            tempDiabetesDB.push(record);
+            currentData.push(record);
         }
         
+        // SOLUCIÓN: Guardar en el store
+        store.saveDiabetesData(currentData);
+        
         closeFormModal();
-        renderDiabetesList();
+        // SOLUCIÓN: Pasar datos actualizados al render
+        renderDiabetesList(currentData);
     });
 
     listContainer?.addEventListener('click', (e) => {
@@ -156,18 +161,21 @@ export function init() {
         if (deleteBtn) {
             const id = deleteBtn.dataset.id;
             if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-                tempDiabetesDB = tempDiabetesDB.filter(rec => rec.id.toString() !== id);
-                renderDiabetesList();
+                // SOLUCIÓN: Modificar currentData y guardar
+                currentData = currentData.filter(rec => rec.id.toString() !== id);
+                store.saveDiabetesData(currentData);
+                renderDiabetesList(currentData);
             }
         }
 
         if (editBtn) {
             const id = editBtn.dataset.id;
-            const record = tempDiabetesDB.find(rec => rec.id.toString() === id);
+             // SOLUCIÓN: Buscar en currentData
+            const record = currentData.find(rec => rec.id.toString() === id);
             if(record) openFormModal(record);
         }
     });
 
-    renderDiabetesList();
+    // SOLUCIÓN: Render inicial con datos del store
+    renderDiabetesList(currentData);
 }
-

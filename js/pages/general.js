@@ -1,9 +1,9 @@
-// --- Base de Datos Temporal ---
-let tempGeneralDB = [];
+// SOLUCIÓN: Importar el store
+import { store } from '../store.js';
 
 // --- Funciones de Renderizado ---
-
-function renderGeneralList() {
+// SOLUCIÓN: Aceptar datos como argumento
+function renderGeneralList(data) {
     const listContainer = document.getElementById('general-list-container');
     const emptyState = document.getElementById('general-empty-state');
     const addMainBtn = document.getElementById('add-general-main-btn');
@@ -11,22 +11,26 @@ function renderGeneralList() {
     if (!listContainer || !emptyState || !addMainBtn) return;
     listContainer.innerHTML = '';
 
-    if (tempGeneralDB.length === 0) {
+    // SOLUCIÓN: Usar la longitud de los datos pasados
+    if (data.length === 0) {
         emptyState.classList.remove('hidden');
+        listContainer.classList.add('hidden'); // Ocultar grid
         addMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
+        listContainer.classList.remove('hidden'); // Mostrar grid
         addMainBtn.classList.remove('hidden');
-        tempGeneralDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
-        tempGeneralDB.forEach(rec => {
+        // SOLUCIÓN: Usar los datos pasados
+        const sortedData = [...data].sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+
+        sortedData.forEach(rec => {
             const card = document.createElement('div');
             card.className = 'summary-card';
             
-            // Lógica para clasificar la severidad
-            let severityClass = 'level-low'; // Verde
-            if (rec.severity === 'Moderado') severityClass = 'level-medium'; // Naranja
-            if (rec.severity === 'Severo') severityClass = 'level-high'; // Rojo
+            let severityClass = 'level-low'; 
+            if (rec.severity === 'Moderado') severityClass = 'level-medium'; 
+            if (rec.severity === 'Severo') severityClass = 'level-high'; 
 
             card.innerHTML = `
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -54,15 +58,15 @@ function renderGeneralList() {
 }
 
 // --- Lógica de Estilos Dinámicos ---
-function injectGeneralStyles() {
+function injectGeneralStyles() { /* ... (Sin cambios aquí) ... */ 
     const styleId = 'general-dynamic-styles';
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
     style.id = styleId;
     style.innerHTML = `
-        .level-low { background-color: #E8F5E9; color: #2E7D32; } /* Verde */
-        .level-medium { background-color: #FFF3E0; color: #E65100; } /* Naranja */
-        .level-high { background-color: #FFEBEE; color: #C62828; } /* Rojo */
+        .level-low { background-color: #E8F5E9; color: #2E7D32; } 
+        .level-medium { background-color: #FFF3E0; color: #E65100; } 
+        .level-high { background-color: #FFEBEE; color: #C62828; } 
         .symptom-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; }
         .level-indicator { font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.9rem; }
         .info-row { margin-top: 0.75rem; font-size: 0.9rem; padding: 0.5rem; background-color: var(--bg-secondary); border-radius: 6px; }
@@ -75,6 +79,9 @@ function injectGeneralStyles() {
 export function init() {
     injectGeneralStyles();
 
+    // SOLUCIÓN: Cargar datos del store
+    let currentData = store.getGeneralData();
+
     const formModal = document.getElementById('general-form-modal');
     const form = document.getElementById('general-form');
     const addInitialBtn = document.getElementById('add-general-initial-btn');
@@ -82,7 +89,7 @@ export function init() {
     const cancelBtn = document.getElementById('cancel-general-btn');
     const listContainer = document.getElementById('general-list-container');
 
-    function openFormModal(record = null) {
+    function openFormModal(record = null) { /* ... (Sin cambios aquí, solo llena el form) ... */ 
         if (!form) return;
         form.reset();
         const now = new Date();
@@ -117,7 +124,7 @@ export function init() {
         const id = document.getElementById('general-id').value;
         
         const record = {
-            id: id || Date.now(),
+            id: id ? parseInt(id) : Date.now(),
             date: document.getElementById('general-date').value,
             time: document.getElementById('general-time').value,
             symptom: document.getElementById('general-symptom').value,
@@ -127,14 +134,18 @@ export function init() {
         };
 
         if (id) {
-            const index = tempGeneralDB.findIndex(rec => rec.id.toString() === id);
-            if (index > -1) tempGeneralDB[index] = record;
+            const index = currentData.findIndex(rec => rec.id.toString() === id);
+            if (index > -1) currentData[index] = record;
         } else {
-            tempGeneralDB.push(record);
+            currentData.push(record);
         }
         
+        // SOLUCIÓN: Guardar en el store
+        store.saveGeneralData(currentData);
+        
         closeFormModal();
-        renderGeneralList();
+        // SOLUCIÓN: Pasar datos actualizados al render
+        renderGeneralList(currentData);
     });
 
     listContainer?.addEventListener('click', (e) => {
@@ -142,16 +153,19 @@ export function init() {
         const editBtn = e.target.closest('.edit-btn');
         if (deleteBtn) {
             if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-                tempGeneralDB = tempGeneralDB.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
-                renderGeneralList();
+                // SOLUCIÓN: Modificar currentData y guardar
+                currentData = currentData.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
+                store.saveGeneralData(currentData);
+                renderGeneralList(currentData);
             }
         }
         if (editBtn) {
-            const record = tempGeneralDB.find(rec => rec.id.toString() === editBtn.dataset.id);
+            // SOLUCIÓN: Buscar en currentData
+            const record = currentData.find(rec => rec.id.toString() === editBtn.dataset.id);
             if (record) openFormModal(record);
         }
     });
 
-    renderGeneralList();
+    // SOLUCIÓN: Render inicial con datos del store
+    renderGeneralList(currentData);
 }
-

@@ -1,5 +1,5 @@
-// --- Base de Datos Temporal ---
-let tempTeaDB = [];
+// SOLUCIÓN: Importar el store
+import { store } from '../store.js';
 
 // --- Datos para los selectores dinámicos ---
 const moods = { 'Feliz': '😊', 'Tranquilo': '😌', 'Ansioso': '😟', 'Triste': '😢', 'Enojado': '😠' };
@@ -7,7 +7,8 @@ const socialInteractions = ['Positivas', 'Neutrales', 'Con Dificultad'];
 const sensoryTriggers = ['Ruidos fuertes', 'Luces brillantes', 'Multitudes', 'Olores', 'Texturas'];
 
 // --- Funciones de Renderizado ---
-function renderTeaList() {
+// SOLUCIÓN: Aceptar datos como argumento
+function renderTeaList(data) {
     const listContainer = document.getElementById('tea-list-container');
     const emptyState = document.getElementById('tea-empty-state');
     const addMainBtn = document.getElementById('add-tea-main-btn');
@@ -15,15 +16,20 @@ function renderTeaList() {
     if (!listContainer || !emptyState || !addMainBtn) return;
     listContainer.innerHTML = '';
 
-    if (tempTeaDB.length === 0) {
+    // SOLUCIÓN: Usar la longitud de los datos pasados
+    if (data.length === 0) {
         emptyState.classList.remove('hidden');
+        listContainer.classList.add('hidden'); // Ocultar grid
         addMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
+        listContainer.classList.remove('hidden'); // Mostrar grid
         addMainBtn.classList.remove('hidden');
-        tempTeaDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
-        tempTeaDB.forEach(rec => {
+        // SOLUCIÓN: Usar los datos pasados
+        const sortedData = [...data].sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+
+        sortedData.forEach(rec => {
             const card = document.createElement('div');
             card.className = 'summary-card';
 
@@ -39,14 +45,8 @@ function renderTeaList() {
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="tea-summary-row">
-                        <span class="tea-summary-label">Estado de Ánimo:</span>
-                        <span class="tea-summary-value mood-value">${moods[rec.mood] || ''} ${rec.mood}</span>
-                    </div>
-                    <div class="tea-summary-row">
-                        <span class="tea-summary-label">Nivel de Ansiedad:</span>
-                        <span class="tea-summary-value">${rec.anxietyLevel}/10</span>
-                    </div>
+                    <div class="tea-summary-row"><span class="tea-summary-label">Estado de Ánimo:</span><span class="tea-summary-value mood-value">${moods[rec.mood] || ''} ${rec.mood}</span></div>
+                    <div class="tea-summary-row"><span class="tea-summary-label">Nivel de Ansiedad:</span><span class="tea-summary-value">${rec.anxietyLevel}/10</span></div>
                     ${rec.social.length > 0 ? `<div class="tags-container" style="margin-top: 0.5rem;">${socialHTML}</div>` : ''}
                     ${rec.sensory.length > 0 ? `<p class="data-label" style="margin-top: 0.75rem;">Disparadores Sensoriales:</p><div class="tags-container">${sensoryHTML}</div>` : ''}
                     ${rec.positiveMoment ? `<div class="positive-moment-summary"><p><strong>Momento Positivo:</strong> ${rec.positiveMoment}</p></div>` : ''}
@@ -58,12 +58,11 @@ function renderTeaList() {
 }
 
 // --- Lógica de Estilos Dinámicos ---
-function injectTeaStyles() {
+function injectTeaStyles() { /* ... (Sin cambios aquí) ... */ 
     const styleId = 'tea-dynamic-styles';
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
     style.id = styleId;
-    // CORRECCIÓN: Se ajustan los colores para el modo oscuro.
     style.innerHTML = `
         .emoji-selector { display: flex; justify-content: space-around; padding: 0.5rem 0; }
         .emoji-btn { font-size: 2rem; background: none; border: 2px solid transparent; border-radius: 50%; padding: 0.25rem; cursor: pointer; transition: all 0.2s; }
@@ -94,6 +93,9 @@ function injectTeaStyles() {
 export function init() {
     injectTeaStyles();
 
+    // SOLUCIÓN: Cargar datos del store
+    let currentData = store.getTeaData();
+
     const formModal = document.getElementById('tea-form-modal');
     const form = document.getElementById('tea-form');
     const addInitialBtn = document.getElementById('add-tea-initial-btn');
@@ -102,16 +104,14 @@ export function init() {
     const listContainer = document.getElementById('tea-list-container');
     const anxietySlider = document.getElementById('anxiety-level');
     const anxietyValue = document.getElementById('anxiety-level-value');
+    const moodContainer = document.getElementById('tea-mood-container');
     
     // --- Lógica para poblar selectores dinámicos ---
-    const moodContainer = document.getElementById('tea-mood-container');
-    if (moodContainer) {
+    if (moodContainer) { /* ... (Sin cambios aquí) ... */ 
+        moodContainer.innerHTML = ''; // Limpiar por si acaso
         for (const [name, emoji] of Object.entries(moods)) {
             const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'emoji-btn';
-            btn.textContent = emoji;
-            btn.dataset.mood = name;
+            btn.type = 'button'; btn.className = 'emoji-btn'; btn.textContent = emoji; btn.dataset.mood = name;
             btn.onclick = () => {
                 moodContainer.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
@@ -121,17 +121,13 @@ export function init() {
         }
     }
 
-    function createTagSelector(containerId, items) {
+    function createTagSelector(containerId, items) { /* ... (Sin cambios aquí) ... */ 
         const container = document.getElementById(containerId);
         if(!container) return;
-        // Limpiar contenedor antes de poblar para evitar duplicados en modo edición
-        container.innerHTML = '';
+        container.innerHTML = ''; 
         items.forEach(item => {
             const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'tag-btn';
-            btn.textContent = item;
-            btn.dataset.value = item;
+            btn.type = 'button'; btn.className = 'tag-btn'; btn.textContent = item; btn.dataset.value = item;
             btn.onclick = () => btn.classList.toggle('selected');
             container.appendChild(btn);
         });
@@ -140,18 +136,16 @@ export function init() {
     createTagSelector('tea-sensory-triggers-container', sensoryTriggers);
     
     // --- Lógica general ---
-
-    function openFormModal(record = null) {
+    function openFormModal(record = null) { /* ... (Sin cambios aquí, solo llena el form) ... */ 
         if (!form) return;
         form.reset();
         document.querySelectorAll('.emoji-btn, .tag-btn').forEach(b => b.classList.remove('selected'));
-
         const now = new Date();
         document.getElementById('tea-date').valueAsDate = now;
         document.getElementById('tea-time').value = now.toTimeString().slice(0, 5);
         document.getElementById('tea-id').value = '';
         document.getElementById('tea-form-title').textContent = 'Nuevo Registro Diario';
-        anxietySlider.value = 5; // Valor por defecto
+        anxietySlider.value = 5; 
         anxietyValue.textContent = 5;
 
         if (record) {
@@ -159,24 +153,20 @@ export function init() {
             document.getElementById('tea-id').value = record.id;
             document.getElementById('tea-date').value = record.date;
             document.getElementById('tea-time').value = record.time;
-            
-            const moodBtn = moodContainer.querySelector(`[data-mood="${record.mood}"]`);
+            const moodBtn = moodContainer?.querySelector(`[data-mood="${record.mood}"]`);
             if(moodBtn) moodBtn.click();
-
             anxietySlider.value = record.anxietyLevel;
             anxietyValue.textContent = record.anxietyLevel;
-            form.elements.emotionNotes.value = record.emotionNotes;
-            
-            record.social.forEach(val => document.querySelector(`#tea-social-container [data-value="${val}"]`)?.classList.add('selected'));
-            record.sensory.forEach(val => document.querySelector(`#tea-sensory-triggers-container [data-value="${val}"]`)?.classList.add('selected'));
-            
-            form.elements.socialNotes.value = record.socialNotes;
-            form.elements.sensoryOverload.value = record.sensoryOverload;
-            form.elements.routineChange.value = record.routineChange;
-            form.elements.changeHandling.value = record.changeHandling;
-            form.elements.sleepQuality.value = record.sleepQuality;
-            form.elements.appetite.value = record.appetite;
-            form.elements.positiveMoment.value = record.positiveMoment;
+            form.elements.emotionNotes.value = record.emotionNotes || '';
+            (record.social || []).forEach(val => document.querySelector(`#tea-social-container [data-value="${val}"]`)?.classList.add('selected'));
+            (record.sensory || []).forEach(val => document.querySelector(`#tea-sensory-triggers-container [data-value="${val}"]`)?.classList.add('selected'));
+            form.elements.socialNotes.value = record.socialNotes || '';
+            form.elements.sensoryOverload.value = record.sensoryOverload || 'No';
+            form.elements.routineChange.value = record.routineChange || 'No';
+            form.elements.changeHandling.value = record.changeHandling || '';
+            form.elements.sleepQuality.value = record.sleepQuality || 'Buena';
+            form.elements.appetite.value = record.appetite || 'Normal';
+            form.elements.positiveMoment.value = record.positiveMoment || '';
         }
         formModal?.classList.remove('hidden');
     }
@@ -195,7 +185,7 @@ export function init() {
         const selectedSensory = Array.from(document.querySelectorAll('#tea-sensory-triggers-container .tag-btn.selected')).map(b => b.dataset.value);
 
         const record = {
-            id: id || Date.now(),
+            id: id ? parseInt(id) : Date.now(),
             date: document.getElementById('tea-date').value,
             time: document.getElementById('tea-time').value,
             mood: document.getElementById('tea-mood-value').value,
@@ -213,14 +203,18 @@ export function init() {
         };
 
         if (id) {
-            const index = tempTeaDB.findIndex(rec => rec.id.toString() === id);
-            if (index > -1) tempTeaDB[index] = record;
+            const index = currentData.findIndex(rec => rec.id.toString() === id);
+            if (index > -1) currentData[index] = record;
         } else {
-            tempTeaDB.push(record);
+            currentData.push(record);
         }
         
+        // SOLUCIÓN: Guardar en el store
+        store.saveTeaData(currentData);
+        
         closeFormModal();
-        renderTeaList();
+        // SOLUCIÓN: Pasar datos actualizados al render
+        renderTeaList(currentData);
     });
 
      listContainer?.addEventListener('click', (e) => {
@@ -229,17 +223,20 @@ export function init() {
 
         if (deleteBtn) {
             if(confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-                tempTeaDB = tempTeaDB.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
-                renderTeaList();
+                // SOLUCIÓN: Modificar currentData y guardar
+                currentData = currentData.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
+                store.saveTeaData(currentData);
+                renderTeaList(currentData);
             }
         }
 
         if(editBtn) {
-            const record = tempTeaDB.find(rec => rec.id.toString() === editBtn.dataset.id);
+            // SOLUCIÓN: Buscar en currentData
+            const record = currentData.find(rec => rec.id.toString() === editBtn.dataset.id);
             if(record) openFormModal(record);
         }
     });
 
-    renderTeaList();
+    // SOLUCIÓN: Render inicial con datos del store
+    renderTeaList(currentData);
 }
-
