@@ -1,4 +1,3 @@
-<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE SEGUIMIENTO DE ARTRITIS === -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -10,12 +9,9 @@
         </button>
     </div>
 
-    <!-- La lista de registros guardados aparecerá aquí -->
     <div id="artritis-list-container" class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-        <!-- Las tarjetas de registros se generarán con JS -->
-    </div>
+        </div>
 
-    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
     <div id="artritis-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
         <h2 class="modal-title">Registra tus Síntomas</h2>
         <img src="images/artritis.png" alt="Icono de Artritis" style="width: 128px; height: 128px; margin: 1.5rem auto;">
@@ -24,27 +20,26 @@
     </div>
 </div>
 
-<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO DE ARTRITIS === -->
 <div id="artritis-form-modal" class="modal-overlay hidden">
     <div class="modal-content">
         <h2 id="artritis-form-title" class="modal-title">Nuevo Registro de Artritis</h2>
         <form id="artritis-form" class="modal-form">
             <input type="hidden" id="artritis-id">
-            
+
             <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
                     <label for="artritis-date">Fecha</label>
-                    <input type="date" id="artritis-date" class="form-input" required>
+                    <input type="date" id="artritis-date" name="date" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label for="artritis-time">Hora</label>
-                    <input type="time" id="artritis-time" class="form-input" required>
+                    <input type="time" id="artritis-time" name="time" class="form-input" required>
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 1rem;">
                 <label for="artritis-pain-level">Nivel de dolor actual (0-10)</label>
-                <select id="artritis-pain-level" class="form-input">
+                <select id="artritis-pain-level" name="painLevel" class="form-input">
                     <option value="0">0 - Sin dolor</option>
                     <option value="1">1 - Muy leve</option>
                     <option value="2">2 - Leve</option>
@@ -59,12 +54,24 @@
                 </select>
             </div>
 
-            <div class="form-group" style="display: flex; gap: 2rem;">
-                 <label class="checkbox-label" style="justify-content: flex-start;"><input type="checkbox" name="symptoms" value="rigidez"> Rigidez matutina</label>
-                 <label class="checkbox-label" style="justify-content: flex-start;"><input type="checkbox" name="symptoms" value="inflamacion"> Inflamación visible</label>
+            <div class="form-group" style="margin-top: 1rem;">
+                 <label>Otros Síntomas</label>
+                 <div style="display: flex; justify-content: center; gap: 1.5rem;">
+                     <label class="checkbox-label"><input type="checkbox" name="symptoms" value="rigidez"> Rigidez matutina</label>
+                     <label class="checkbox-label"><input type="checkbox" name="symptoms" value="inflamacion"> Inflamación visible</label>
+                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 1rem;">
+                 <label for="artritis-rigidez-duracion">Duración Rigidez Matutina (si aplica)</label>
+                 <select id="artritis-rigidez-duracion" name="rigidez_duracion" class="form-input">
+                    <option value="">No aplica / No hubo</option>
+                    <option value="< 30 min">Menos de 30 min</option>
+                    <option value="30-60 min">Entre 30 y 60 min</option>
+                    <option value="> 60 min">Más de 60 min</option>
+                 </select>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
                 <label>Articulaciones afectadas</label>
                 <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
                     <label class="checkbox-label"><input type="checkbox" name="joints" value="Manos"> Manos</label>
@@ -80,16 +87,44 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 1rem;">
+                <div class="form-group">
+                    <label for="artritis-fatiga">Nivel de Fatiga</label>
+                    <select id="artritis-fatiga" name="fatiga" class="form-input">
+                        <option value="Ninguna">Ninguna</option>
+                        <option value="Leve">Leve</option>
+                        <option value="Moderada">Moderada</option>
+                        <option value="Severa">Severa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="artritis-impacto">Impacto en Actividades</label>
+                    <select id="artritis-impacto" name="impacto_actividades" class="form-input">
+                        <option value="Ninguno">Ninguno</option>
+                        <option value="Leve">Leve</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Severo">Severo</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="artritis-sueno">Calidad del Sueño</label>
+                    <select id="artritis-sueno" name="calidad_sueno" class="form-input">
+                        <option value="Buena">Buena</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Mala">Mala</option>
+                    </select>
+                </div>
+            </div>
+             <div class="form-group" style="margin-top: 1rem;">
                 <label for="artritis-mobility">Limitación de movilidad</label>
-                <select id="artritis-mobility" class="form-input">
+                <select id="artritis-mobility" name="mobility" class="form-input"> <option value="Ninguna">Ninguna</option>
                     <option value="Leve">Leve</option>
                     <option value="Moderada">Moderada</option>
                     <option value="Severa">Severa</option>
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 1rem;">
                 <label for="artritis-med-input">Medicamentos tomados (Opcional)</label>
                 <div class="input-with-button">
                      <input type="text" id="artritis-med-input" placeholder="Nombre del medicamento" class="form-input">
@@ -98,14 +133,13 @@
                 <div id="artritis-meds-list" class="tags-container" style="margin-top: 0.5rem;"></div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 1rem;">
                 <label for="artritis-notes">Notas adicionales</label>
-                <textarea id="artritis-notes" class="form-input" placeholder="Observaciones, factores desencadenantes, etc."></textarea>
-            </div>
+                <textarea id="artritis-notes" name="notes" class="form-input" placeholder="Observaciones, factores desencadenantes, etc."></textarea> </div>
 
-            <div class="modal-actions">
-                <button type="button" id="cancel-artritis-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
+            <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button>
+                <button type="button" id="cancel-artritis-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
         </form>
     </div>

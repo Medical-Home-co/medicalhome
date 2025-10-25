@@ -1,4 +1,3 @@
-<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE SEGUIMIENTO CARDIACO === -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -10,12 +9,9 @@
         </button>
     </div>
 
-    <!-- La lista de registros guardados aparecerá aquí -->
     <div id="cardiaco-list-container" class="content-grid">
-        <!-- Las tarjetas de registros se generarán con JS -->
-    </div>
+        </div>
 
-    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
     <div id="cardiaco-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
         <h2 class="modal-title">Monitorea tu Presión Arterial</h2>
         <img src="images/cardiaco.png" alt="Icono de Corazón" style="width: 128px; height: 128px; margin: 1.5rem auto;">
@@ -24,43 +20,72 @@
     </div>
 </div>
 
-<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO CARDIACO === -->
 <div id="cardiaco-form-modal" class="modal-overlay hidden">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 550px;">
         <h2 id="cardiaco-form-title" class="modal-title">Agregar Registro de Presión</h2>
         <form id="cardiaco-form" class="modal-form">
             <input type="hidden" id="cardiaco-id">
             <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
                     <label for="cardiaco-date">Fecha</label>
-                    <input type="date" id="cardiaco-date" class="form-input" required>
+                    <input type="date" id="cardiaco-date" name="date" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label for="cardiaco-time">Hora</label>
-                    <input type="time" id="cardiaco-time" class="form-input" required>
+                    <input type="time" id="cardiaco-time" name="time" class="form-input" required>
                 </div>
             </div>
-            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="cardiaco-measurement-time">Momento de la Medición</label>
+                <select id="cardiaco-measurement-time" name="measurementTime" class="form-input">
+                    <option value="">Seleccionar...</option>
+                    <option value="despertar">Al despertar</option>
+                    <option value="antes_medicacion">Antes de medicación</option>
+                    <option value="despues_medicacion">Después de medicación</option>
+                    <option value="antes_ejercicio">Antes de ejercicio</option>
+                    <option value="despues_ejercicio">Después de ejercicio</option>
+                    <option value="malestar">Sintiendo malestar</option>
+                    <option value="reposo">En reposo</option>
+                    <option value="otro">Otro (especificar en notas)</option>
+                </select>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 1rem;">
                 <div class="form-group">
                     <label for="cardiaco-systolic">Sistólica (SYS)</label>
-                    <input type="number" id="cardiaco-systolic" class="form-input" placeholder="Ej: 120" required>
+                    <input type="number" id="cardiaco-systolic" name="systolic" class="form-input" placeholder="Ej: 120" required>
                 </div>
                 <div class="form-group">
                     <label for="cardiaco-diastolic">Diastólica (DIA)</label>
-                    <input type="number" id="cardiaco-diastolic" class="form-input" placeholder="Ej: 80" required>
+                    <input type="number" id="cardiaco-diastolic" name="diastolic" class="form-input" placeholder="Ej: 80" required>
                 </div>
                  <div class="form-group">
                     <label for="cardiaco-heartrate">Pulso (BPM)</label>
-                    <input type="number" id="cardiaco-heartrate" class="form-input" placeholder="Ej: 70" required>
+                    <input type="number" id="cardiaco-heartrate" name="heartRate" class="form-input" placeholder="Ej: 70" required>
                 </div>
             </div>
-            <div class="form-group">
+
+             <div class="form-group" style="margin-top: 1rem;">
+                 <label>Síntomas durante la medición (Opcional)</label>
+                 <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Mareo"> Mareo</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Dolor de cabeza"> Dolor de cabeza</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Visión borrosa"> Visión borrosa</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Palpitaciones"> Palpitaciones</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Dolor de pecho"> Dolor de pecho</label>
+                    <label class="checkbox-label"><input type="checkbox" name="symptoms" value="Falta de aire"> Falta de aire</label>
+                 </div>
+                 </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
                 <label for="cardiaco-notes">Notas (Opcional)</label>
-                <textarea id="cardiaco-notes" class="form-input" placeholder="Ej: Después de caminar, en reposo..."></textarea>
+                <textarea id="cardiaco-notes" name="notes" class="form-input" placeholder="Ej: Brazo derecho, sentado, ..."></textarea>
             </div>
-            <div class="modal-actions">
-                <button type="button" id="cancel-cardiaco-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
+
+            <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button>
+                <button type="button" id="cancel-cardiaco-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
         </form>
     </div>

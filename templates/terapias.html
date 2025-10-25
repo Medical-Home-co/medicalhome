@@ -1,9 +1,8 @@
-<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR TERAPIA === -->
 <div id="terapias-form-modal" class="modal-overlay hidden">
     <div class="modal-content" style="text-align: left; max-width: 500px;">
         <h2 id="terapia-form-title" class="modal-title">Agregar Terapia</h2>
         <p class="modal-subtitle">Completa la información de la sesión.</p>
-        
+
         <form id="terapia-form" class="modal-form" style="margin-top: 1.5rem;">
             <input type="hidden" id="terapia-id">
             <div class="form-group">
@@ -24,8 +23,7 @@
                 <label for="terapia-professional">Profesional</label>
                 <input type="text" id="terapia-professional" name="professional" class="form-input" placeholder="Ej: Dr. Solarte">
             </div>
-            
-            <!-- Nuevos campos condicionales -->
+
             <div class="form-group">
                 <label for="terapia-type">Tipo de Terapia *</label>
                 <select id="terapia-type" name="type" class="form-input" required>
@@ -33,7 +31,7 @@
                     <option value="ambulatorio">Ambulatorio</option>
                 </select>
             </div>
-            
+
             <div id="ambulatorio-fields" class="hidden" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
                  <div class="form-group">
                     <label for="terapia-entity">Entidad (Clínica) *</label>
@@ -48,17 +46,15 @@
                     <input type="tel" id="terapia-phone" name="phone" class="form-input" placeholder="Número de teléfono">
                 </div>
             </div>
-            <!-- Fin de los nuevos campos -->
 
-            <div class="modal-actions" style="justify-content: center; flex-direction: row; gap: 1rem; margin-top: 1.5rem;">
-                <button type="button" id="cancel-terapia-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
+            <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button>
+                <button type="button" id="cancel-terapia-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
-        </form>
+            </form>
     </div>
 </div>
 
-<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE TERAPIAS === -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -71,10 +67,8 @@
     </div>
 
     <div id="terapias-list-container" class="content-grid">
-        <!-- Las tarjetas de terapias se generarán aquí -->
-    </div>
+        </div>
 
-    <!-- ESTADO VACÍO (se muestra si no hay terapias) -->
     <div id="terapias-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
 
         <h2 class="modal-title">Ingresa tus Terapias</h2>
@@ -83,4 +77,3 @@
         <button id="add-terapia-initial-btn" class="button button-primary">Agregar Terapia</button>
     </div>
 </div>
-

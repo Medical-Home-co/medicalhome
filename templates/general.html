@@ -1,4 +1,3 @@
-<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA GENERAL === -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -10,12 +9,9 @@
         </button>
     </div>
 
-    <!-- La lista de registros guardados aparecerá aquí -->
     <div id="general-list-container" class="content-grid">
-        <!-- Las tarjetas se generarán con JS -->
-    </div>
+        </div>
 
-    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
     <div id="general-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
         <h2 class="modal-title">Tu Diario de Salud General</h2>
         <img src="images/general.png" alt="Icono de Salud General" style="width: 128px; height: 128px; margin: 1.5rem auto;">
@@ -24,15 +20,14 @@
     </div>
 </div>
 
-<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO === -->
 <div id="general-form-modal" class="modal-overlay hidden">
     <div class="modal-content">
         <h2 id="general-form-title" class="modal-title">Nuevo Registro General</h2>
         <p class="modal-subtitle">Describe el síntoma o evento de salud.</p>
-        
+
         <form id="general-form" class="modal-form">
             <input type="hidden" id="general-id">
-            
+
             <div class="form-grid">
                 <div class="form-group">
                     <label for="general-date">Fecha</label>
@@ -68,10 +63,10 @@
                 <textarea id="general-notes" name="notes" class="form-input" rows="3" placeholder="Describe con más detalle, posibles causas, etc."></textarea>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" id="cancel-general-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
+             <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                 <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button>
+                 <button type="button" id="cancel-general-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
-        </form>
+             </form>
     </div>
 </div>

@@ -1,3 +1,25 @@
+<style>
+    .card-data-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; font-size: 0.95rem; }
+    .card-data-row span:first-child { color: var(--text-secondary); }
+    .card-data-row .data-value { font-weight: 600; color: var(--text-primary); }
+    .card-data-row.dotted { border-bottom: 1px dotted var(--border-color); }
+    .card-data-row.highlight .data-value { font-size: 1.2em; color: var(--primary-blue); }
+    .liquid-log { margin-top: 1rem; max-height: 150px; overflow-y: auto; padding-right: 5px; }
+    .liquid-log-entry { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); padding: 0.25rem 0; border-bottom: 1px solid var(--border-color); }
+    .liquid-log-entry:last-child { border-bottom: none; }
+    .summary-card.limit-exceeded { background-color: var(--danger-light, #FFEBEE) !important; border-color: var(--danger-color, #C62828) !important; }
+    body.dark-theme .summary-card.limit-exceeded { background-color: var(--danger-light, #4b2222) !important; border-color: var(--danger-color, #ef9a9a) !important; }
+    .summary-card.limit-exceeded *, body.dark-theme .summary-card.limit-exceeded * { color: var(--danger-color, #C62828) !important; }
+    body.dark-theme .summary-card.limit-exceeded span, body.dark-theme .summary-card.limit-exceeded p { color: var(--danger-color, #ffcdd2) !important; }
+    .bcm-combined-card-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem; align-items: start; }
+    .bcm-separator { width: 1px; background-color: var(--border-color); align-self: stretch; }
+    @media (max-width: 768px) {
+        .bcm-combined-card-grid { grid-template-columns: 1fr; gap: 1rem; }
+        .bcm-separator { width: 100%; height: 1px; margin: 1rem 0; align-self: auto; }
+        #bcm-liquid-section { border-top: none; padding-top: 0; }
+    }
+</style>
+
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -5,51 +27,30 @@
             <p class="page-subtitle">Control de peso y líquidos para pacientes renales.</p>
         </div>
         <button id="add-bcm-main-btn" class="button button-primary hidden">
-            <span>+ Actualizar Peso</span>
+            <span>+ Agregar Registro</span>
         </button>
     </div>
 
-    <div id="bcm-data-container" class="content-grid hidden">
-        <div id="bcm-weight-card" class="summary-card">
-            <h3 class="card-title">Control de Peso</h3>
-            <div class="card-data-row">
-                <span>Peso Actual</span>
-                <span class="data-value" id="bcm-display-current">...</span>
-            </div>
-            <div class="card-data-row">
-                <span>Peso Seco</span>
-                <span class="data-value" id="bcm-display-dry">...</span>
-            </div>
-            <div class="card-data-row highlight">
-                <span>Ganancia de Líquido</span>
-                <span class="data-value" id="bcm-display-gain">...</span>
-            </div>
-            <button id="update-weight-btn" class="button button-primary" style="width: 100%; margin-top: 1rem;">+ Actualizar Peso</button>
-        </div>
-
-        <div id="bcm-liquid-card" class="summary-card">
-            <h3 class="card-title">Control de Líquidos</h3>
-            <div class="card-data-row dotted">
-                <span>Límite Diario</span>
-                <span class="data-value" id="bcm-display-limit">...</span>
-            </div>
-             <div class="card-data-row highlight">
-                <span>Líquido Restante</span>
-                <span class="data-value" id="bcm-display-remaining">...</span>
-            </div>
-            <button id="add-liquid-btn" class="button button-primary" style="width: 100%; margin-top: 1rem;">+ Agregar Líquido</button>
-            <div id="bcm-liquid-log" class="liquid-log">
+    <div id="bcm-data-container" class="hidden">
+        <div id="bcm-combined-card" class="summary-card">
+            <div class="bcm-combined-card-grid">
+                <div id="bcm-weight-section">
+                    <h3 class="card-title" style="border: none; padding-bottom: 0.5rem;">Control de Peso</h3>
+                    <div class="card-data-row"> <span>Fecha Registro</span> <span class="data-value" id="bcm-display-date">...</span> </div>
+                    <div class="card-data-row"> <span>Peso Actual</span> <span class="data-value" id="bcm-display-current">...</span> </div>
+                    <div class="card-data-row"> <span>Peso Seco</span> <span class="data-value" id="bcm-display-dry">...</span> </div>
+                    <div class="card-data-row highlight"> <span>Ganancia de Líquido</span> <span class="data-value" id="bcm-display-gain">...</span> </div>
+                    
                 </div>
-        </div>
-
-        <div id="bcm-appointments-card" class="summary-card">
-            <div class="page-header" style="margin-bottom: 1rem;">
-                <h3 class="card-title">Citas de Peso Seco</h3>
-                <button id="add-appointment-btn" class="button button-primary button-small">+ Agendar</button>
-            </div>
-            <div id="bcm-appointments-list">
-                <p id="bcm-no-appointments-msg" style="color: var(--text-secondary); font-size: 0.9rem;">No hay citas agendadas.</p>
+                <div class="bcm-separator"></div>
+                <div id="bcm-liquid-section">
+                     <h3 class="card-title" style="border: none; padding-bottom: 0.5rem;">Control de Líquidos</h3>
+                    <div class="card-data-row dotted"> <span>Límite Diario</span> <span class="data-value" id="bcm-display-limit">...</span> </div>
+                    <div class="card-data-row highlight"> <span>Líquido Restante</span> <span class="data-value" id="bcm-display-remaining">...</span> </div>
+                    <button id="add-liquid-btn" class="button button-primary" style="width: 100%; margin-top: 1rem;">+ Agregar Líquido</button>
+                    <div id="bcm-liquid-log" class="liquid-log" style="margin-top: 1rem;"> </div>
                 </div>
+            </div>
         </div>
     </div>
 
@@ -57,27 +58,21 @@
         <h2 class="modal-title">Registra tu Balance Hídrico</h2>
         <img src="images/renal.png" alt="Icono Renal" style="width: 128px; height: 128px; margin: 1.5rem auto;">
         <p class="modal-subtitle" style="max-width: 400px; margin: 0 auto 1.5rem;">Comienza ingresando tu peso para calcular y controlar tu ingesta de líquidos.</p>
-        <button id="add-bcm-initial-btn" class="button button-primary">Ingresar Peso</button>
+        <button id="add-bcm-initial-btn" class="button button-primary">Ingresar Primer Registro</button>
     </div>
 </div>
-
 
 <div id="bcm-weight-modal" class="modal-overlay hidden">
     <div class="modal-content">
         <h2 class="modal-title">Registrar Peso</h2>
         <form id="bcm-weight-form" class="modal-form">
             <div class="form-group">
-                <label for="bcm-current-weight">Peso Actual (kg)</label>
-                <input type="number" step="0.1" id="bcm-current-weight" class="form-input" required>
+                <label for="bcm-record-date">Fecha del Registro</label>
+                <input type="date" id="bcm-record-date" name="date" class="form-input" required>
             </div>
-            <div class="form-group">
-                <label for="bcm-dry-weight">Peso Seco (kg)</label>
-                <input type="number" step="0.1" id="bcm-dry-weight" class="form-input" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="cancel-weight-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
-            </div>
+            <div class="form-group"> <label for="bcm-current-weight">Peso Actual (kg)</label> <input type="number" step="0.1" id="bcm-current-weight" name="currentWeight" class="form-input" required> </div>
+            <div class="form-group"> <label for="bcm-dry-weight">Peso Seco (kg)</label> <input type="number" step="0.1" id="bcm-dry-weight" name="dryWeight" class="form-input" required> </div>
+            <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"> <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button> <button type="button" id="cancel-weight-btn" class="button button-secondary" style="width: 100%;">Cancelar</button> </div>
         </form>
     </div>
 </div>
@@ -86,39 +81,8 @@
     <div class="modal-content">
         <h2 class="modal-title">Agregar Líquido Ingerido</h2>
         <form id="bcm-liquid-form" class="modal-form">
-            <div class="form-group">
-                <label for="bcm-liquid-amount">Cantidad (ml)</label>
-                <input type="number" id="bcm-liquid-amount" class="form-input" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="cancel-liquid-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Agregar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="bcm-appointment-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <h2 class="modal-title">Agendar Cita de Peso Seco</h2>
-        <form id="bcm-appointment-form" class="modal-form">
-            <div class="form-group">
-                <label for="bcm-appointment-date">Fecha</label>
-                <input type="date" id="bcm-appointment-date" class="form-input" required>
-            </div>
-             <div class="form-group">
-                <label for="bcm-appointment-time">Hora</label>
-                <input type="time" id="bcm-appointment-time" class="form-input" required>
-            </div>
-            <div class="form-group">
-                <label for="bcm-appointment-new-weight">Nuevo Peso Seco Esperado (kg)</label>
-                <input type="number" step="0.1" id="bcm-appointment-new-weight" class="form-input" required>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" id="cancel-appointment-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Agendar</button>
-            </div>
+            <div class="form-group"> <label for="bcm-liquid-amount">Cantidad (ml)</label> <input type="number" id="bcm-liquid-amount" class="form-input" required> </div>
+             <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"> <button type="submit" class="button button-primary" style="width: 100%;">Agregar</button> <button type="button" id="cancel-liquid-btn" class="button button-secondary" style="width: 100%;">Cancelar</button> </div>
         </form>
     </div>
 </div>

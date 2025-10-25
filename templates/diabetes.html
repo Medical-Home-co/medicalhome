@@ -1,4 +1,3 @@
-<!-- === CONTENIDO PRINCIPAL DE LA PÁGINA DE CONTROL DE DIABETES === -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -10,12 +9,9 @@
         </button>
     </div>
 
-    <!-- La lista de registros guardados aparecerá aquí -->
     <div id="diabetes-list-container" class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-        <!-- Las tarjetas de registros se generarán con JS -->
-    </div>
+        </div>
 
-    <!-- ESTADO VACÍO (se muestra si no hay registros) -->
     <div id="diabetes-empty-state" class="empty-state-container" style="text-align: center; margin-top: 4rem;">
         <h2 class="modal-title">Monitorea tu Glucosa</h2>
         <img src="images/diabetes.png" alt="Icono de Diabetes" style="width: 128px; height: 128px; margin: 1.5rem auto;">
@@ -24,7 +20,6 @@
     </div>
 </div>
 
-<!-- === MODAL: FORMULARIO PARA AGREGAR/EDITAR REGISTRO DE DIABETES === -->
 <div id="diabetes-form-modal" class="modal-overlay hidden">
     <div class="modal-content">
         <h2 id="diabetes-form-title" class="modal-title">Nuevo Registro</h2>
@@ -33,33 +28,41 @@
             <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
                     <label for="diabetes-date">Fecha</label>
-                    <input type="date" id="diabetes-date" class="form-input" required>
-                </div>
+                    <input type="date" id="diabetes-date" name="date" class="form-input" required> </div>
                 <div class="form-group">
                     <label for="diabetes-time">Hora</label>
-                    <input type="time" id="diabetes-time" class="form-input" required>
-                </div>
+                    <input type="time" id="diabetes-time" name="time" class="form-input" required> </div>
             </div>
             <div class="form-group">
                 <label for="diabetes-glucose">Nivel de Glucosa (mg/dL) *</label>
-                <input type="number" id="diabetes-glucose" class="form-input" placeholder="Ej: 110" required>
+                <input type="number" id="diabetes-glucose" name="glucose" class="form-input" placeholder="Ej: 110" required> </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="diabetes-measurement-time">Momento de la Medición</label>
+                <select id="diabetes-measurement-time" name="measurementTime" class="form-input">
+                    <option value="">Seleccionar...</option>
+                    <option value="ayunas">Al despertar / Ayunas</option>
+                    <option value="antes_desayuno">Antes del desayuno</option>
+                    <option value="despues_desayuno">Después del desayuno (ej. 2h)</option>
+                    <option value="antes_almuerzo">Antes del almuerzo</option>
+                    <option value="despues_almuerzo">Después del almuerzo (ej. 2h)</option>
+                    <option value="antes_cena">Antes de la cena</option>
+                    <option value="despues_cena">Después de la cena (ej. 2h)</option>
+                    <option value="antes_dormir">Antes de dormir</option>
+                    <option value="otro">Otro (especificar en notas)</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label for="diabetes-hba1c">Hemoglobina Glicosilada (HbA1c) (Opcional)</label>
-                <input type="number" step="0.1" id="diabetes-hba1c" class="form-input" placeholder="Ej: 5.7">
+            <div class="form-group" style="margin-top: 1rem;"> <label for="diabetes-hba1c">Hemoglobina Glicosilada (HbA1c) (Opcional)</label>
+                <input type="number" step="0.1" id="diabetes-hba1c" name="hba1c" class="form-input" placeholder="Ej: 5.7"> </div>
+             <div class="form-group" style="margin-top: 1rem;"> <label for="diabetes-insulin">Dosis de Insulina (unidades) (Opcional)</label>
+                <input type="number" id="diabetes-insulin" name="insulin" class="form-input" placeholder="Ej: 10"> </div>
+            <div class="form-group" style="margin-top: 1rem;"> <label for="diabetes-notes">Notas (Opcional)</label>
+                <textarea id="diabetes-notes" name="notes" class="form-input" placeholder="Ej: Síntomas, actividad física, ..."></textarea> </div>
+
+            <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" class="button button-primary" style="width: 100%;">Guardar</button>
+                <button type="button" id="cancel-diabetes-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
-             <div class="form-group">
-                <label for="diabetes-insulin">Dosis de Insulina (unidades) (Opcional)</label>
-                <input type="number" id="diabetes-insulin" class="form-input" placeholder="Ej: 10">
-            </div>
-            <div class="form-group">
-                <label for="diabetes-notes">Notas (Opcional)</label>
-                <textarea id="diabetes-notes" class="form-input" placeholder="Ej: En ayunas, después del almuerzo..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="cancel-diabetes-btn" class="button button-secondary">Cancelar</button>
-                <button type="submit" class="button button-primary">Guardar</button>
-            </div>
-        </form>
+            </form>
     </div>
 </div>
