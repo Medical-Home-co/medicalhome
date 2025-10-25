@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
-</head>
+    </head>
 <body class="hidden">
 
     <div id="welcome-modal" class="modal-overlay hidden">
@@ -30,7 +30,6 @@
 
     <div id="about-modal" class="modal-overlay hidden">
         <div class="modal-content" style="text-align: center;">
-        
             <img src="images/marca.png" alt="Logo de VivirAplicaciones" class="modal-logo">
             <h2 class="modal-title">Sobre VivirAplicaciones</h2>
             <p class="modal-subtitle">Somos una organización sin ánimo de lucro centrada en desarrollar tecnología accesible para pacientes y personas con condiciones de salud delicadas, buscando mejorar su calidad de vida a través de herramientas intuitivas y seguras.</p>
@@ -39,20 +38,21 @@
             </div>
         </div>
     </div>
-    
+
     <div id="report-modal" class="modal-overlay hidden">
         <div class="modal-content">
-             <i data-lucide="cog" class="modal-icon"></i>
-            <h2 class="modal-title">Reportar un Fallo</h2>
+           <h2 class="modal-title"> Reportar un Fallo</h2>
             <p class="modal-subtitle">Si has encontrado un error o tienes una sugerencia, por favor, descríbelo a continuación. Tu ayuda es muy valiosa para nosotros.</p>
             <form id="report-form" class="modal-form">
                 <textarea id="report-text" placeholder="Describe el problema o la sugerencia aquí..." required></textarea>
-                <button type="submit" class="button button-primary">Enviar Reporte</button>
-                 <button type="button" class="button button-secondary close-modal-btn">Cancelar</button>
-            </form>
+                <div class="modal-actions" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button type="submit" class="button button-primary" style="width: 100%;">Enviar Reporte</button>
+                    <button type="button" class="button button-secondary close-modal-btn" style="width: 100%;">Cancelar</button>
+                </div>
+                </form>
         </div>
     </div>
-    
+
     <div class="app-shell">
         <aside class="sidebar">
             <nav class="sidebar-nav">
@@ -65,16 +65,14 @@
                 <ul class="nav-links">
                     <li><a href="#dashboard" class="nav-link active"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
                    <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
-                    
                     <hr class="nav-divider">
-
                    <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
                    <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
                     <li><a href="#terapias" class="nav-link"><img src="images/icons/accessibility.svg" class="nav-icon-img" alt="Terapias"><span>Terapias</span></a></li>
                     <li class="nav-item-accordion">
                         <a href="#" class="nav-link accordion-toggle">
                             <span><img src="images/icons/microscope.svg" class="nav-icon-img" alt="Condición Médica"> Condición Médica</span><img src="images/icons/chevron-down.svg" class="chevron nav-icon-img" alt="Desplegar">
-                            <i data-lucide="chevron-down" class="chevron"></i>
+                            
                         </a>
                         <ul class="sub-menu">
                             <li><a href="#renal" class="nav-link sub-link"><img src="images/icons/bean.svg" class="nav-icon-img" alt="Renal"> BCM (Renal)</a></li>
@@ -88,15 +86,11 @@
                             <li><a href="#general" class="nav-link sub-link"><img src="images/icons/clipboard-list.svg" class="nav-icon-img" alt="General"> General</a></li>
                         </ul>
                     </li>
-                    
                     <hr class="nav-divider">
-
                     <li><a href="#agenda" class="nav-link"><img src="images/icons/book-user.svg" class="nav-icon-img" alt="Agenda"><span>Agenda</span></a></li>
                     <li><a href="#asistente-ia" class="nav-link"><img src="images/icons/bot.svg" class="nav-icon-img" alt="Asistente Virtual"><span>Asistente Virtual</span></a></li>
                    <li><a href="#bienestar" class="nav-link"><img src="images/icons/flower-2.svg" class="nav-icon-img" alt="Bienestar"><span>Bienestar</span></a></li>
-
                     <hr class="nav-divider">
-
                     <li><a href="#notificaciones" class="nav-link"><img src="images/icons/bell.svg" class="nav-icon-img" alt="Notificaciones"><span>Notificaciones</span></a></li>
                     <li><a href="#share" class="nav-link"><img src="images/icons/share-2.svg" class="nav-icon-img" alt="Compartir App"><span>Compartir App</span></a></li>
                     <li><a href="#about" class="nav-link" id="about-btn"><img src="images/marca.png" class="nav-icon-img"/><span>Quiénes somos</span></a></li>
@@ -112,8 +106,7 @@
                    <a href="#logout" class="nav-link"><img src="images/icons/log-out.svg" class="nav-icon-img" alt="Cerrar Sesión"><span>Cerrar Sesión</span></a>
                     <hr class="nav-divider">
                     <button class="collapse-btn" aria-expanded="true" aria-label="Cerrar menú">
-                        <i data-lucide="chevrons-left" class="collapse-icon-open"></i>
-                        <i data-lucide="menu" class="collapse-icon-closed"></i>
+                         
                         <span class="collapse-text-open"><img src="images/icons/chevrons-left.svg" class="collapse-icon-open nav-icon-img" alt="Cerrar">Cerrar</span>
                         <span class="collapse-text-closed"><img src="images/icons/menu.svg" class="collapse-icon-closed nav-icon-img" alt="Menú">Menú</span>
                     </button>
@@ -126,30 +119,17 @@
     </div>
 
     <nav class="mobile-nav" align="center">
-        <a href="#dashboard" class="mobile-nav-link active">
-            <i data-lucide="layout-grid"></i>
-            <span><img src="images/icons/layout-grid.svg" alt="Resumen"><br>Resumen</span>
-        </a>
-        <a href="#medicamentos" class="mobile-nav-link">
-            <i data-lucide="pilcrow"></i>
-            <span><img src="images/icons/pill.svg" alt="Medicamentos"><br>Med/tos</span>
-        </a>
-        <a href="#citas" class="mobile-nav-link">
-            <i data-lucide="calendar-days"></i>
-            <span><img src="images/icons/calendar-days.svg" alt="Citas"><br>Citas</span>
-        </a>
-        <button id="mobile-menu-btn" class="mobile-nav-link">
-            <i data-lucide="menu"></i>
-            <span><img src="images/icons/menu.svg" alt="Menú"><br>Menú</span>
-        </button>
+        <a href="#dashboard" class="mobile-nav-link active"> <span><img src="images/icons/layout-grid.svg" alt="Resumen"><br>Resumen</span> </a>
+        <a href="#medicamentos" class="mobile-nav-link"> <span><img src="images/icons/pill.svg" alt="Medicamentos"><br>Med/tos</span> </a>
+        <a href="#citas" class="mobile-nav-link"> <span><img src="images/icons/calendar-days.svg" alt="Citas"><br>Citas</span> </a>
+        <button id="mobile-menu-btn" class="mobile-nav-link"> <span><img src="images/icons/menu.svg" alt="Menú"><br>Menú</span> </button>
     </nav>
 
     <div id="mobile-menu-modal" class="modal-overlay hidden">
         <div class="mobile-menu-content">
             </div>
     </div>
-    
-   
+
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
