@@ -3,14 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedicalHome</title>
+    
+    <title>MedicalHome | Asistente de Salud Personal</title>
+
+    <meta name="description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar. MedicalHome es tu asistente de salud personal, seguro y privado.">
+
+    <link rel="canonical" href="https://medical-home-co.github.io/medicalhome/">
+
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:title" content="MedicalHome | Asistente de Salud Personal">
+    <meta property="og:description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://medical-home-co.github.io/medicalhome/">
+    <meta property="og:image" content="https://medical-home-co.github.io/medicalhome/images/social-preview.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MedicalHome | Asistente de Salud Personal">
+    <meta name="twitter:description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar.">
+    <meta name="twitter:image" content="https://medical-home-co.github.io/medicalhome/images/social-preview.png">
+
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
-    </head>
+</head>
 <body class="hidden">
 
+    <style>
+      #manual-splash-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* 1. Coincide con el background_color del manifest */
+        background-color: #3A86FF; 
+        z-index: 9999;
+        /* 2. Transición para el 'fade-out' */
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #splash-logo {
+        width: 128px;
+        height: 128px;
+        /* 3. Animación de "pulso" para el logo */
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .loading-bar-container {
+        width: 150px;
+        height: 4px;
+        background-color: rgba(255, 255, 255, 0.3); /* Fondo de la barra */
+        border-radius: 2px;
+        margin-top: 24px;
+        overflow: hidden; /* Para contener la barra interior */
+      }
+
+      .loading-bar {
+        width: 100%;
+        height: 100%;
+        background-color: #FFFFFF; /* Color de la barra */
+        transform-origin: left;
+        /* 4. Animación de barra de carga (indeterminada) */
+        animation: indeterminate-load 1.5s infinite ease-in-out;
+      }
+
+      /* 5. Definición de las animaciones */
+      @keyframes pulse {
+        0%   { transform: scale(1); }
+        50%  { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes indeterminate-load {
+        0%   { transform: scaleX(0); transform-origin: left; }
+        45%  { transform: scaleX(1); transform-origin: left; }
+        50%  { transform: scaleX(1); transform-origin: right; }
+        100% { transform: scaleX(0); transform-origin: right; }
+      }
+    </style>
+
+    <div id="manual-splash-screen">
+      
+      <img id="splash-logo" src="images/icono.png" alt="MedicalHome Logo">
+      
+      <div class="loading-bar-container">
+        <div class="loading-bar"></div>
+      </div>
+      
+    </div>
     <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <img src="images/logo.png" alt="Logo de MedicalHome" class="modal-logo">
@@ -66,7 +152,7 @@
                     <li><a href="#dashboard" class="nav-link active"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
                    <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
                     <hr class="nav-divider">
-                   <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
+                   <li><a href="#medicamentos" class="nav-link"><img src_T_T src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
                    <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
                     <li><a href="#terapias" class="nav-link"><img src="images/icons/accessibility.svg" class="nav-icon-img" alt="Terapias"><span>Terapias</span></a></li>
                     <li class="nav-item-accordion">
