@@ -1,6 +1,8 @@
 /* --- Variables de Color y Base --- */
 :root {
     --primary-blue: #3A86FF;
+    /* --- MEJORA: Color primario más oscuro para hover --- */
+    --primary-blue-dark: #3171e0; 
     --bg-primary: #FFFFFF;
     --bg-secondary: #F4F7F9;
     --text-primary: #1A202C;
@@ -14,6 +16,8 @@
 
 body.dark-theme {
     --primary-blue: #5a9bff;
+    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
+    --primary-blue-dark: #4a88f0;
     --bg-primary: #1A202C;
     --bg-secondary: #2D3748;
     --text-primary: #F7FAFC;
@@ -24,11 +28,21 @@ body.dark-theme {
 
 /* --- Reseteo y Estilos Globales --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- MEJORA: Tipografía base y suavizado de fuentes --- */
+html {
+    font-size: 16px; /* Establece una base consistente */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
 body {
     font-family: var(--font-family);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     transition: background-color 0.2s, color 0.2s;
+    line-height: 1.5; /* Mejora la legibilidad */
 }
 body.hidden { visibility: hidden; }
 a { text-decoration: none; color: inherit; }
@@ -36,7 +50,24 @@ button { background: none; border: none; cursor: pointer; }
 ul { list-style: none; }
 .hidden { display: none !important; }
 
-/* --- Modales --- */
+/* --- MEJORA: Clase de utilidad para accesibilidad (Screen Reader Only) --- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+
+/* * ============================================
+ * ESTRATEGIA RESPONSIVA: UNIDADES FLUIDAS
+ * ============================================
+ */
 .modal-overlay {
     position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
     display: flex; justify-content: center; align-items: center; z-index: 1000;
@@ -47,7 +78,7 @@ ul { list-style: none; }
     padding: 2rem; 
     border-radius: 12px;
     width: 90%; 
-    max-width: 500px; /* Un poco más de espacio para formularios largos */
+    max-width: 500px; /* Perfecto: 'max-width' para PC */
     text-align: left;
     max-height: 90vh; /* Límite de altura */
     overflow-y: auto; /* Activa el scroll si es necesario */
@@ -63,24 +94,65 @@ ul { list-style: none; }
     background-color: var(--bg-secondary); border: 1px solid var(--border-color);
     border-radius: 8px; padding: 0.75rem; min-height: 120px;
     font-family: inherit; font-size: 1rem; color: var(--text-primary);
+    /* --- MEJORA: Transición para foco --- */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* --- MEJORA: Estilo de foco para Textarea (Accesibilidad) --- */
+.modal-form textarea:focus,
+.modal-form textarea:focus-visible {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3);
+    outline: none;
 }
 
 
 /* --- Componentes Genéricos --- */
-.button { padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+.button { 
+    padding: 0.75rem 1rem; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    transition: all 0.2s; 
+    /* --- MEJORA: Asegurar que el texto no se parta --- */
+    white-space: nowrap; 
+}
 .button-primary { background-color: var(--primary-blue); color: white; }
 .button-secondary { background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+/* --- MEJORA: Interactividad de botones (Hover y Active) --- */
+.button-primary:hover {
+    background-color: var(--primary-blue-dark);
+}
+.button-secondary:hover {
+    background-color: var(--border-color);
+}
+.button:active {
+    /* --- MEJORA: Efecto de "click" --- */
+    transform: scale(0.98);
+}
+
+/* --- MEJORA: Accesibilidad (Foco visible para botones) --- */
+.button:focus-visible {
+    outline: 3px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+
 .checkbox-label { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer; justify-content: center; }
 
 /* --- Estructura Principal y Dashboard --- */
 .app-shell { display: flex; }
 .main-content {
-    flex-grow: 1; padding: 2rem; margin-left: var(--sidebar-width);
+    flex-grow: 1; 
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    padding: 1.5rem; 
+    margin-left: var(--sidebar-width);
     transition: margin-left 0.3s ease;
 }
 .content-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 2rem;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    margin-bottom: 1rem;
 }
 .content-logo {
     display: flex; align-items: center; gap: 0.75rem;
@@ -95,30 +167,41 @@ ul { list-style: none; }
     display: flex; justify-content: center; align-items: center;
     font-size: 0.65rem; font-weight: 700;
 }
+
+/* * ============================================
+ * ESTRATEGIA RESPONSIVA: GRID FLUIDO
+ * ============================================
+ */
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
+    /* --- MEJORA: Asegurar un mínimo de 300px, ideal para móviles --- */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    gap: 1rem;
 }
 /*-- para poner el boton al frente del titulo--*/
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem; 
-    /* Opcional: para dar espacio debajo */
-
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    margin-bottom: 1rem; 
 }
 /*-----------------*/
 .summary-card {
     display: block; background-color: var(--bg-primary); border-radius: 12px;
-    border: 1px solid var(--border-color); padding: 1.5rem;
+    border: 1px solid var(--border-color); 
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    padding: 1rem;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .summary-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px var(--shadow-color); }
 .card-title {
-    font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;
+    font-size: 1.1rem; font-weight: 600; 
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 0.5rem;
 }
 .card-item-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .card-item-list li {
@@ -144,21 +227,38 @@ ul { list-style: none; }
     font-weight: 600;
 }
 .page-form-body {
-    padding: 1.5rem;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    padding: 1rem;
 }
 .form-section-title {
     font-size: 1rem;
     font-weight: 600;
     color: var(--primary-blue);
-    margin-bottom: 1rem;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
 }
+/* * Esta regla también es responsiva. 
+ * 'minmax(250px, 1fr)' crea columnas de 250px que se 
+ * ajustan automáticamente. ¡Perfecto!
+ */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem 1.5rem;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    gap: 0.75rem;
 }
+
+/* --- MEJORA: Grid específico de 2 columnas --- */
+/* Úsalo para agrupar 'Fecha' y 'Hora', o 'Condiciones Médicas' */
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    gap: 0.75rem;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -177,18 +277,33 @@ ul { list-style: none; }
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
+    /* --- MEJORA: Transición para foco --- */
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+/* --- MEJORA: Estilo de foco para Inputs (Accesibilidad) --- */
+.form-input:focus,
+.form-input:focus-visible {
+    border-color: var(--primary-blue);
+    background-color: var(--bg-primary);
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3);
+    outline: none;
+}
+
+
+/* --- ARREGLO: Forzar 2 columnas en grids de checkboxes (Perfil, Ocular) --- */
 .checkbox-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
 }
 .form-actions {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
+    /* --- ARREGLO: Reducción de "espacio muerto" --- */
+    margin-top: 1rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--border-color);
 }
 .input-with-button { position: relative; }
@@ -226,7 +341,18 @@ ul { list-style: none; }
     box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
 }
 .profile-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
-.nav-links { flex-grow: 1; overflow-y: auto; }
+.nav-links { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    /* --- MEJORA: Ocultar scrollbar pero permitir scroll --- */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE y Edge */
+}
+/* --- MEJORA: Ocultar scrollbar en Chrome/Safari --- */
+.nav-links::-webkit-scrollbar {
+    display: none;
+}
+
 .nav-divider { border: none; height: 1px; background-color: var(--border-color); margin: 0.5rem 0.75rem; }
 .nav-link {
     display: flex; align-items: center; gap: 0.85rem;
@@ -237,6 +363,16 @@ ul { list-style: none; }
 }
 .nav-link:hover { background-color: var(--bg-secondary); }
 .nav-link.active { background-color: var(--primary-blue); color: white; }
+/* --- MEJORA: Accesibilidad (Foco visible para links) --- */
+.nav-link:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: -2px;
+}
+.nav-link.active:focus-visible {
+    outline: 2px solid var(--bg-primary); /* Contraste sobre azul */
+}
+
+
 .nav-link i { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-icon-img { width: 18px; height: 18px; border-radius: 4px; }
 .sub-menu { padding-left: 28px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -307,6 +443,8 @@ ul { list-style: none; }
 .mobile-nav-link {
     flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
     align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-secondary);
+    /* --- MEJORA: Evitar tap-highlight en móviles --- */
+    -webkit-tap-highlight-color: transparent;
 }
 .mobile-nav-link.active { color: var(--primary-blue); }
 .mobile-nav-link i { width: 22px; height: 22px; }
@@ -317,14 +455,115 @@ ul { list-style: none; }
     border-top-left-radius: 12px; border-top-right-radius: 12px;
     max-height: 70vh; overflow-y: auto;
 }
-.mobile-menu-content .sidebar-profile, .mobile-menu-content .sidebar-footer { display: none; }
-
-/* --- Media Queries --- */
-@media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main-content { margin-left: 0; padding: 1rem; padding-bottom: 80px; }
-    .mobile-nav { display: flex; }
+/* --- ARREGLO: Mostrar botones de footer en menú móvil --- */
+.mobile-menu-content .sidebar-profile { display: none; }
+.mobile-menu-content .sidebar-footer { 
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.5rem;
 }
+
+/* * ============================================
+ * ESTRATEGIA RESPONSIVA: MEDIA QUERIES
+ * ============================================
+ */
+@media (max-width: 768px) {
+    /* Oculta el menú lateral de PC */
+    .sidebar { display: none; }
+    
+    /* El contenido principal ahora ocupa todo el ancho */
+    .main-content { 
+        margin-left: 0; 
+        /* --- ARREGLO: Reducción de "espacio muerto" --- */
+        padding: 1rem; 
+        padding-bottom: 80px; /* Espacio para el menú inferior */
+        /* --- ARREGLO: Evitar overflow horizontal (Notificaciones) --- */
+        overflow-x: hidden;
+    }
+    
+    /* Muestra el menú inferior móvil */
+    .mobile-nav { display: flex; }
+
+    /* Ejemplo: Hacer que el header de la página sea más simple */
+    .page-header {
+        flex-direction: column; /* Pone el título encima del botón */
+        align-items: flex-start; /* Alinea todo a la izquierda */
+        /* --- ARREGLO: Reducción de "espacio muerto" --- */
+        gap: 0.75rem; 
+    }
+    
+    /* --- MEJORA: Títulos más pequeños en móvil --- */
+    .page-title {
+        font-size: 1.5rem; /* Reducir tamaño de título */
+    }
+    .page-subtitle {
+        font-size: 0.95rem;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+    }
+
+    /* Ejemplo: Hacer que el botón "Agregar Registro" ocupe todo el ancho */
+    #add-bcm-main-btn, 
+    #add-ocular-main-btn, 
+    #add-respiratorio-main-btn, 
+    #add-agenda-main-btn,
+    #add-bcm-initial-btn,
+    #add-ocular-initial-btn,
+    #add-respiratorio-initial-btn,
+    #add-agenda-initial-btn {
+        width: 100%;
+        padding: 0.8rem; /* Botones más grandes para tocar */
+    }
+
+    /* --- ARREGLO: Ocular 'Corrección Óptica' en 2 columnas (para tablet) --- */
+    .checkbox-grid-ocular {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+/* * ============================================
+ * ESTRATEGIA RESPONSIVA: (OPCIONAL) MÁS PUNTOS DE QUIEBRE
+ * ============================================
+ */
+@media (max-width: 480px) {
+    /* En teléfonos muy pequeños, reduce el padding de los modales */
+    .modal-content {
+        padding: 1.5rem 1rem; /* Menos padding a los lados */
+        width: 95%; /* Ocupar casi todo el ancho */
+    }
+
+    /* Achica los títulos de las páginas */
+    .page-title {
+        font-size: 1.25rem;
+    }
+    .page-subtitle {
+        font-size: 0.9rem;
+    }
+
+    /* * Fuerza a los 'form-grid' a tener una sola columna.
+     */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* --- ARREGLO: Forzar grids de 2 columnas en móvil --- */
+    /* Para Fecha/Hora y Condiciones Médicas */
+    /* (La regla global .grid-2-cols ya maneja esto) */
+    
+    /* --- ARREGLO: Forzar 1 columna en checkboxes generales en móvil pequeño --- */
+    .checkbox-grid {
+        grid-template-columns: 1fr; 
+    }
+    
+    /* --- ARREGLO: Ocular 'Corrección Óptica' MANTIENE 2 columnas --- */
+    .checkbox-grid-ocular {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+/* --- FIN DEL NUEVO BLOQUE --- */
+
 
 /* --- Switch de Tema --- */
 .switch { position: relative; }
@@ -524,3 +763,27 @@ body.dark-theme .nav-link.active img[src*="images/icons/"] {
     */
     filter: invert(1) brightness(2);
 }
+
+/* --- MEJORA: Estilos para Scrollbars (Barras de Desplazamiento) --- */
+/* Funciona en Chrome, Edge, y Safari */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+}
+/* Firefox */
+body, .modal-content, .nav-links {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-secondary);
+}
+
