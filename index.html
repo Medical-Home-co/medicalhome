@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>MedicalHome | Asistente de Salud Personal</title>
-
     <meta name="description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar. MedicalHome es tu asistente de salud personal, seguro y privado.">
-
     <link rel="canonical" href="https://medical-home-co.github.io/medicalhome/">
-
     <meta name="robots" content="index, follow">
     
     <meta property="og:title" content="MedicalHome | Asistente de Salud Personal">
@@ -28,7 +25,8 @@
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
 </head>
-<body class="hidden">
+
+<body>
 
     <style>
       #manual-splash-screen {
@@ -41,56 +39,89 @@
         left: 0;
         width: 100%;
         height: 100%;
-        /* 1. Coincide con el background_color del manifest */
-        background-color: #3A86FF; 
+        /* 1. CORRECCIÓN: Fondo claro para coincidir con la imagen */
+        background-color: #F5F6FA; 
         z-index: 9999;
-        /* 2. Transición para el 'fade-out' */
         transition: opacity 0.5s ease-out;
       }
-      
       #splash-logo {
         width: 128px;
         height: 128px;
-        /* 3. Animación de "pulso" para el logo */
         animation: pulse 1.5s infinite ease-in-out;
       }
+      
+      /* 2. CORRECCIÓN: Estilo del Nombre para coincidir con la imagen */
+      #splash-app-name {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1.5rem; /* ~24px */
+        font-weight: 500; 
+        color: #333; /* Texto oscuro */
+        margin-top: 16px;
+        margin-bottom: 4px;
+      }
 
+      /* 3. CORRECCIÓN: Estilo del Eslogan para fondo claro */
+      #splash-slogan {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1rem; /* ~16px */
+        color: #666; /* Texto gris oscuro */
+        font-weight: 400;
+        margin: 0;
+        text-align: center;
+        padding: 0 1rem;
+        opacity: 0; /* Empezar oculto */
+        animation: fadeIn 1s ease-out 0.5s forwards; 
+      }
+
+      /* 4. CORRECCIÓN: Estilo de la barra de carga para fondo claro */
       .loading-bar-container {
         width: 150px;
         height: 4px;
-        background-color: rgba(255, 255, 255, 0.3); /* Fondo de la barra */
+        background-color: #E0E0E0; /* Fondo de la barra (gris claro) */
         border-radius: 2px;
         margin-top: 24px;
-        overflow: hidden; /* Para contener la barra interior */
+        overflow: hidden;
       }
-
       .loading-bar {
         width: 100%;
         height: 100%;
-        background-color: #FFFFFF; /* Color de la barra */
+        background-color: #3A86FF; /* Color de la barra (tu color de tema) */
         transform-origin: left;
-        /* 4. Animación de barra de carga (indeterminada) */
         animation: indeterminate-load 1.5s infinite ease-in-out;
       }
 
-      /* 5. Definición de las animaciones */
+      /* Animaciones */
       @keyframes pulse {
         0%   { transform: scale(1); }
         50%  { transform: scale(1.05); }
         100% { transform: scale(1); }
       }
-
       @keyframes indeterminate-load {
         0%   { transform: scaleX(0); transform-origin: left; }
         45%  { transform: scaleX(1); transform-origin: left; }
         50%  { transform: scaleX(1); transform-origin: right; }
         100% { transform: scaleX(0); transform-origin: right; }
       }
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 0.9; }
+      }
+
+      /* Ocultar splash en navegador */
+      @media (display-mode: browser) {
+        #manual-splash-screen {
+          display: none;
+        }
+      }
     </style>
 
     <div id="manual-splash-screen">
       
       <img id="splash-logo" src="images/icono.png" alt="MedicalHome Logo">
+      
+      <h1 id="splash-app-name">MedicalHome</h1>
+      
+      <p id="splash-slogan">Tu salud, organizada y en casa</p>
       
       <div class="loading-bar-container">
         <div class="loading-bar"></div>
@@ -139,7 +170,7 @@
         </div>
     </div>
 
-    <div class="app-shell">
+    <div class="app-shell" style="visibility: hidden;">
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-profile">
@@ -152,7 +183,7 @@
                     <li><a href="#dashboard" class="nav-link active"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
                    <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
                     <hr class="nav-divider">
-                   <li><a href="#medicamentos" class="nav-link"><img src_T_T src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
+                   <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
                    <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
                     <li><a href="#terapias" class="nav-link"><img src="images/icons/accessibility.svg" class="nav-icon-img" alt="Terapias"><span>Terapias</span></a></li>
                     <li class="nav-item-accordion">
