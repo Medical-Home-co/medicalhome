@@ -48,7 +48,7 @@ const firebaseConfig = {
 };
 
 
-
+• vapid key: BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I
 
 Aquí hay algunas ideas basadas en lo que hemos hablado:
 
