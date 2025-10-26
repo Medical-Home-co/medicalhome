@@ -1,4 +1,5 @@
 <style>
+    /* Estilos (sin cambios) */
     .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
     @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
     .profile-card { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; }
@@ -23,10 +24,17 @@
             <h2 class="page-title">Mi Perfil</h2>
             <p class="page-subtitle">Tu información de salud y contacto.</p>
         </div>
-        <button id="edit-profile-main-btn" class="button button-primary hidden">
-            <span>Editar Perfil</span>
-        </button>
-    </div>
+        
+        <div class="button-group">
+            <button id="activate-notifications-btn" class="button button-secondary hidden">
+                <i data-lucide="bell-ring"></i>
+                <span>Activar Notificaciones</span>
+            </button>
+            <button id="edit-profile-main-btn" class="button button-primary hidden">
+                <i data-lucide="edit-3"></i> <span>Editar Perfil</span>
+            </button>
+        </div>
+        </div>
 
     <div id="profile-summary-container" class="profile-grid hidden">
         <div class="profile-card">
@@ -55,7 +63,6 @@
     <div class="modal-content">
         <h2 id="profile-form-title" class="modal-title">Crear Perfil</h2>
         <form id="profile-form" class="modal-form">
-
             <div class="form-group" style="grid-column: 1 / -1; text-align: center;">
                 <img src="images/avatar.png" id="avatar-preview" alt="Avatar Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); margin-bottom: 1rem;">
                 <label for="avatar-upload" class="button button-secondary" style="cursor: pointer;">
@@ -63,7 +70,6 @@
                     <input type="file" id="avatar-upload" name="avatar-upload" accept="image/*" class="hidden">
                 </label>
             </div>
-
             <h2 class="form-section-title">Información Personal</h2>
             <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group" style="grid-column: span 2;"><label for="fullName">Nombre Completo *</label><input type="text" id="fullName" name="fullName" placeholder="Nombre completo" class="form-input" required></div>
@@ -72,14 +78,12 @@
                 <div class="form-group"><label for="weight">Peso (Kg) *</label><input type="number" id="weight" name="weight" pattern="[0-9]*" inputmode="numeric" placeholder="Peso en Kg" class="form-input" required></div>
                 <div class="form-group"><label for="height">Estatura (cm) *</label><input type="number" id="height" name="height" pattern="[0-9]*" inputmode="numeric" placeholder="Estatura en cm" class="form-input" required></div>
             </div>
-
             <h2 class="form-section-title">Seguridad de la Cuenta</h2>
             <div class="form-grid">
                 <div class="form-group" style="grid-column: span 2;"><label for="email">Correo Electrónico *</label><input type="email" id="email" name="email" placeholder="tu@correo.com" class="form-input" required></div>
                 <div class="form-group"><label for="password">Contraseña (solo números) *</label><input type="password" id="password" name="password" inputmode="numeric" pattern="[0-9]*" class="form-input" required></div>
                 <div class="form-group"><label for="confirmPassword">Confirmar Contraseña *</label><input type="password" id="confirmPassword" name="confirmPassword" inputmode="numeric" pattern="[0-9]*" class="form-input" required></div>
             </div>
-
             <h2 class="form-section-title">Información Médica</h2>
             <div class="form-group">
                 <label>Condiciones Médicas</label>
@@ -95,7 +99,6 @@
                     <label class="checkbox-label"><input type="checkbox" name="conditions" value="general"> General</label>
                 </div>
             </div>
-
             <div id="renal-info-container" class="form-section-conditional hidden">
                 <h3 class="form-subsection-title">Información Renal</h3>
                 <div class="form-group"><label>Tipo de Acceso *</label><div class="radio-grid"><label class="radio-label"><input type="radio" name="renalAccess" value="cateter" required> Catéter</label><label class="radio-label"><input type="radio" name="renalAccess" value="fistula" required> Fístula</label></div></div>
@@ -103,7 +106,6 @@
                 <div class="form-group" style="margin-top: 1rem;"><label>Días de Hemodiálisis *</label><div class="radio-grid"><label class="radio-label"><input type="radio" name="hemodialysisDays" value="L-M-V" required> L-M-V</label><label class="radio-label"><input type="radio" name="hemodialysisDays" value="M-J-S" required> M-J-S</label></div></div>
                 <div class="form-grid" style="margin-top: 1rem;"><div class="form-group"><label for="hemodialysisTime">Hora *</label><input type="time" id="hemodialysisTime" name="hemodialysisTime" class="form-input" required></div><div class="form-group"><label for="clinicName">Clínica *</label><input type="text" id="clinicName" name="clinicName" class="form-input" required></div></div>
             </div>
-
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label for="alergias-input">Alergias (Opcional)</label>
                 <div class="input-with-button">
@@ -112,7 +114,6 @@
                 </div>
                 <div id="alergias-list" class="tags-container" style="margin-top: 1rem;"></div>
             </div>
-
             <h2 class="form-section-title">Contacto y Seguridad</h2>
             <div class="form-grid">
                 <div class="form-group"><label for="eps">EPS *</label><input type="text" id="eps" name="eps" class="form-input" required></div>
@@ -120,11 +121,10 @@
                 <div class="form-group"><label for="emergencyContactName">Contacto de Emergencia *</label><input type="text" id="emergencyContactName" name="emergencyContactName" class="form-input" required></div>
                 <div class="form-group"><label for="emergencyContactPhone">Teléfono de Emergencia *</label><input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" class="form-input" required></div>
             </div>
-
             <div class="modal-actions" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <button type="submit" class="button button-primary" style="width: 100%;">Guardar Perfil</button>
                 <button type="button" id="cancel-profile-btn" class="button button-secondary" style="width: 100%;">Cancelar</button>
             </div>
-             </form>
+         </form>
     </div>
 </div>

@@ -1,42 +1,12 @@
 <style>
-    .collapsible-info-box {
-        background-color: var(--bg-primary); 
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-top: 2rem;
-        box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
-    }
-    .collapsible-info-box summary {
-        font-weight: 600;
-        font-size: 1.1rem; 
-        color: var(--text-primary); 
-        display: flex;
-        align-items: center;
-        gap: 0.75rem; 
-        cursor: pointer;
-        list-style: none; 
-    }
-    .collapsible-info-box summary img {
-        width: 24px; 
-        height: 24px;
-    }
-    .collapsible-info-box div.content {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border-color);
-        color: var(--text-primary); 
-        font-size: 1rem; 
-    }
-    .collapsible-info-box div.content ul {
-        padding-left: 1.5rem; 
-    }
-     .collapsible-info-box div.content li {
-        margin-bottom: 0.75rem; 
-    }
-    .collapsible-info-box summary::-webkit-details-marker {
-      display: none;
-    }
+    /* Estilos (sin cambios) */
+    .collapsible-info-box { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); }
+    .collapsible-info-box summary { font-weight: 600; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none; }
+    .collapsible-info-box summary img { width: 24px; height: 24px; }
+    .collapsible-info-box div.content { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); color: var(--text-primary); font-size: 1rem; }
+    .collapsible-info-box div.content ul { padding-left: 1.5rem; }
+    .collapsible-info-box div.content li { margin-bottom: 0.75rem; }
+    .collapsible-info-box summary::-webkit-details-marker { display: none; }
 </style>
 
 <div class="page-container">
@@ -48,22 +18,27 @@
     </div>
 
     <div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
-        
         <div style="flex-shrink: 0; margin-right: 1.5rem;"> 
-            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Control Principal</h3>
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Control Principal (Interno)</h3>
             <p id="notify-master-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">...</p>
         </div>
-        </div>
-
         <div style="display: flex; gap: 0.75rem; flex-grow: 1; justify-content: center;">
             <button id="notify-activate-all" class="button button-primary" style="padding: 0.6rem 1rem;">Activar Todas</button> 
             <button id="notify-deactivate-all" class="button button-secondary" style="padding: 0.6rem 1rem;">Desactivar Todas</button>
         </div>
-        <br>
-     <!-- <label class="switch" style="flex-shrink: 0; margin-left: 1.5rem;"> 
-            <input type="checkbox" id="notify-master-toggle">
-            <span class="slider"></span>
-        </label>-->
+    </div>
+
+    <div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Permiso de Notificaciones Push</h3>
+                <p id="push-notifications-status" style="font-size: 0.9rem; color: var(--text-secondary);">Activa el permiso del navegador para recibir alertas.</p>
+            </div>
+            <button id="activate-push-notifications-btn" class="button button-primary">
+                <i data-lucide="bell-ring"></i>
+                <span>Activar</span>
+            </button>
+        </div>
     </div>
     <h2 class="section-title">Notificaciones Programadas</h2>
     
@@ -71,25 +46,9 @@
         </div>
     
     <div id="notify-empty-state" class="empty-state-container hidden" style="text-align: center; margin-top: 2rem;">
-        <h2 class="modal-title">No hay recordatorios activos</h2>
-        <img src="images/notificaciones.png" alt="Icono de Notificaciones" style="width: 128px; height: 128px; margin: 1.5rem auto;">
-        <p class="modal-subtitle" style="max-width: 400px; margin: 0 auto 1.5rem;">Cuando agregues medicamentos o citas, sus recordatorios aparecerán aquí.</p>
-    </div>
+        </div>
 
     <details class="collapsible-info-box">
-        <summary>
-            <img src="images/icons/alerta.gif" alt="Alerta">
-            Información Importante sobre Notificaciones
-        </summary>
-        <div class="content"> 
-            <ul>
-                <li>Las notificaciones de medicamentos se envían 20 minutos antes de la hora programada.</li>
-                <li>Las citas médicas te recordarán 24 horas antes.</li>
-                <li>Las terapias envían 2 notificaciones: una 24h antes y otra 2h antes.</li>
-                <li>Las Citas de peso seco se recordarán 3 días antes y un día antes.</li>
-                <li>Para recibir notificaciones, asegúrate de tener habilitadas las notificaciones del navegador para esta aplicación. Puede que necesites conceder permiso la primera vez.</li>
-            </ul>
-        </div>
-    </details>
+        </details>
 
 </div>
