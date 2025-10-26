@@ -1,10 +1,13 @@
-// --- pages/notificaciones.js ---
-import { store } from '../store.js';
+// --- js/pages/notificaciones.js ---
+// (Esta es la PÁGINA que muestra la lista)
+
+import { store } from '../store.js'; 
+import { requestNotificationPermission } from '../notifications.js'; // Importa el SERVICIO
 
 let allNotifications = [];
 let allData = {};
 
-// --- 1. Recopilar Notificaciones (MODIFICADO) ---
+// --- 1. Recopilar Notificaciones (Sin cambios) ---
 function collectNotifications() {
     allData = {
         meds: store.getMeds(),
@@ -12,8 +15,7 @@ function collectNotifications() {
         terapias: store.getTerapias(),
         bcmData: store.getBcmData()
     };
-
-    // SOLUCIÓN: Simplificado para que coincida con los iconos de la app
+    // ... (El resto de esta función es idéntico)
     const medNotifications = (allData.meds || []).flatMap(med =>
         (med.schedules || []).map((schedule, index) => ({
             id: `${med.id}-${index}`,
@@ -21,37 +23,34 @@ function collectNotifications() {
             sourceId: med.id,
             title: med.name || 'Medicamento',
             subtitle: `Recordatorio: ${med.dose || 'N/A'}`,
-            icon: 'pill.svg', // Icono de Medicamentos
+            icon: 'pill.svg', 
             type: 'Medicamento',
             time: schedule || 'N/A',
             notify: med.notify !== undefined ? med.notify : true
         }))
     );
-
     const citaNotifications = (allData.citas || []).map(cita => ({
         id: `cita-${cita.id}`,
         source: 'citas',
         sourceId: cita.id,
         title: cita.name || 'Cita Médica',
         subtitle: `Cita con ${cita.doctor || 'Doctor'}`,
-        icon: 'calendar-days.svg', // Icono de Citas
+        icon: 'calendar-days.svg', 
         type: 'Cita Médica',
         time: '24 horas antes',
         notify: cita.notify !== undefined ? cita.notify : true
     }));
-
     const terapiaNotifications = (allData.terapias || []).map(terapia => ({
         id: `terapia-${terapia.id}`,
         source: 'terapias',
         sourceId: terapia.id,
         title: terapia.name || 'Terapia',
         subtitle: `Sesión programada`,
-        icon: 'accessibility.svg', // Icono de Terapias
+        icon: 'accessibility.svg', 
         type: 'Terapia',
         time: '24h y 2h antes',
         notify: terapia.notify !== undefined ? terapia.notify : true
     }));
-
     const bcmAppointments = (allData.bcmData?.dryWeightAppointments || []);
     const bcmNotifications = bcmAppointments.map(app => ({
         id: `bcm-${app.id}`,
@@ -59,12 +58,11 @@ function collectNotifications() {
         sourceId: app.id,
         title: 'Cita de Peso Seco',
         subtitle: `Nuevo Peso: ${app.newWeight || 'N/A'} kg`,
-        icon: 'bean.svg', // Icono Renal
+        icon: 'bean.svg', 
         type: 'BCM (Renal)',
         time: '24 horas antes',
         notify: app.notify !== undefined ? app.notify : true
     }));
-
     allNotifications = [
         ...medNotifications,
         ...citaNotifications,
@@ -73,11 +71,9 @@ function collectNotifications() {
     ];
 }
 
-
-// --- 2. Renderizar la UI ---
-
+// --- 2. Renderizar la UI (Sin cambios) ---
 function renderMasterControl() {
-    // (Esta función no necesita cambios, ya funciona)
+    // ... (idéntico)
     const subtitle = document.getElementById('notify-master-subtitle');
     const masterToggle = document.getElementById('notify-master-toggle');
     const activateAllBtn = document.getElementById('notify-activate-all');
@@ -101,41 +97,29 @@ function renderMasterControl() {
         deactivateAllBtn.classList.add('button-state-active');
     }
 }
-
-/**
- * SOLUCIÓN: Función 'renderNotificationList' reescrita.
- * Ahora crea tarjetas 'summary-card' en lugar de la lista oscura.
- */
 function renderNotificationList() {
+    // ... (idéntico)
     const listContainer = document.getElementById('notify-list-container');
     const emptyState = document.getElementById('notify-empty-state');
     if (!listContainer || !emptyState) return;
-    
     listContainer.innerHTML = '';
-    
     if (allNotifications.length === 0) {
         listContainer.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
     }
-    
     listContainer.classList.remove('hidden');
     emptyState.classList.add('hidden');
-    
     allNotifications.forEach(item => {
         const card = document.createElement('div');
-        // Usa la misma clase que las tarjetas de Medicamentos, Citas, etc.
         card.className = 'summary-card';
-        card.style.padding = '1rem'; // Padding estándar de las tarjetas
-
+        card.style.padding = '1rem'; 
         const title = item.title || 'Título no disponible';
         const subtitle = item.subtitle || 'Subtítulo no disponible';
-        const icon = item.icon || 'bell.svg'; // Usar .svg por defecto
+        const icon = item.icon || 'bell.svg'; 
         const type = item.type || 'Tipo no disponible';
         const time = item.time || 'Hora no disponible';
         const notify = item.notify !== undefined ? item.notify : true;
-
-        // Estructura HTML basada en la tarjeta de Medicamentos
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="display: flex; gap: 0.75rem; align-items: center;">
@@ -146,7 +130,6 @@ function renderNotificationList() {
                     </div>
                 </div>
             </div>
-            
             <div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
                     ${type} <span style="font-weight: 400; color: var(--text-secondary);">• ${time}</span>
@@ -158,20 +141,16 @@ function renderNotificationList() {
                     <span class="slider"></span>
                 </label>
             </div>`;
-            
         listContainer.appendChild(card);
     });
-    
-    // No necesitamos llamar a lucide.createIcons() porque ahora usamos <img>
 }
-
 
 // --- 3. Sincronizar cambios (Sin cambios) ---
 function updateNotificationState(source, sourceId, newState) {
-     let itemToUpdate;
+    // ... (idéntico)
+    let itemToUpdate;
     let dataArray;
     let saveFunction;
-
     switch (source) {
         case 'meds':
             dataArray = allData.meds || store.getMeds();
@@ -193,10 +172,8 @@ function updateNotificationState(source, sourceId, newState) {
             break;
         default: return;
     }
-
     if (!Array.isArray(dataArray)) return;
     itemToUpdate = dataArray.find(i => i && i.id.toString() === sourceId.toString());
-
     if (itemToUpdate) {
         itemToUpdate.notify = newState;
         if (source === 'bcmData') saveFunction();
@@ -204,12 +181,11 @@ function updateNotificationState(source, sourceId, newState) {
     } else {
          console.warn(`No se encontró item: source=${source}, sourceId=${sourceId}`);
     }
-
     const localItem = allNotifications.find(n => n.source === source && n.sourceId.toString() === sourceId.toString());
     if (localItem) localItem.notify = newState;
 }
-
 function setAllNotifications(state) {
+    // ... (idéntico)
     allNotifications.forEach(item => {
         if (item.notify !== state) {
             item.notify = state;
@@ -221,23 +197,19 @@ function setAllNotifications(state) {
     renderMasterControl();
 }
 
-
 // --- 4. Asignar Listeners (Sin cambios) ---
 function attachListeners() {
+    // ... (idéntico)
     const masterToggle = document.getElementById('notify-master-toggle');
     const activateAllBtn = document.getElementById('notify-activate-all');
     const deactivateAllBtn = document.getElementById('notify-deactivate-all');
     const listContainer = document.getElementById('notify-list-container');
-
     masterToggle?.addEventListener('change', () => {
         const newState = masterToggle.checked;
         setAllNotifications(newState);
     });
-
     activateAllBtn?.addEventListener('click', () => setAllNotifications(true));
     deactivateAllBtn?.addEventListener('click', () => setAllNotifications(false));
-
-    // SOLUCIÓN: El listener ahora funciona con el 'content-grid'
     listContainer?.addEventListener('change', (e) => {
         const toggle = e.target.closest('.notify-toggle');
         if (!toggle) return;
@@ -247,14 +219,61 @@ function attachListeners() {
         updateNotificationState(source, sourceId, newState);
         renderMasterControl();
     });
+    const pushBtn = document.getElementById('activate-push-notifications-btn');
+    pushBtn?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        pushBtn.disabled = true;
+        pushBtn.innerHTML = '<span>Procesando...</span>';
+        await requestNotificationPermission();
+        checkNotificationPermissionStatus();
+    });
 }
 
+// --- 5. Función para chequear permiso (MODIFICADA) ---
+function checkNotificationPermissionStatus() {
+    const statusEl = document.getElementById('push-notifications-status');
+    const pushBtn = document.getElementById('activate-push-notifications-btn');
+    if (!statusEl || !pushBtn) return;
 
-// --- 5. Función de Inicio ---
+    if (!('Notification' in window)) {
+        statusEl.textContent = 'Este navegador no soporta notificaciones push.';
+        pushBtn.classList.add('hidden');
+        return;
+    }
+
+    switch (Notification.permission) {
+        case 'granted':
+            statusEl.textContent = 'Permiso de notificaciones CONCEDIDO.';
+            statusEl.style.color = 'var(--success-color)';
+            pushBtn.classList.add('hidden'); 
+            break;
+        case 'denied':
+            statusEl.textContent = 'Permiso DENEGADO. Debes cambiarlo en la configuración del navegador.';
+            statusEl.style.color = 'var(--danger-color)';
+            pushBtn.disabled = true;
+            pushBtn.innerHTML = '<span>Denegado</span>';
+            break;
+        default: // 'default' (preguntar)
+            statusEl.textContent = 'Activa el permiso del navegador para recibir alertas.';
+            statusEl.style.color = 'var(--text-secondary)';
+            pushBtn.disabled = false;
+            
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Se elimina el ícono <i data-lucide...> para evitar el conflicto
+            // con el script de íconos que rompe el elemento <details>.
+            pushBtn.innerHTML = '<span>Activar</span>';
+            // --- FIN DE LA CORRECCIÓN ---
+            
+            break;
+    }
+}
+
+// --- 6. Función de Inicio (Sin cambios) ---
 export function init() {
     console.log('Cargado js/pages/notificaciones.js (con estilo de tarjeta unificado)');
     collectNotifications();
     renderNotificationList();
     renderMasterControl();
     attachListeners();
+    checkNotificationPermissionStatus();
 }
