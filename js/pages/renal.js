@@ -1,42 +1,59 @@
-/* --- pages/renal.js --- */
-import { store } from '../store.js';
-
-// Siempre trabajaremos con un array de registros
-let bcmHistory = [];
+/* --- pages/renal.js (Corregido v13) --- */
+import { store } from '../store.js'; // Asumiendo que store.js está en la carpeta padre
 
 /* --- Funciones de Renderizado --- */
 
-// Renderiza la vista principal (tarjeta o estado vacío) basado en el historial
+// Renderiza la vista principal (lista de tarjetas o estado vacío)
 function renderBcmDisplay() {
-    const dataContainer = document.getElementById('bcm-data-container');
+    console.log("[RenderDisplay] Re-renderizando BCM...");
+    const historyContainer = document.getElementById('bcm-history-container');
     const emptyState = document.getElementById('bcm-empty-state');
     const addBcmMainBtn = document.getElementById('add-bcm-main-btn');
 
-    // Asegurar que bcmHistory sea un array y ordenarlo
-    if (!Array.isArray(bcmHistory)) {
-        bcmHistory = [];
-    }
-    bcmHistory.sort((a, b) => new Date(b.date) - new Date(a.date)); // Más reciente primero
+    // 1. Leer historial FRESCO del store
+    let bcmHistory = store.getBcmData();
+    if (!Array.isArray(bcmHistory)) bcmHistory = [];
 
-    const latestRecord = bcmHistory.length > 0 ? bcmHistory[0] : null;
+    // 2. **ORDENAR: Más reciente primero** (Clave para 'isLatest' y orden visual)
+    bcmHistory.sort((a, b) => b.id - a.id); // CAMBIO: Ordenar por ID (fecha de creación) descendente
+    console.log("[RenderDisplay] Historial leído y ordenado:", bcmHistory.length, "registros");
 
-    if (!latestRecord) {
-        if (dataContainer) dataContainer.classList.add('hidden');
+    // 3. Limpiar contenedor ANTES de añadir tarjetas
+    if (!historyContainer) { console.error("Contenedor del historial no encontrado!"); return; }
+    historyContainer.innerHTML = '';
+
+    // 4. Decidir si mostrar historial o estado vacío
+    if (bcmHistory.length === 0) {
+        console.log("[RenderDisplay] Mostrando estado vacío.");
+        historyContainer.classList.add('hidden');
         if (emptyState) emptyState.classList.remove('hidden');
         if (addBcmMainBtn) addBcmMainBtn.classList.add('hidden');
     } else {
-        if (dataContainer) dataContainer.classList.remove('hidden');
+        console.log("[RenderDisplay] Renderizando tarjetas...");
+        historyContainer.classList.remove('hidden');
         if (emptyState) emptyState.classList.add('hidden');
         if (addBcmMainBtn) addBcmMainBtn.classList.remove('hidden');
-        renderCombinedCard(latestRecord); // Mostrar siempre el más reciente
+
+        // 5. Crear una tarjeta para CADA registro en el orden correcto
+        bcmHistory.forEach((record) => {
+            createAndAppendBcmCard(record, historyContainer);
+        });
+        console.log("[RenderDisplay] Tarjetas renderizadas.");
     }
 }
 
-// Renderiza la tarjeta combinada con datos de UN registro
-function renderCombinedCard(record) {
-    const combinedCard = document.getElementById('bcm-combined-card');
-    if (!combinedCard || !record) return;
+// Crea UNA tarjeta para UN registro BCM y la añade al contenedor
+function createAndAppendBcmCard(record, container) {
+    if (!record || typeof record.id === 'undefined' || !container) { // Verificar ID
+        console.warn("Intento de crear tarjeta con datos inválidos:", record);
+        return;
+    }
 
+    const card = document.createElement('div');
+    card.className = 'summary-card'; // Clase base
+    const recordId = record.id.toString();
+
+    // Calcular valores de peso
     const currentW = parseFloat(record.currentWeight);
     const dryW = parseFloat(record.dryWeight);
     const liquidGain = (!isNaN(currentW) && !isNaN(dryW)) ? (currentW - dryW).toFixed(1) : NaN;
@@ -44,150 +61,252 @@ function renderCombinedCard(record) {
         ? new Date(record.date + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
         : 'N/A';
 
-    const updateText = (id, text) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    };
+    // (Asumiendo que usas SVG inline o tus rutas de imágenes funcionan)
+    const editIcon = `<img src="images/icons/edit.svg" alt="Editar">`;
+    const trashIcon = `<img src="images/icons/trash.svg" alt="Eliminar">`;
 
-    updateText('bcm-display-date', recordDate);
-    updateText('bcm-display-current', !isNaN(currentW) ? `${currentW} kg` : 'N/A');
-    updateText('bcm-display-dry', !isNaN(dryW) ? `${dryW} kg` : 'N/A');
-    updateText('bcm-display-gain', !isNaN(liquidGain) ? `${liquidGain} kg` : 'N/A');
+    // Construir HTML de la sección de Peso (SIEMPRE presente)
+    const weightHTML = `
+        <div class="bcm-card-header">
+            <div>
+                 <h3 class="card-title" style="border: none; padding: 0; margin: 0;">Registro del ${recordDate}</h3>
+            </div>
+            <div class="bcm-card-actions">
+                <button class="icon-button edit-btn" data-id="${recordId}" aria-label="Editar registro">${editIcon}</button>
+                <button class="icon-button delete-btn" data-id="${recordId}" aria-label="Eliminar registro">${trashIcon}</button>
+            </div>
+        </div>
+        <div class="card-data-row"> <span>Peso Actual</span> <span class="data-value">${!isNaN(currentW) ? `${currentW} kg` : '-- kg'}</span> </div>
+        <div class="card-data-row"> <span>Peso Seco</span> <span class="data-value">${!isNaN(dryW) ? `${dryW} kg` : '-- kg'}</span> </div>
+        <div class="card-data-row highlight"> <span>Ganancia</span> <span class="data-value">${!isNaN(liquidGain) ? `${liquidGain} kg` : '-- kg'}</span> </div>
+    `;
 
+    // --- Lógica de líquidos AHORA SE EJECUTA SIEMPRE ---
+    
+    // Calcular valores de líquidos
     const liquidsToday = Array.isArray(record.liquids) ? record.liquids : [];
     const validLiquidGain = !isNaN(liquidGain) ? parseFloat(liquidGain) : 0;
     const liquidLimit = Math.max(0, validLiquidGain * 1000);
     const totalConsumed = liquidsToday.reduce((sum, liq) => sum + (liq.amount || 0), 0);
     const liquidRemaining = liquidLimit - totalConsumed;
 
-    updateText('bcm-display-limit', `${liquidLimit.toFixed(0)} ml`);
-    updateText('bcm-display-remaining', `${liquidRemaining.toFixed(0)} ml`);
-
-    combinedCard.classList.toggle('limit-exceeded', liquidRemaining < 0);
-
-    const liquidLog = document.getElementById('bcm-liquid-log');
-    if (liquidLog) {
-        liquidLog.innerHTML = '';
-        if (liquidsToday.length > 0) {
-            [...liquidsToday].reverse().forEach(liq => {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'liquid-log-entry';
-                logEntry.innerHTML = `<span>${liq.time || '??:??'}</span><span>${liq.amount || 0} ml</span>`;
-                liquidLog.appendChild(logEntry);
-            });
-        } else {
-            liquidLog.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; padding: 0.5rem 0;">No hay líquidos registrados para esta fecha.</p>';
-        }
+    // Construir el log de líquidos
+    let liquidLogHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0 0 0;">No hay líquidos registrados.</p>';
+    if (liquidsToday.length > 0) {
+        liquidLogHTML = [...liquidsToday].reverse().map(liq => // .reverse() para mostrar último primero
+            `<div class="liquid-log-entry"><span>${liq.time || '--:--'}</span><span>${liq.amount || 0} ml</span></div>`
+        ).join('');
     }
+
+    // Construir HTML de la sección de líquidos completa
+    const liquidHTML = `
+        <div class="bcm-separator"></div>
+        <div class="bcm-liquid-section"> 
+             <h3 class="card-title" style="border: none; padding-bottom: 0.5rem;">Control Líquidos</h3>
+            <div class="card-data-row dotted"> <span>Límite Diario</span> <span class="data-value">${liquidLimit.toFixed(0)} ml</span> </div>
+            <div class="card-data-row highlight"> <span>Restante</span> <span class="data-value">${liquidRemaining.toFixed(0)} ml</span> </div>
+            
+            <button class="button button-primary add-liquid-btn" style="width: 100%; margin-top: 1rem;" data-record-id="${recordId}">+ Agregar Líquido</button>
+            
+            <div class="bcm-liquid-log" style="margin-top: 1rem;">${liquidLogHTML}</div>
+        </div>
+    `;
+
+    // Aplicar clase de límite excedido a la tarjeta principal
+    if(liquidRemaining < 0) card.classList.add('limit-exceeded');
+
+    // Combinar HTML de peso y (si aplica) líquidos
+    card.innerHTML = `
+        ${weightHTML}
+        ${liquidHTML}
+    `;
+
+    // **AÑADIR AL CONTENEDOR** (appendChild es correcto porque el array ya está ordenado)
+    container.appendChild(card);
 }
 
 
+// --- Función Principal de Inicialización ---
 export function init() {
-    // Cargar historial y asegurar que sea array
-    bcmHistory = store.getBcmData();
-    if (!Array.isArray(bcmHistory)) {
-        bcmHistory = [];
-    }
-
-    console.log("Cargado js/pages/renal.js (v8 - Enfoque historial simple)");
+    console.log("Cargado js/pages/renal.js (v13 - CORREGIDO)");
 
     // Referencias DOM
     const weightModal = document.getElementById('bcm-weight-modal');
     const liquidModal = document.getElementById('bcm-liquid-modal');
     const weightForm = document.getElementById('bcm-weight-form');
     const liquidForm = document.getElementById('bcm-liquid-form');
+    const recordIdInput = document.getElementById('bcm-record-id');
     const dateInput = document.getElementById('bcm-record-date');
     const currentWeightInput = document.getElementById('bcm-current-weight');
     const dryWeightInput = document.getElementById('bcm-dry-weight');
     const addInitialBtn = document.getElementById('add-bcm-initial-btn');
     const addMainBtn = document.getElementById('add-bcm-main-btn');
-    const addLiquidBtn = document.getElementById('add-liquid-btn');
+    // addLiquidBtn se busca dinámicamente
     const cancelWeightBtn = document.getElementById('cancel-weight-btn');
     const cancelLiquidBtn = document.getElementById('cancel-liquid-btn');
+    const historyContainer = document.getElementById('bcm-history-container');
+    const weightModalTitle = document.getElementById('bcm-weight-modal-title');
+    
+    // Referencia al input oculto en el modal de líquidos
+    // (Asegúrate que este input exista en tu 'renal.html')
+    // <input type="hidden" id="bcm-liquid-target-id">
+    const liquidTargetIdInput = document.getElementById('bcm-liquid-target-id');
 
 
-    // Funciones helper
     function openModal(modal) { if (modal) modal.classList.remove('hidden'); }
     function closeModal(modal) { if (modal) modal.classList.add('hidden'); }
 
-    // Función para abrir el modal de NUEVO peso (siempre vacío)
+    // Abrir modal para NUEVO peso (siempre limpio)
     function openNewWeightModal() {
-        if (weightForm && dateInput && currentWeightInput && dryWeightInput) {
-            weightForm.reset(); // Limpiar todo
-            dateInput.valueAsDate = new Date(); // Poner fecha actual
-            currentWeightInput.value = ''; // Asegurar vacío
-            dryWeightInput.value = ''; // Asegurar vacío
-        } else {
-             console.error("Elementos del formulario de peso no encontrados.");
-             return;
-        }
+        if (!weightForm) return;
+        weightForm.reset();
+        recordIdInput.value = ''; // ID vacío para nuevo
+        if (dateInput) dateInput.valueAsDate = new Date();
+        if (currentWeightInput) currentWeightInput.value = '';
+        if (dryWeightInput) dryWeightInput.value = '';
+        if (weightModalTitle) weightModalTitle.textContent = "Registrar Peso";
         openModal(weightModal);
     }
 
+    // Abrir modal para EDITAR peso
+    function openEditWeightModal(record) {
+         if (!weightForm || !record) return;
+         weightForm.reset();
+         recordIdInput.value = record.id; // ID del registro a editar
+         if (dateInput) dateInput.value = record.date;
+         if (currentWeightInput) currentWeightInput.value = record.currentWeight;
+         if (dryWeightInput) dryWeightInput.value = record.dryWeight;
+         if (weightModalTitle) weightModalTitle.textContent = "Editar Registro de Peso";
+         openModal(weightModal);
+    }
+
     // --- Listeners ---
-    // Abrir modal de peso (botones inicial y principal)
     addInitialBtn?.addEventListener('click', openNewWeightModal);
     addMainBtn?.addEventListener('click', openNewWeightModal);
 
-    // Abrir modal de líquido
-    addLiquidBtn?.addEventListener('click', () => {
-        bcmHistory.sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por si acaso
-        if (bcmHistory.length === 0) {
-             alert("Primero debes agregar un registro de peso.");
-             return;
+    // Listener delegado para botones DENTRO del historial
+    historyContainer?.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
+
+        const recordIdStr = button.dataset.id || button.dataset.recordId;
+
+        // Botón "+ Agregar Líquido" (por CLASE)
+        if (button.classList.contains('add-liquid-btn')) {
+             if (liquidForm) liquidForm.reset();
+             
+             // Guardar el ID del registro en el modal
+             if(liquidTargetIdInput && recordIdStr) {
+                  liquidTargetIdInput.value = recordIdStr;
+                  console.log("Abriendo modal de líquido para recordId:", recordIdStr);
+                  openModal(liquidModal);
+             } else {
+                 console.error("No se pudo encontrar el ID del registro o el input oculto 'bcm-liquid-target-id'.");
+             }
         }
-        if (liquidForm) liquidForm.reset();
-        openModal(liquidModal);
+        // Botón Editar
+        else if (button.classList.contains('edit-btn') && recordIdStr) {
+            let currentHistory = store.getBcmData();
+            if (!Array.isArray(currentHistory)) currentHistory = [];
+            const recordToEdit = currentHistory.find(r => r.id.toString() === recordIdStr);
+            if (recordToEdit) {
+                openEditWeightModal(recordToEdit);
+            } else {
+                console.error("No se encontró registro para editar:", recordIdStr);
+            }
+        }
+        // Botón Borrar
+        else if (button.classList.contains('delete-btn') && recordIdStr) {
+             // Reemplaza 'confirm' con tu propio modal de confirmación
+             if (confirm('¿Eliminar este registro de peso? (Los líquidos asociados también se borrarán)')) {
+                 let currentHistory = store.getBcmData();
+                 if (!Array.isArray(currentHistory)) currentHistory = [];
+                 const updatedHistory = currentHistory.filter(r => r.id.toString() !== recordIdStr);
+                 store.saveBcmData(updatedHistory);
+                 renderBcmDisplay(); // Re-renderizar
+             }
+        }
     });
 
-    // Cerrar modales
     cancelWeightBtn?.addEventListener('click', () => closeModal(weightModal));
     cancelLiquidBtn?.addEventListener('click', () => closeModal(liquidModal));
 
     // --- Formularios ---
-    // Guardar NUEVO registro de peso
+    // Guardar registro de peso (NUEVO o EDITADO)
     weightForm?.addEventListener('submit', (e) => {
         e.preventDefault();
-
+        const recordIdValue = recordIdInput.value; // Puede ser string vacío o ID
         const date = dateInput.value;
         const currentWeight = parseFloat(currentWeightInput.value);
         const dryWeight = parseFloat(dryWeightInput.value);
 
-        // Validaciones
-        if (!date) { alert('Por favor, selecciona una fecha.'); return; }
-        if (isNaN(currentWeight) || isNaN(dryWeight)) { alert('Por favor, ingresa valores numéricos para los pesos.'); return; }
-        if (dryWeight >= currentWeight) { alert('Error: El Peso Seco debe ser menor que el Peso Actual.'); return; } // Ajuste: >=
-        if (currentWeight <= 0 || dryWeight <= 0) { alert('Los pesos deben ser valores positivos.'); return; }
-
-        // Crear objeto nuevo
-        const newRecord = {
-            id: Date.now() + Math.random(), // ID único
-            date: date,
-            currentWeight: currentWeight,
-            dryWeight: dryWeight,
-            liquids: [] // Siempre lista vacía al crear
-        };
-
-        // Asegurar que bcmHistory es un array antes de añadir
-        if (!Array.isArray(bcmHistory)) {
-             bcmHistory = [];
+        if (!date || isNaN(currentWeight) || isNaN(dryWeight) || currentWeight <= 0 || dryWeight <= 0) {
+            alert('Datos inválidos. Verifica la fecha y que los pesos sean positivos.'); // Reemplazar con modal
+            return;
         }
 
-        bcmHistory.push(newRecord); // Añadir al historial en memoria
-        bcmHistory.sort((a, b) => new Date(b.date) - new Date(a.date)); // Reordenar
+        if (dryWeight >= currentWeight) {
+            alert('El Peso Seco no puede ser mayor o igual al Peso Actual.'); // Reemplazar con modal
+            return;
+        }
 
-        store.saveBcmData(bcmHistory); // Guardar el historial completo
+        let currentHistory = store.getBcmData(); // Leer estado actual
+        if (!Array.isArray(currentHistory)) currentHistory = [];
+
+        if (recordIdValue) { // --- Editar ---
+            const recordId = parseInt(recordIdValue); // ID a buscar
+            const recordIndex = currentHistory.findIndex(r => r.id === recordId);
+            if (recordIndex > -1) {
+                // Actualizar, manteniendo líquidos
+                currentHistory[recordIndex] = {
+                    ...currentHistory[recordIndex], // Mantener ID y líquidos
+                    date: date,
+                    currentWeight: currentWeight,
+                    dryWeight: dryWeight
+                };
+                console.log("Registro EDITADO:", currentHistory[recordIndex]);
+            } else {
+                 alert("Error al editar: Registro no encontrado."); return; // Reemplazar con modal
+            }
+        } else { // --- Nuevo ---
+            const newRecord = {
+                id: Date.now(), // ID nuevo
+                date: date,
+                currentWeight: currentWeight,
+                dryWeight: dryWeight,
+                liquids: []
+            };
+            currentHistory.push(newRecord);
+            console.log("Registro NUEVO añadido:", newRecord);
+        }
+
+        // Guardar el historial modificado
+        store.saveBcmData(currentHistory);
         closeModal(weightModal);
-        renderBcmDisplay(); // Re-renderizar la vista principal
+        renderBcmDisplay(); // Re-renderizar todo
     });
 
-    // Guardar líquido (añade al registro más reciente)
+    // Guardar líquido (añade al registro específico)
     liquidForm?.addEventListener('submit', (e) => {
         e.preventDefault();
-        bcmHistory.sort((a, b) => new Date(b.date) - new Date(a.date)); // Asegurar orden
-        if (bcmHistory.length === 0) {
-            alert("Error interno: No hay registro de peso al cual agregar líquido.");
-            closeModal(liquidModal);
+
+        let currentHistory = store.getBcmData();
+        if (!Array.isArray(currentHistory)) currentHistory = [];
+        
+        // Obtener el ID del registro del input oculto
+        const targetRecordIdStr = liquidTargetIdInput.value;
+
+        if (!targetRecordIdStr) {
+            alert("Error: No se seleccionó ningún registro. Cierra el modal e inténtalo de nuevo."); // Reemplazar con modal
+            return;
+        }
+
+        // Encontrar el registro específico para actualizar
+        const recordToUpdate = currentHistory.find(r => r.id.toString() === targetRecordIdStr);
+
+        if (!recordToUpdate) {
+            alert("Error: No se encontró el registro para añadir el líquido."); // Reemplazar con modal
+            closeModal(liquidModal); 
             return;
         }
 
@@ -196,21 +315,20 @@ export function init() {
         const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
         if (isNaN(amount) || amount <= 0) {
-            alert('Por favor, ingresa una cantidad válida de líquido (mayor que 0).'); return;
+            alert('Cantidad inválida.'); return; // Reemplazar con modal
         }
 
-        const latestRecord = bcmHistory[0]; // El más reciente
-        if (!Array.isArray(latestRecord.liquids)) { // Asegurar que liquids exista
-            latestRecord.liquids = [];
-        }
+        // Modificar el registro encontrado
+        if (!Array.isArray(recordToUpdate.liquids)) recordToUpdate.liquids = [];
+        recordToUpdate.liquids.push({ time, amount });
+        console.log("Líquido añadido al registro:", targetRecordIdStr);
 
-        latestRecord.liquids.push({ time, amount }); // Añadir al array de líquidos del último registro
 
-        store.saveBcmData(bcmHistory); // Guardar el historial completo actualizado
+        store.saveBcmData(currentHistory); // Guardar
         closeModal(liquidModal);
-        renderCombinedCard(latestRecord); // Solo re-renderizar la tarjeta que cambió
+        renderBcmDisplay(); // Re-renderizar todo
     });
 
-    // Renderizado inicial al cargar la página
+    // Renderizado inicial
     renderBcmDisplay();
 }

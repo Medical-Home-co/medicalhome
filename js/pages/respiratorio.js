@@ -1,5 +1,7 @@
+import { store } from '../store.js'; // <-- CAMBIO: Importar el store
+
 // --- Base de Datos Temporal ---
-let tempRespiratorioDB = [];
+// let tempRespiratorioDB = []; // <-- CAMBIO: No usar la base de datos temporal
 
 // --- Funciones de Renderizado ---
 
@@ -11,15 +13,17 @@ function renderRespiratorioList() {
     if (!listContainer || !emptyState || !addMainBtn) return;
     listContainer.innerHTML = '';
 
-    if (tempRespiratorioDB.length === 0) {
+    const currentData = store.getRespiratorioData(); // <-- CAMBIO: Leer del store
+
+    if (currentData.length === 0) { // <-- CAMBIO
         emptyState.classList.remove('hidden');
         addMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
         addMainBtn.classList.remove('hidden');
-        tempRespiratorioDB.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+        currentData.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time)); // <-- CAMBIO
 
-        tempRespiratorioDB.forEach(rec => {
+        currentData.forEach(rec => { // <-- CAMBIO
             const card = document.createElement('div');
             card.className = 'summary-card';
             
@@ -161,12 +165,16 @@ export function init() {
             notes: document.getElementById('respiratorio-notes').value
         };
 
+        let currentData = store.getRespiratorioData(); // <-- CAMBIO: Leer del store
+
         if (id) {
-            const index = tempRespiratorioDB.findIndex(rec => rec.id.toString() === id);
-            if (index > -1) tempRespiratorioDB[index] = record;
+            const index = currentData.findIndex(rec => rec.id.toString() === id); // <-- CAMBIO
+            if (index > -1) currentData[index] = record; // <-- CAMBIO
         } else {
-            tempRespiratorioDB.push(record);
+            currentData.push(record); // <-- CAMBIO
         }
+        
+        store.saveRespiratorioData(currentData); // <-- CAMBIO: Guardar en el store
         
         closeFormModal();
         renderRespiratorioList();
@@ -175,18 +183,21 @@ export function init() {
     listContainer?.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-btn');
         const editBtn = e.target.closest('.edit-btn');
+        
+        let currentData = store.getRespiratorioData(); // <-- CAMBIO: Leer del store
+
         if (deleteBtn) {
             if (confirm('¿Estás seguro?')) {
-                tempRespiratorioDB = tempRespiratorioDB.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
+                currentData = currentData.filter(rec => rec.id.toString() !== deleteBtn.dataset.id); // <-- CAMBIO
+                store.saveRespiratorioData(currentData); // <-- CAMBIO: Guardar en el store
                 renderRespiratorioList();
             }
         }
         if (editBtn) {
-            const record = tempRespiratorioDB.find(rec => rec.id.toString() === editBtn.dataset.id);
+            const record = currentData.find(rec => rec.id.toString() === editBtn.dataset.id); // <-- CAMBIO
             if (record) openFormModal(record);
         }
     });
 
     renderRespiratorioList();
 }
-

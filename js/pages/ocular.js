@@ -286,6 +286,7 @@ export function init() {
 
     form?.addEventListener('submit', (e) => {
         e.preventDefault();
+        let validationFailed = false; // <-- CAMBIO 1: Añadida variable bandera
         const id = document.getElementById('ocular-entry-id').value;
         const formData = new FormData(form);
         const data = {};
@@ -299,8 +300,8 @@ export function init() {
                  // Validar que los inputs "Otro" tengan valor si "Otro" está seleccionado
                  if (!otroInput1.value || !otroInput2.value) {
                      alert(`Por favor, especifica el valor para ${select.previousElementSibling.textContent} o selecciona una opción válida.`);
-                     e.preventDefault(); // Detener envío
-                     // Podrías enfocar el input problemático aquí
+                     // e.preventDefault(); // <-- CAMBIO 2: Eliminada llamada redundante
+                     validationFailed = true; // <-- CAMBIO 3: Usar la bandera
                      return; 
                  }
                  data[key] = `${otroInput1.value}/${otroInput2.value}`;
@@ -310,7 +311,7 @@ export function init() {
         });
         
         // Si el formulario fue detenido por validación, salir
-        if (e.defaultPrevented) return; 
+        if (validationFailed) return; // <-- CAMBIO 4: Comprobar la bandera, no e.defaultPrevented
 
         data.id = id ? parseInt(id) : Date.now();
         data.clasificacion = formData.get('clasificacion');
