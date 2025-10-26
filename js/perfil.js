@@ -1,6 +1,7 @@
 // --- js/perfil.js ---
 
 import { store } from './store.js';
+import { requestNotificationPermission } from './notifications.js';
 
 let tempProfileData = null; 
 let avatarDataUrl = null;
@@ -11,8 +12,12 @@ function renderProfileSummary() {
     const summaryContainer = document.getElementById('profile-summary-container');
     const emptyState = document.getElementById('profile-empty-state');
     const editBtn = document.getElementById('edit-profile-main-btn');
-
-    if (!summaryContainer || !emptyState || !editBtn) {
+    
+    // --- INICIO DE LA CORRECCIÓN ---
+    // También seleccionamos el botón de notificaciones
+    const activateNotificationsBtn = document.getElementById('activate-notifications-btn'); 
+    
+    if (!summaryContainer || !emptyState || !editBtn || !activateNotificationsBtn) { // Añadido a la validación
         console.warn("Elementos principales del resumen de perfil no encontrados.");
         return;
     }
@@ -21,16 +26,22 @@ function renderProfileSummary() {
         summaryContainer.classList.add('hidden');
         emptyState.classList.remove('hidden');
         editBtn.classList.add('hidden');
+        activateNotificationsBtn.classList.add('hidden'); // Ocultarlo si no hay perfil
     } else {
         summaryContainer.classList.remove('hidden');
         emptyState.classList.add('hidden');
         editBtn.classList.remove('hidden');
+        activateNotificationsBtn.classList.remove('hidden'); // Mostrarlo si hay perfil
+        // --- FIN DE LA CORRECCIÓN ---
         
         const avatarEl = document.getElementById('summary-avatar');
         const nameEl = document.getElementById('summary-name');
         const emailEl = document.getElementById('summary-email');
         const personalDataEl = document.getElementById('personal-data-summary');
-        const contactDataEl = document.getElementById('contact-data-summary');
+        // --- CORRECCIÓN DE ID --- 
+        // Tu HTML usa 'emergency-data-summary', no 'contact-data-summary'
+        const contactDataEl = document.getElementById('emergency-data-summary'); 
+        // --- FIN CORRECCIÓN DE ID ---
         const medicalDataEl = document.getElementById('medical-data-summary');
 
         if (avatarEl) {
@@ -46,6 +57,9 @@ function renderProfileSummary() {
         if (personalDataEl) {
             personalDataEl.innerHTML = `
                 <div class="profile-item"><span class="profile-item-label">Edad</span><span class="profile-item-value">${tempProfileData.age || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Tipo Sangre</span><span class="profile-item-value">${tempProfileData.bloodType || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Peso</span><span class="profile-item-value">${tempProfileData.weight ? tempProfileData.weight + ' Kg' : 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Estatura</span><span class="profile-item-value">${tempProfileData.height ? tempProfileData.height + ' cm' : 'N/A'}</span></div>
             `;
         }
 
@@ -69,6 +83,7 @@ function renderProfileSummary() {
 }
 
 function updateMainMenu(conditions = []) {
+    // ... (código idéntico) ...
     const allConditions = ['renal', 'cardiaco', 'diabetes', 'artritis', 'tea', 'respiratorio', 'gastrico', 'general'];
     const accordion = document.querySelector('.nav-item-accordion');
     let hasVisibleConditions = false;
@@ -94,6 +109,7 @@ function updateMainMenu(conditions = []) {
 }
 
 function openFormModal() {
+    // ... (código idéntico) ...
     const form = document.getElementById('profile-form');
     if (!form) return; 
 
@@ -109,8 +125,6 @@ function openFormModal() {
     if(fistulaLocationContainer) fistulaLocationContainer.classList.add('hidden');
     if(avatarPreview) avatarPreview.src = 'images/avatar.png';
     
-    // Deshabilitar los checkboxes de días (si es que la lógica aplicara, 
-    // pero como ahora son radios, esta línea es solo de seguridad)
     form.querySelectorAll('input[name="hemodialysisDays"]').forEach(cb => cb.disabled = false);
 
     
@@ -135,12 +149,8 @@ function openFormModal() {
         if (tempProfileData.conditions && tempProfileData.conditions.includes('renal')) {
             const renalAccessRadio = form.querySelector(`input[name="renalAccess"][value="${tempProfileData.renalAccess}"]`);
             if(renalAccessRadio) renalAccessRadio.checked = true;
-
-            // --- ¡CORRECCIÓN DEL ERROR! ---
-            // Esta lógica maneja datos antiguos (string) y nuevos (array)
+            
             if (tempProfileData.hemodialysisDays) {
-                // Si es un array (método nuevo, ej: ["L-M-V"]), usa el primer valor.
-                // Si es un string (método antiguo, ej: "L-M-V"), úsalo directamente.
                 const dayValue = Array.isArray(tempProfileData.hemodialysisDays) 
                     ? tempProfileData.hemodialysisDays[0] 
                     : tempProfileData.hemodialysisDays;
@@ -150,7 +160,6 @@ function openFormModal() {
                     if(radio) radio.checked = true;
                 }
             }
-            // --- FIN DE LA CORRECCIÓN ---
         }
         
         if(tempProfileData.avatar && avatarPreview) {
@@ -169,6 +178,7 @@ function openFormModal() {
 }
 
 function closeFormModal() {
+    // ... (código idéntico) ...
     const formModal = document.getElementById('profile-form-modal');
     formModal?.classList.add('hidden');
 }
@@ -180,7 +190,7 @@ export function init() {
     
     if (!form) {
         console.warn("Formulario de perfil (profile-form) no encontrado. Reintentando en 10ms...");
-        setTimeout(init, 10); // Reintenta la función 'init' completa
+        setTimeout(init, 10); 
         return;
     }
     
@@ -191,6 +201,7 @@ export function init() {
     const addInitialBtn = document.getElementById('add-profile-initial-btn');
     const editBtn = document.getElementById('edit-profile-main-btn');
     const cancelBtn = document.getElementById('cancel-profile-btn');
+    const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
     
     const avatarUpload = document.getElementById('avatar-upload');
     const avatarPreview = document.getElementById('avatar-preview');
@@ -199,12 +210,10 @@ export function init() {
     const fistulaRadio = form.querySelector('input[name="renalAccess"][value="fistula"]');
     const fistulaLocationContainer = document.getElementById('fistula-location-container');
 
-    // --- ¡CÓDIGO ELIMINADO! ---
-    // Se eliminó el "const hemodialysisDaysCheckboxes" y su .forEach,
-    // ya que esa lógica era para checkboxes y tu HTML usa radios.
 
     // Asignación de eventos
     avatarUpload?.addEventListener('change', (e) => {
+        // ... (código idéntico) ...
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
@@ -217,10 +226,12 @@ export function init() {
     });
 
     renalCheckbox?.addEventListener('change', () => {
+        // ... (código idéntico) ...
         if(renalInfoContainer) renalInfoContainer.classList.toggle('hidden', !renalCheckbox.checked);
     });
 
     form.querySelectorAll('input[name="renalAccess"]').forEach(radio => {
+        // ... (código idéntico) ...
         radio.addEventListener('change', () => {
             if(fistulaLocationContainer) fistulaLocationContainer.classList.toggle('hidden', !fistulaRadio.checked);
         });
@@ -230,7 +241,14 @@ export function init() {
     editBtn?.addEventListener('click', openFormModal);
     cancelBtn?.addEventListener('click', closeFormModal);
 
+    // Listener para el botón de notificaciones
+    activateNotificationsBtn?.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        requestNotificationPermission();
+    });
+
     form.addEventListener('submit', (e) => {
+        // ... (código idéntico) ...
         e.preventDefault();
 
         const password = form.elements.password.value;
@@ -243,9 +261,21 @@ export function init() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        // Sobrescribir con .getAll() para asegurar que sean arrays
         data.conditions = formData.getAll('conditions');
-        data.hemodialysisDays = formData.getAll('hemodialysisDays'); // Esto guardará ["L-M-V"]
+
+        // --- CORRECCIÓN LÓGICA HEMODIÁLISIS ---
+        // Solo guardar días de hemodiálisis SI la condición renal está marcada
+        if (data.conditions.includes('renal')) {
+             data.hemodialysisDays = formData.getAll('hemodialysisDays');
+        } else {
+            // Limpiar datos renales si la casilla no está marcada
+            delete data.renalAccess;
+            delete data.fistulaLocation;
+            delete data.hemodialysisDays;
+            delete data.hemodialysisTime;
+            delete data.clinicName;
+        }
+        // --- FIN CORRECCIÓN LÓGICA ---
         
         data.avatar = avatarDataUrl || tempProfileData?.avatar;
 
@@ -259,7 +289,7 @@ export function init() {
     });
 
     // --- Renderizado y actualización inicial ---
-    renderProfileSummary();
+    renderProfileSummary(); // Esta función ahora maneja la visibilidad de los botones
     if(tempProfileData && tempProfileData.conditions) {
         updateMainMenu(tempProfileData.conditions);
     } else {
@@ -268,6 +298,7 @@ export function init() {
 
     // --- Lógica del Welcome Modal ---
     if (sessionStorage.getItem('openProfileModal') === 'true') {
+        // ... (código idéntico) ...
         sessionStorage.removeItem('openProfileModal');
         openFormModal(); 
     }
