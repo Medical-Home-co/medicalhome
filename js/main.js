@@ -82,12 +82,137 @@ document.addEventListener('DOMContentLoaded', () => {
     
     /* --- (Resto de listeners sin cambios) --- */
     /* ... (código idéntico al anterior) ... */
-    const aboutBtn = document.getElementById('about-btn'); const reportBtn = document.getElementById('report-btn'); const aboutModal = document.getElementById('about-modal'); const reportModal = document.getElementById('report-modal'); function openModal(modal) { modal?.classList.remove('hidden'); } function closeModalOnClick(modal) { modal?.classList.add('hidden'); } aboutBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); }); reportBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); }); document.querySelectorAll('.close-modal-btn').forEach(btn => { btn.addEventListener('click', () => { const modalToClose = btn.closest('.modal-overlay'); closeModalOnClick(modalToClose); }); }); const reportForm = document.getElementById('report-form'); reportForm?.addEventListener('submit', (e) => { e.preventDefault(); const textElement = document.getElementById('report-text'); const text = textElement ? textElement.value : ''; window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte MedicalHome&body=${encodeURIComponent(text)}`; closeModalOnClick(reportModal); });
+    // --- ARREGLO: Mover Lógica de Modales a delegación de eventos ---
+    const aboutModal = document.getElementById('about-modal'); 
+    const reportModal = document.getElementById('report-modal'); 
+    
+    function openModal(modal) { modal?.classList.remove('hidden'); } 
+    function closeModalOnClick(modal) { modal?.classList.add('hidden'); } 
+    
+    // Quitar listeners antiguos
+    // const aboutBtn = document.getElementById('about-btn'); 
+    // const reportBtn = document.getElementById('report-btn'); 
+    // aboutBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); }); 
+    // reportBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); }); 
+    
+    document.querySelectorAll('.close-modal-btn').forEach(btn => { btn.addEventListener('click', () => { const modalToClose = btn.closest('.modal-overlay'); closeModalOnClick(modalToClose); }); }); 
+    const reportForm = document.getElementById('report-form'); reportForm?.addEventListener('submit', (e) => { e.preventDefault(); const textElement = document.getElementById('report-text'); const text = textElement ? textElement.value : ''; window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte MedicalHome&body=${encodeURIComponent(text)}`; closeModalOnClick(reportModal); });
     const collapseBtn = document.querySelector('.collapse-btn'); if (collapseBtn) { collapseBtn.addEventListener('click', () => { appShell?.classList.toggle('collapsed'); const isCollapsed = appShell?.classList.contains('collapsed'); collapseBtn.setAttribute('aria-expanded', !isCollapsed); }); }
-    document.body.addEventListener('click', (e) => { const accordionToggle = e.target.closest('.accordion-toggle'); if (accordionToggle) { e.preventDefault(); const parentItem = accordionToggle.closest('.nav-item-accordion'); parentItem?.classList.toggle('open'); } });
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn'); const mobileMenuModal = document.getElementById('mobile-menu-modal'); if (mobileMenuBtn && mobileMenuModal) { const mobileMenuContent = document.querySelector('.mobile-menu-content'); const desktopNav = document.querySelector('.sidebar-nav > .nav-links'); let isMenuCloned = false; mobileMenuBtn.addEventListener('click', () => { if (!isMenuCloned && mobileMenuContent && desktopNav) { try { const clonedNav = desktopNav.cloneNode(true); mobileMenuContent.appendChild(clonedNav); isMenuCloned = true; } catch (error) { console.error("Error clonando menú:", error); } } mobileMenuModal.classList.toggle('hidden'); }); mobileMenuModal.addEventListener('click', (e) => { if (e.target === mobileMenuModal) mobileMenuModal.classList.add('hidden'); }); if (mobileMenuContent) { mobileMenuContent.addEventListener('click', (e) => { if (e.target.closest('a')) mobileMenuModal.classList.add('hidden'); }); } }
-    const themeToggle = document.getElementById('theme-toggle-desktop'); if (themeToggle) { const currentTheme = localStorage.getItem('theme'); if (currentTheme === 'dark') { body.classList.add('dark-theme'); themeToggle.checked = true; } themeToggle.addEventListener('change', () => { body.classList.toggle('dark-theme'); localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light'); }); }
-    document.querySelectorAll('a[href="#share"]').forEach(shareLink => { shareLink.addEventListener('click', async (e) => { e.preventDefault(); const shareData = { title: 'MedicalHome', text: '¡Descubre MedicalHome!', url: window.location.origin }; if (navigator.share) { try { await navigator.share(shareData); } catch (err) { console.error('Error share:', err); } } else { try { await navigator.clipboard.writeText(shareData.url); alert('¡Enlace copiado!'); } catch (err) { alert('No se pudo compartir.'); } } }); });
+    
+    // Quitar listener de accordion antiguo
+    // document.body.addEventListener('click', (e) => { const accordionToggle = e.target.closest('.accordion-toggle'); if (accordionToggle) { e.preventDefault(); const parentItem = accordionToggle.closest('.nav-item-accordion'); parentItem?.classList.toggle('open'); } });
+    
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn'); 
+    const mobileMenuModal = document.getElementById('mobile-menu-modal'); 
+    
+    if (mobileMenuBtn && mobileMenuModal) { 
+        const mobileMenuContent = document.querySelector('.mobile-menu-content'); 
+        const desktopNav = document.querySelector('.sidebar-nav > .nav-links'); 
+        let isMenuCloned = false; 
+        
+        mobileMenuBtn.addEventListener('click', () => { 
+            if (!isMenuCloned && mobileMenuContent && desktopNav) { 
+                try { 
+                    const clonedNav = desktopNav.cloneNode(true); 
+                    mobileMenuContent.appendChild(clonedNav); 
+                    
+                    // --- ARREGLO: Clonar también el Footer ---
+                    const desktopFooter = document.querySelector('.sidebar-nav > .sidebar-footer');
+                    if (desktopFooter) {
+                        const clonedFooter = desktopFooter.cloneNode(true);
+                        mobileMenuContent.appendChild(clonedFooter);
+                        
+                        // --- ARREGLO: Re-enganchar listener del theme toggle clonado ---
+                        const mobileToggle = clonedFooter.querySelector('#theme-toggle-desktop');
+                        if (mobileToggle) {
+                            mobileToggle.id = 'theme-toggle-mobile'; // Darle un nuevo ID
+                            mobileToggle.addEventListener('change', () => {
+                                body.classList.toggle('dark-theme');
+                                localStorage.setItem('theme', mobileToggle.checked ? 'dark' : 'light');
+                            });
+                        }
+                    }
+                    // --- FIN ARREGLO ---
+                    
+                    isMenuCloned = true; 
+                } catch (error) { console.error("Error clonando menú:", error); } 
+            } 
+            mobileMenuModal.classList.toggle('hidden'); 
+        }); 
+        
+        mobileMenuModal.addEventListener('click', (e) => { if (e.target === mobileMenuModal) mobileMenuModal.classList.add('hidden'); }); 
+        
+        if (mobileMenuContent) { 
+            mobileMenuContent.addEventListener('click', (e) => { 
+                // --- ARREGLO: No cerrar el modal si se hace click en un accordion ---
+                if (e.target.closest('a') && !e.target.closest('.accordion-toggle')) {
+                    mobileMenuModal.classList.add('hidden'); 
+                }
+            }); 
+        } 
+    }
+    
+    const themeToggle = document.getElementById('theme-toggle-desktop'); 
+    if (themeToggle) { 
+        const currentTheme = localStorage.getItem('theme'); 
+        if (currentTheme === 'dark') { 
+            body.classList.add('dark-theme'); 
+            themeToggle.checked = true; 
+        } 
+        themeToggle.addEventListener('change', () => { 
+            body.classList.toggle('dark-theme'); 
+            localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light'); 
+        }); 
+    }
+    
+    // Quitar listener de share antiguo
+    // document.querySelectorAll('a[href="#share"]').forEach(shareLink => { ... });
+
+    // --- ARREGLO: Listener de BODY para delegación de eventos ---
+    // Esto maneja clicks en botones de PC y Móvil (clonados)
+    document.body.addEventListener('click', async (e) => {
+        // 1. Lógica de Modales
+        const aboutBtn = e.target.closest('#about-btn');
+        const reportBtn = e.target.closest('#report-btn');
+
+        if (aboutBtn) {
+            e.preventDefault();
+            openModal(aboutModal);
+        }
+        
+        if (reportBtn) {
+            e.preventDefault();
+            openModal(reportModal);
+        }
+        
+        // 2. Lógica de Accordion
+        const accordionToggle = e.target.closest('.accordion-toggle');
+        if (accordionToggle) {
+            e.preventDefault();
+            const parentItem = accordionToggle.closest('.nav-item-accordion');
+            parentItem?.classList.toggle('open');
+        }
+
+        // 3. Lógica de Compartir
+        const shareLink = e.target.closest('a[href="#share"]');
+        if (shareLink) {
+            e.preventDefault();
+            const shareData = { title: 'MedicalHome', text: '¡Descubre MedicalHome!', url: window.location.origin };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } 
+                catch (err) { console.error('Error share:', err); }
+            } else {
+                try { 
+                    await navigator.clipboard.writeText(shareData.url); 
+                    // No usar alert, reemplazar con un modal custom si es posible
+                    console.log('¡Enlace copiado!'); 
+                } catch (err) { 
+                    console.error('No se pudo compartir.'); 
+                }
+            }
+        }
+    });
+    // --- FIN ARREGLO ---
 
     
     // --- SOLUCIÓN: Actualizar Sidebar al Cargar ---
