@@ -1,29 +1,43 @@
 /* --- Variables de Color y Base --- */
 :root {
     --primary-blue: #3A86FF;
-    /* --- MEJORA: Color primario más oscuro para hover --- */
     --primary-blue-dark: #3171e0; 
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F4F7F9;
+    --bg-secondary: #F4F7F9; /* Usaré este como fondo azul claro del splash */
     --text-primary: #1A202C;
-    --text-secondary: #4A5568;
-    --border-color: #E2E8F0;
+    --text-secondary: #4A5568; /* Usaré este para el texto "Cargando..." */
+    --border-color: #E2E8F0; /* Usaré este para el fondo de la barra de progreso */
     --shadow-color: rgba(0, 0, 0, 0.05);
     --sidebar-width: 240px;
     --sidebar-width-collapsed: 70px;
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    /* --- INICIO: Colores añadidos para iconos y tags --- */
+    --success-color: #25D366; /* Verde WhatsApp */
+    --danger-color: #dc3545;  /* Rojo Borrar */
+    --danger-light-text: #c53030;
+    --danger-light-bg: #fff5f5;
+    --danger-light-border: #f7d4d6;
+    /* --- FIN: Colores añadidos --- */
 }
 
 body.dark-theme {
     --primary-blue: #5a9bff;
-    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
     --primary-blue-dark: #4a88f0;
     --bg-primary: #1A202C;
-    --bg-secondary: #2D3748;
+    --bg-secondary: #2D3748; /* Fondo del splash en modo oscuro */
     --text-primary: #F7FAFC;
-    --text-secondary: #A0AEC0;
-    --border-color: #4A5568;
+    --text-secondary: #A0AEC0; /* Texto "Cargando..." en modo oscuro */
+    --border-color: #4A5568; /* Fondo de la barra en modo oscuro */
     --shadow-color: rgba(0, 0, 0, 0.2);
+
+    /* --- INICIO: Colores añadidos (dark) --- */
+    --success-color: #30e070; /* Verde WhatsApp (más brillante) */
+    --danger-color: #e84a5a;  /* Rojo Borrar (más brillante) */
+    --danger-light-text: #fc8181;
+    --danger-light-bg: #4d2f2f;
+    --danger-light-border: #7a4a4a;
+    /* --- FIN: Colores añadidos (dark) --- */
 }
 
 /* --- Reseteo y Estilos Globales --- */
@@ -34,6 +48,9 @@ html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* ===== INICIO: Corrección Tamaño Móvil ===== */
+    overflow-x: hidden;
+    /* ===== FIN: Corrección Tamaño Móvil ===== */
 }
 
 body {
@@ -42,6 +59,9 @@ body {
     color: var(--text-primary);
     transition: background-color 0.2s, color 0.2s;
     line-height: 1.5;
+    /* ===== INICIO: Corrección Tamaño Móvil ===== */
+    overflow-x: hidden;
+    /* ===== FIN: Corrección Tamaño Móvil ===== */
 }
 body.hidden { visibility: hidden; }
 a { text-decoration: none; color: inherit; }
@@ -713,5 +733,100 @@ body, .modal-content, .nav-links {
     color: var(--text-secondary);
     font-weight: 500;
 }
+
+/* ===== INICIO: Estilos para el texto del Splash (Añadido) ===== */
+#splash-app-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+#splash-slogan {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+/* ===== FIN: Estilos para el texto del Splash ===== */
 /* ===== FIN: Estilos del Splash Screen ===== */
+
+/* ===== INICIO: Estilos para Agenda (Añadido) ===== */
+.card-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    /* Alinea los items de la grid en el centro verticalmente y horizontalmente */
+    align-items: center;
+    justify-items: center;
+}
+
+.card-actions-grid .icon-button {
+    padding: 0.25rem; /* Un padding pequeño para el área de clic */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-actions-grid .icon-button img {
+    width: 20px; /* Tamaño de los iconos de la grid */
+    height: 20px;
+    /* Opacidad base para los iconos de color */
+    opacity: 0.8; 
+    transition: opacity 0.2s, filter 0.2s;
+}
+
+/* Opacidad para el icono de editar (que no tiene color) */
+.card-actions-grid .icon-button .icon-edit {
+    opacity: 0.7;
+}
+
+
+.card-actions-grid .icon-button:hover img {
+    opacity: 1;
+}
+
+/* --- INICIO: Colores de Iconos (Filtros) --- */
+/* Estos filtros asumen que el icono original es NEGRO.
+  Si tus iconos son de otro color, los filtros pueden no funcionar.
+  
+  Generador de filtros (para iconos negros):
+  - Azul (var(--primary-blue) -> #3A86FF): filter: invert(48%) sepia(87%) saturate(2311%) hue-rotate(204deg) brightness(101%) contrast(101%);
+  - Verde (var(--success-color) -> #25D366): filter: invert(66%) sepia(51%) saturate(934%) hue-rotate(93deg) brightness(91%) contrast(86%);
+  - Rojo (var(--danger-color) -> #dc3545): filter: invert(30%) sepia(61%) saturate(2118%) hue-rotate(331deg) brightness(92%) contrast(88%);
+*/
+
+.card-actions-grid .icon-phone {
+    /* Azul: var(--primary-blue) */
+    filter: invert(48%) sepia(87%) saturate(2311%) hue-rotate(204deg) brightness(101%) contrast(101%);
+}
+
+.card-actions-grid .icon-whatsapp {
+    /* Verde: var(--success-color) */
+    filter: invert(66%) sepia(51%) saturate(934%) hue-rotate(93deg) brightness(91%) contrast(86%);
+}
+
+.card-actions-grid .icon-delete {
+    /* Rojo: var(--danger-color) */
+    filter: invert(30%) sepia(61%) saturate(2118%) hue-rotate(331deg) brightness(92%) contrast(88%);
+}
+/* --- FIN: Colores de Iconos --- */
+
+
+/* --- INICIO: Corrección Insignia Emergencia --- */
+.tag {
+    /* Estilos base para todas las insignias .tag */
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.tag-emergency {
+    /* Estilos específicos para la insignia de emergencia */
+    background-color: var(--danger-light-bg);
+    color: var(--danger-light-text);
+    border: 1px solid var(--danger-light-border);
+}
+/* --- FIN: Corrección Insignia Emergencia --- */
+/* ===== FIN: Estilos para Agenda ===== */
 
