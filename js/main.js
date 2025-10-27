@@ -1,13 +1,26 @@
 /* --- js/main.js --- */
 import { store } from './store.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    /* ... (Código inicial sin cambios: lucide, body, appShell, appContent) ... */
+// Convertimos el listener principal en async para poder usar 'await'
+document.addEventListener('DOMContentLoaded', async () => {
+    /* ... (Código inicial sin cambios: lucide) ... */
     if (window.lucide) { try { lucide.createIcons(); } catch(e){} }
+    
+    // Referencias a elementos clave
     const body = document.body;
     const appShell = document.querySelector('.app-shell');
     const appContent = document.getElementById('app-content');
+    
+    // ===== INICIO: Modificación Splash Screen =====
+    // Obtenemos la referencia al splash screen
+    const splashScreen = document.getElementById('splash-screen');
+    // ===== FIN: Modificación Splash Screen =====
+
     if (!body || !appShell || !appContent) { console.error("Elementos base faltan!"); return; }
+    
+    // Esta línea es la original tuya, la dejamos.
+    // Quita el .hidden del body, lo que muestra el splash (que está en z-index alto)
+    // y la app (que está detrás del splash).
     body.classList.remove('hidden');
 
     /* --- Lógica del Router (BASADA EN TU ARCHIVO FUNCIONAL) --- */
@@ -82,25 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     /* --- (Resto de listeners sin cambios) --- */
     /* ... (código idéntico al anterior) ... */
-    // --- ARREGLO: Mover Lógica de Modales a delegación de eventos ---
     const aboutModal = document.getElementById('about-modal'); 
     const reportModal = document.getElementById('report-modal'); 
     
     function openModal(modal) { modal?.classList.remove('hidden'); } 
     function closeModalOnClick(modal) { modal?.classList.add('hidden'); } 
     
-    // Quitar listeners antiguos
-    // const aboutBtn = document.getElementById('about-btn'); 
-    // const reportBtn = document.getElementById('report-btn'); 
-    // aboutBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); }); 
-    // reportBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); }); 
-    
     document.querySelectorAll('.close-modal-btn').forEach(btn => { btn.addEventListener('click', () => { const modalToClose = btn.closest('.modal-overlay'); closeModalOnClick(modalToClose); }); }); 
     const reportForm = document.getElementById('report-form'); reportForm?.addEventListener('submit', (e) => { e.preventDefault(); const textElement = document.getElementById('report-text'); const text = textElement ? textElement.value : ''; window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte MedicalHome&body=${encodeURIComponent(text)}`; closeModalOnClick(reportModal); });
     const collapseBtn = document.querySelector('.collapse-btn'); if (collapseBtn) { collapseBtn.addEventListener('click', () => { appShell?.classList.toggle('collapsed'); const isCollapsed = appShell?.classList.contains('collapsed'); collapseBtn.setAttribute('aria-expanded', !isCollapsed); }); }
-    
-    // Quitar listener de accordion antiguo
-    // document.body.addEventListener('click', (e) => { const accordionToggle = e.target.closest('.accordion-toggle'); if (accordionToggle) { e.preventDefault(); const parentItem = accordionToggle.closest('.nav-item-accordion'); parentItem?.classList.toggle('open'); } });
     
     const mobileMenuBtn = document.getElementById('mobile-menu-btn'); 
     const mobileMenuModal = document.getElementById('mobile-menu-modal'); 
@@ -116,23 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     const clonedNav = desktopNav.cloneNode(true); 
                     mobileMenuContent.appendChild(clonedNav); 
                     
-                    // --- ARREGLO: Clonar también el Footer ---
                     const desktopFooter = document.querySelector('.sidebar-nav > .sidebar-footer');
                     if (desktopFooter) {
                         const clonedFooter = desktopFooter.cloneNode(true);
-                        mobileMenuContent.appendChild(clonedFooter);
+                        mobileMenuContent.appendChild(clonedFooter); 
                         
-                        // --- ARREGLO: Re-enganchar listener del theme toggle clonado ---
                         const mobileToggle = clonedFooter.querySelector('#theme-toggle-desktop');
                         if (mobileToggle) {
-                            mobileToggle.id = 'theme-toggle-mobile'; // Darle un nuevo ID
+                            mobileToggle.id = 'theme-toggle-mobile'; 
                             mobileToggle.addEventListener('change', () => {
                                 body.classList.toggle('dark-theme');
                                 localStorage.setItem('theme', mobileToggle.checked ? 'dark' : 'light');
                             });
                         }
                     }
-                    // --- FIN ARREGLO ---
                     
                     isMenuCloned = true; 
                 } catch (error) { console.error("Error clonando menú:", error); } 
@@ -144,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (mobileMenuContent) { 
             mobileMenuContent.addEventListener('click', (e) => { 
-                // --- ARREGLO: No cerrar el modal si se hace click en un accordion ---
                 if (e.target.closest('a') && !e.target.closest('.accordion-toggle')) {
                     mobileMenuModal.classList.add('hidden'); 
                 }
@@ -165,13 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     }
     
-    // Quitar listener de share antiguo
-    // document.querySelectorAll('a[href="#share"]').forEach(shareLink => { ... });
-
-    // --- ARREGLO: Listener de BODY para delegación de eventos ---
-    // Esto maneja clicks en botones de PC y Móvil (clonados)
     document.body.addEventListener('click', async (e) => {
-        // 1. Lógica de Modales
         const aboutBtn = e.target.closest('#about-btn');
         const reportBtn = e.target.closest('#report-btn');
 
@@ -185,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal(reportModal);
         }
         
-        // 2. Lógica de Accordion
         const accordionToggle = e.target.closest('.accordion-toggle');
         if (accordionToggle) {
             e.preventDefault();
@@ -193,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
             parentItem?.classList.toggle('open');
         }
 
-        // 3. Lógica de Compartir
         const shareLink = e.target.closest('a[href="#share"]');
         if (shareLink) {
             e.preventDefault();
@@ -204,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 try { 
                     await navigator.clipboard.writeText(shareData.url); 
-                    // No usar alert, reemplazar con un modal custom si es posible
                     console.log('¡Enlace copiado!'); 
                 } catch (err) { 
                     console.error('No se pudo compartir.'); 
@@ -212,10 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    // --- FIN ARREGLO ---
 
     
-    // --- SOLUCIÓN: Actualizar Sidebar al Cargar ---
     try {
         const profile = store.getProfile();
         if (profile) {
@@ -225,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarAvatar.src = profile.avatar || 'images/avatar.png';
             }
             if (sidebarUsername) {
-                // Limitar el nombre si es muy largo (opcional, pero buena idea)
                 const name = profile.fullName ? profile.fullName.split(' ')[0] : 'Invitado';
                 sidebarUsername.textContent = `Hola, ${name}`;
             }
@@ -233,7 +220,34 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         console.error("Error al actualizar sidebar en main.js:", e);
     }
-    // --- FIN SOLUCIÓN ---
 
-    handleNavigation(); // Carga inicial
+
+    // ===== INICIO: Modificación Splash Screen =====
+    // Reemplazamos la llamada original 'handleNavigation();' por esta lógica.
+    try {
+        // 1. Esperamos a que la navegación inicial (cargar dashboard) termine.
+        await handleNavigation(); 
+    } catch (e) {
+        console.error("Error en la carga inicial:", e);
+        // Ocultamos el splash igualmente para no bloquear al usuario.
+    } finally {
+        // 2. Una vez cargado, ocultamos el splash.
+        // Damos un breve retraso para que la animación de la barra sea visible.
+        setTimeout(() => {
+            if (splashScreen) {
+                splashScreen.classList.add('hidden');
+                // Opcional: Eliminar el splash del DOM después de la transición
+                splashScreen.addEventListener('transitionend', () => {
+                    try {
+                        splashScreen.remove();
+                    } catch(e) {
+                        // El elemento podría no existir, ignorar error.
+                    }
+                }, { once: true });
+            }
+        }, 1000); // 1 segundo de retraso. Ajusta este valor si quieres.
+    }
+    // ===== FIN: Modificación Splash Screen =====
+
 });
+
