@@ -1,43 +1,49 @@
 /* --- Variables de Color y Base --- */
 :root {
     --primary-blue: #3A86FF;
+    /* --- MEJORA: Color primario más oscuro para hover --- */
     --primary-blue-dark: #3171e0; 
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F4F7F9; /* Usaré este como fondo azul claro del splash */
+    --bg-secondary: #F4F7F9;
     --text-primary: #1A202C;
-    --text-secondary: #4A5568; /* Usaré este para el texto "Cargando..." */
-    --border-color: #E2E8F0; /* Usaré este para el fondo de la barra de progreso */
+    --text-secondary: #4A5568;
+    --border-color: #E2E8F0;
     --shadow-color: rgba(0, 0, 0, 0.05);
     --sidebar-width: 240px;
     --sidebar-width-collapsed: 70px;
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-    /* --- INICIO: Colores añadidos para iconos y tags --- */
+    
+    /* --- INICIO: Colores añadidos para iconos --- */
     --success-color: #25D366; /* Verde WhatsApp */
     --danger-color: #dc3545;  /* Rojo Borrar */
+    
+    /* --- INICIO: Colores para insignia "Emergencia" (Rojo Claro) --- */
     --danger-light-text: #c53030;
     --danger-light-bg: #fff5f5;
     --danger-light-border: #f7d4d6;
-    /* --- FIN: Colores añadidos --- */
+    /* --- FIN: Colores para insignia "Emergencia" --- */
 }
 
 body.dark-theme {
     --primary-blue: #5a9bff;
+    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
     --primary-blue-dark: #4a88f0;
     --bg-primary: #1A202C;
-    --bg-secondary: #2D3748; /* Fondo del splash en modo oscuro */
+    --bg-secondary: #2D3748;
     --text-primary: #F7FAFC;
-    --text-secondary: #A0AEC0; /* Texto "Cargando..." en modo oscuro */
-    --border-color: #4A5568; /* Fondo de la barra en modo oscuro */
+    --text-secondary: #A0AEC0;
+    --border-color: #4A5568;
     --shadow-color: rgba(0, 0, 0, 0.2);
 
-    /* --- INICIO: Colores añadidos (dark) --- */
+    /* --- INICIO: Colores añadidos para iconos (dark) --- */
     --success-color: #30e070; /* Verde WhatsApp (más brillante) */
     --danger-color: #e84a5a;  /* Rojo Borrar (más brillante) */
+
+    /* --- INICIO: Colores para insignia "Emergencia" (Dark) --- */
     --danger-light-text: #fc8181;
     --danger-light-bg: #4d2f2f;
     --danger-light-border: #7a4a4a;
-    /* --- FIN: Colores añadidos (dark) --- */
+    /* --- FIN: Colores para insignia "Emergencia" --- */
 }
 
 /* --- Reseteo y Estilos Globales --- */
@@ -599,16 +605,16 @@ body.dark-theme .info-box-ocular {
 }
 /* === FIN SOLUCIÓN === */
 
-/* === SOLUCIÓN: Iconos en Modo Oscuro === */
-
+/* --- INICIO: CORRECCIÓN DE FILTRO DE ICONOS EN MODO OSCURO --- */
 /*
-  Esto selecciona todas las imágenes en modo oscuro
-  cuya ruta (src) contenga "images/icons/".
-  No afectará a tus fotos de perfil o imágenes de estado vacío.
+  Invierte todos los iconos en modo oscuro, EXCEPTO los iconos
+  de la agenda que tienen color personalizado.
 */
-body.dark-theme img[src*="images/icons/"] {
+body.dark-theme img[src*="images/icons/"]:not(.icon-phone):not(.icon-whatsapp):not(.icon-delete) {
     filter: invert(1);
 }
+/* --- FIN: CORRECCIÓN DE FILTRO DE ICONOS EN MODO OSCURO --- */
+
 
 /*
   Asegura que los iconos en botones activos (que ya son blancos
@@ -771,62 +777,88 @@ body, .modal-content, .nav-links {
 .card-actions-grid .icon-button img {
     width: 20px; /* Tamaño de los iconos de la grid */
     height: 20px;
-    /* Opacidad base para los iconos de color */
-    opacity: 0.8; 
-    transition: opacity 0.2s, filter 0.2s;
-}
-
-/* Opacidad para el icono de editar (que no tiene color) */
-.card-actions-grid .icon-button .icon-edit {
     opacity: 0.7;
+    transition: all 0.2s; /* Transición para opacidad y filtro */
 }
-
 
 .card-actions-grid .icon-button:hover img {
     opacity: 1;
 }
 
-/* --- INICIO: Colores de Iconos (Filtros) --- */
-/* Estos filtros asumen que el icono original es NEGRO.
-  Si tus iconos son de otro color, los filtros pueden no funcionar.
-  
-  Generador de filtros (para iconos negros):
-  - Azul (var(--primary-blue) -> #3A86FF): filter: invert(48%) sepia(87%) saturate(2311%) hue-rotate(204deg) brightness(101%) contrast(101%);
-  - Verde (var(--success-color) -> #25D366): filter: invert(66%) sepia(51%) saturate(934%) hue-rotate(93deg) brightness(91%) contrast(86%);
-  - Rojo (var(--danger-color) -> #dc3545): filter: invert(30%) sepia(61%) saturate(2118%) hue-rotate(331deg) brightness(92%) contrast(88%);
+/* --- INICIO: Corrección de Colores de Iconos --- */
+/* Usamos filtros CSS para 'colorear' los iconos.
+  Estos generadores ayudan: https://codepen.io/sosuke/pen/Pjoqqp
 */
 
-.card-actions-grid .icon-phone {
-    /* Azul: var(--primary-blue) */
-    filter: invert(48%) sepia(87%) saturate(2311%) hue-rotate(204deg) brightness(101%) contrast(101%);
+/* Icono Editar (Gris/Negro por defecto) */
+.icon-edit {
+    /* No necesita filtro, usa el color base (o invert(1) en dark mode) */
 }
 
-.card-actions-grid .icon-whatsapp {
-    /* Verde: var(--success-color) */
-    filter: invert(66%) sepia(51%) saturate(934%) hue-rotate(93deg) brightness(91%) contrast(86%);
+/* Icono Borrar (Rojo) */
+.icon-delete {
+    /* Filtro para --danger-color: #dc3545 */
+    filter: invert(30%) sepia(80%) saturate(2586%) hue-rotate(330deg) brightness(93%) contrast(93%);
+    opacity: 0.8;
+}
+.icon-delete:hover {
+    opacity: 1;
 }
 
-.card-actions-grid .icon-delete {
-    /* Rojo: var(--danger-color) */
-    filter: invert(30%) sepia(61%) saturate(2118%) hue-rotate(331deg) brightness(92%) contrast(88%);
+/* Icono Teléfono (Azul) */
+.icon-phone {
+    /* Filtro para --primary-blue: #3A86FF */
+    filter: invert(48%) sepia(76%) saturate(3475%) hue-rotate(206deg) brightness(101%) contrast(101%);
+    opacity: 0.8;
 }
-/* --- FIN: Colores de Iconos --- */
+.icon-phone:hover {
+    opacity: 1;
+}
+
+/* Icono WhatsApp (Verde) */
+.icon-whatsapp {
+    /* Filtro para --success-color: #25D366 */
+    filter: invert(57%) sepia(96%) saturate(664%) hue-rotate(93deg) brightness(93%) contrast(88%);
+    opacity: 0.8;
+}
+.icon-whatsapp:hover {
+    opacity: 1;
+}
+
+/*
+  Sobreescribimos los filtros en modo oscuro para que coincidan
+  con las variables de color más brillantes del dark-theme.
+*/
+body.dark-theme .icon-delete {
+    /* Filtro para --danger-color (dark): #e84a5a */
+    filter: invert(45%) sepia(35%) saturate(3015%) hue-rotate(317deg) brightness(94%) contrast(92%);
+}
+
+body.dark-theme .icon-phone {
+    /* Filtro para --primary-blue (dark): #5a9bff */
+    filter: invert(61%) sepia(50%) saturate(2670%) hue-rotate(193deg) brightness(102%) contrast(100%);
+}
+
+body.dark-theme .icon-whatsapp {
+    /* Filtro para --success-color (dark): #30e070 */
+    filter: invert(70%) sepia(54%) saturate(928%) hue-rotate(90deg) brightness(94%) contrast(88%);
+}
 
 
-/* --- INICIO: Corrección Insignia Emergencia --- */
-.tag {
-    /* Estilos base para todas las insignias .tag */
+/* --- INICIO: Corrección Insignia "Emergencia" --- */
+/* Esta regla es más específica que el estilo en línea
+  que inyecta agenda.js, por lo que lo sobreescribe.
+*/
+.summary-card .tag-emergency {
+    background-color: var(--danger-light-bg) !important;
+    color: var(--danger-light-text) !important;
+    border: 1px solid var(--danger-light-border) !important;
+    font-weight: 500 !important;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
     font-size: 0.8rem;
-    font-weight: 500;
+    border-radius: 6px;
+    display: inline-block;
 }
-.tag-emergency {
-    /* Estilos específicos para la insignia de emergencia */
-    background-color: var(--danger-light-bg);
-    color: var(--danger-light-text);
-    border: 1px solid var(--danger-light-border);
-}
-/* --- FIN: Corrección Insignia Emergencia --- */
+/* --- FIN: CorreScción Insignia "Emergencia" --- */
 /* ===== FIN: Estilos para Agenda ===== */
 
