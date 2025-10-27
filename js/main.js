@@ -1,16 +1,18 @@
 /* --- js/main.js --- */
 import { store } from './store.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ===== INICIO: Lógica del Splash (Añadida) =====
-    const splashScreen = document.getElementById('splash-screen');
-    // ===== FIN: Lógica del Splash =====
-
+document.addEventListener('DOMContentLoaded', async () => { // Convertido a async
     /* ... (Código inicial sin cambios: lucide, body, appShell, appContent) ... */
     if (window.lucide) { try { lucide.createIcons(); } catch(e){} }
     const body = document.body;
     const appShell = document.querySelector('.app-shell');
     const appContent = document.getElementById('app-content');
+    
+    // --- INICIO: Corrección Splash Screen ---
+    // Obtener referencia al splash screen
+    const splashScreen = document.getElementById('splash-screen');
+    // --- FIN: Corrección Splash Screen ---
+
     if (!body || !appShell || !appContent) { console.error("Elementos base faltan!"); return; }
     body.classList.remove('hidden');
 
@@ -42,7 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
          if (route) {
              try {
-                 const response = await fetch(route.template);
+                 // --- INICIO: Corrección Carga Resumen Dashboard ---
+                 // Añadimos un cache-buster a los templates HTML
+                 const response = await fetch(`${route.template}?v=${Date.now()}`);
+                 // --- FIN: Corrección Carga Resumen Dashboard ---
                  if (!response.ok) throw new Error(`Plantilla no encontrada: ${route.template}`);
                  content = await response.text();
                  appContent.innerHTML = content; // Inyectar HTML
@@ -50,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (route.script) {
                      try {
                          const modulePath = route.script; 
+                         // Añadimos cache-buster a los scripts también
                          const pageModule = await import(modulePath + `?v=${Date.now()}`);
                          
                          setTimeout(() => {
@@ -197,24 +203,69 @@ document.addEventListener('DOMContentLoaded', () => {
             parentItem?.classList.toggle('open');
         }
 
-        // 3. Lógica de Compartir
+        // --- INICIO: Lógica de Compartir Mejorada ---
         const shareLink = e.target.closest('a[href="#share"]');
         if (shareLink) {
             e.preventDefault();
-            const shareData = { title: 'MedicalHome', text: '¡Descubre MedicalHome!', url: window.location.origin };
+            
+            const shareTitle = 'MedicalHome';
+            const shareText = '¡Descubre MedicalHome, tu asistente de salud personal!';
+            const shareUrl = window.location.origin;
+
             if (navigator.share) {
-                try { await navigator.share(shareData); } 
-                catch (err) { console.error('Error share:', err); }
+                let imageFile = null;
+                try {
+                    // 1. Intentar cargar la imagen
+                    const response = await fetch('images/social-preview.svg');
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        imageFile = new File([blob], 'social-preview.svg', { type: 'image/svg+xml' });
+                    } else {
+                        throw new Error('Image fetch failed');
+                    }
+                } catch (fetchErr) {
+                    console.warn("No se pudo cargar la imagen social-preview.svg:", fetchErr);
+                    imageFile = null;
+                }
+
+                try {
+                    const shareData = {
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl,
+                    };
+
+                    if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+                        // 2. Intentar compartir con imagen
+                        shareData.files = [imageFile];
+                        await navigator.share(shareData);
+                    } else {
+                        // 3. Compartir solo texto (fallback si no se puede compartir archivos o falló la carga)
+                        await navigator.share({
+                            title: shareTitle,
+                            text: shareText,
+                            url: shareUrl
+                        });
+                    }
+                } catch (err) {
+                    // Ignorar errores AbortError (el usuario canceló)
+                    if (err.name !== 'AbortError') {
+                        console.error('Error al usar navigator.share:', err);
+                    }
+                }
+
             } else {
+                // 4. Fallback para navegadores sin API de Share (ej. PC)
                 try { 
-                    await navigator.clipboard.writeText(shareData.url); 
-                    // No usar alert, reemplazar con un modal custom si es posible
-                    console.log('¡Enlace copiado!'); 
+                    await navigator.clipboard.writeText(shareUrl);
+                    // NO USAR ALERT.
+                    console.log('¡Enlace copiado al portapapeles!');
                 } catch (err) { 
-                    console.error('No se pudo compartir.'); 
+                    console.error('No se pudo copiar el enlace.'); 
                 }
             }
         }
+        // --- FIN: Lógica de Compartir Mejorada ---
     });
     // --- FIN ARREGLO ---
 
@@ -239,15 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- FIN SOLUCIÓN ---
 
-    handleNavigation(); // Carga inicial
+    await handleNavigation(); // Carga inicial
 
-    // ===== INICIO: Lógica del Splash (Añadida al final) =====
-    // Da 1.5 segundos para que la animación CSS se vea
-    setTimeout(() => {
-        if (splashScreen) {
+    // --- INICIO: Corrección Splash Screen ---
+    // Ocultar el splash DESPUÉS de que la navegación inicial se complete
+    if (splashScreen) {
+        // Damos un tiempo extra para que la animación de la barra se vea
+        setTimeout(() => {
             splashScreen.classList.add('hidden');
-        }
-    }, 1500); // 1.5 segundos
-    // ===== FIN: Lógica del Splash =====
+        }, 500); // 500ms de retraso
+    }
+    // --- FIN: Corrección Splash Screen ---
 });
 
