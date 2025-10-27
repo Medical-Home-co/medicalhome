@@ -210,15 +210,15 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
             
             const shareTitle = 'MedicalHome';
             const shareText = '¡Descubre MedicalHome, tu asistente de salud personal!';
-            // Usamos window.location.origin para obtener la URL base (ej: https://app.medicalhome.com)
-            // Y nos aseguramos de que no tenga un hash (#) al final
+            // --- INICIO: Corrección - Re-agregamos la URL ---
             const shareUrl = window.location.origin + window.location.pathname;
+            // --- FIN: Corrección - Re-agregamos la URL ---
 
 
             if (navigator.share) {
                 let imageFile = null;
                 try {
-                    // 1. Intentar cargar la imagen (Cambiado a la URL absoluta de GitHub)
+                    // 1. Intentar cargar la imagen desde la URL absoluta
                     const response = await fetch('https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true');
                     if (response.ok) {
                         const blob = await response.blob();
@@ -232,11 +232,13 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
                 }
 
                 try {
+                    // --- INICIO: Corrección - Re-agregamos la URL ---
                     const shareData = {
                         title: shareTitle,
                         text: shareText,
-                        url: shareUrl,
+                        url: shareUrl, // Propiedad URL re-agregada
                     };
+                    // --- FIN: Corrección - Re-agregamos la URL ---
 
                     if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
                         // 2. Intentar compartir con imagen
@@ -247,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
                         await navigator.share({
                             title: shareTitle,
                             text: shareText,
-                            url: shareUrl
+                            url: shareUrl // Propiedad URL re-agregada
                         });
                     }
                 } catch (err) {
@@ -259,13 +261,15 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
 
             } else {
                 // 4. Fallback para navegadores sin API de Share (ej. PC)
+                // --- INICIO: Corrección - Volvemos a copiar la URL ---
                 try { 
-                    await navigator.clipboard.writeText(shareUrl);
+                    await navigator.clipboard.writeText(shareUrl); // Copiamos la URL
                     // NO USAR ALERT.
-                    console.log('¡Enlace copiado al portapapeles!');
+                    console.log('¡Enlace de la app copiado al portapapeles!');
                 } catch (err) { 
                     console.error('No se pudo copiar el enlace.'); 
                 }
+                // --- FIN: Corrección - Volvemos a copiar la URL ---
             }
         }
         // --- FIN: Lógica de Compartir Mejorada ---
