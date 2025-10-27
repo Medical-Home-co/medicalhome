@@ -29,9 +29,16 @@ function renderAgendaList() {
             card.className = 'summary-card';
             card.style.padding = '1rem';
             
-            /* Indicador visual si es de emergencia */
+            // --- CORRECCIÓN: Usar una clase CSS en lugar de estilo en línea ---
             const emergencyBadge = contact.isEmergency ? 
-                '<span class="tag" style="background-color: var(--danger-light); color: var(--danger-color); border: 1px solid var(--danger-color); font-weight: 500;">Emergencia</span>' : '';
+                '<span class="tag tag-emergency">Emergencia</span>' : '';
+            
+            // Sanitizar número para enlaces
+            const cleanPhone = contact.phone.replace(/[^0-9+]/g, '');
+            const phoneLink = `tel:${cleanPhone}`;
+            // Asumir un código de país si no está (ej. 57 para Colombia)
+            const whatsappPhone = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : (cleanPhone.length > 8 ? cleanPhone : `57${cleanPhone}`);
+            const whatsappLink = `https://wa.me/${whatsappPhone}`;
 
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -40,10 +47,25 @@ function renderAgendaList() {
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">${contact.relation}</p>
                         <p style="font-size: 1rem; font-weight: 500; margin-top: 0.5rem; color: var(--primary-blue);">${contact.phone}</p>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                         <button class="icon-button edit-contact-btn" data-id="${contact.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                         <button class="icon-button delete-contact-btn" data-id="${contact.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
+                    
+                    <!-- INICIO: Contenedor de acciones con clases añadidas -->
+                    <div class="card-actions-grid">
+                        <button class="icon-button edit-contact-btn" data-id="${contact.id}">
+                            <img src="images/icons/edit.svg" alt="Editar" class="icon-edit">
+                        </button>
+                        <button class="icon-button delete-contact-btn" data-id="${contact.id}">
+                            <img src="images/icons/trash-2.svg" alt="Eliminar" class="icon-delete">
+                        </button>
+                        
+                        <a href="${phoneLink}" class="icon-button" aria-label="Llamar">
+                            <img src="images/icons/phone.svg" alt="Llamar" class="icon-phone">
+                        </a>
+                        <a href="${whatsappLink}" class="icon-button" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                            <img src="images/icons/whatsapp.svg" alt="WhatsApp" class="icon-whatsapp">
+                        </a>
                     </div>
+                    <!-- FIN: Contenedor de acciones -->
+
                 </div>
                 ${emergencyBadge ? `<div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem;">${emergencyBadge}</div>` : ''}
             `;
@@ -55,6 +77,7 @@ function renderAgendaList() {
 
 /* --- Funciones del Modal --- */
 function openFormModal(contact = null) {
+// ... (código existente sin cambios) ...
     const formModal = document.getElementById('agenda-form-modal');
     const form = document.getElementById('agenda-form');
     const formTitle = document.getElementById('agenda-form-title');
@@ -87,6 +110,7 @@ function closeFormModal() {
 
 /* --- Listener de Envío de Formulario --- */
 function handleFormSubmit(e) {
+// ... (código existente sin cambios) ...
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
@@ -116,6 +140,7 @@ function handleFormSubmit(e) {
 
 /* --- Asignar Listeners (Editar/Eliminar) --- */
 function attachEventListeners() {
+// ... (código existente sin cambios) ...
     const listContainer = document.getElementById('agenda-list-container');
     if (!listContainer) return;
     const newContainer = listContainer.cloneNode(true);
@@ -131,6 +156,7 @@ function attachEventListeners() {
             if (contactToEdit) openFormModal(contactToEdit);
         } else if (deleteBtn) {
             const entryId = parseInt(deleteBtn.dataset.id, 10);
+            // Reemplazar confirm por un modal custom en el futuro
             if (confirm("¿Eliminar este contacto?")) {
                 currentAgendaData = currentAgendaData.filter(c => c.id !== entryId);
                 store.saveAgenda(currentAgendaData);
@@ -142,6 +168,7 @@ function attachEventListeners() {
 
 /* --- Función Principal --- */
 export function init() {
+// ... (código existente sin cambios) ...
     console.log("Cargado js/pages/agenda.js");
     currentAgendaData = store.getAgenda() || []; // Cargar datos del store
 
@@ -167,3 +194,4 @@ export function init() {
     attachEventListeners(); // Listeners para tarjetas
     renderAgendaList(); // Renderizado inicial
 }
+
