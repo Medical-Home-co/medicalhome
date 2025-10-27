@@ -210,21 +210,24 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
             
             const shareTitle = 'MedicalHome';
             const shareText = '¡Descubre MedicalHome, tu asistente de salud personal!';
-            const shareUrl = window.location.origin;
+            // Usamos window.location.origin para obtener la URL base (ej: https://app.medicalhome.com)
+            // Y nos aseguramos de que no tenga un hash (#) al final
+            const shareUrl = window.location.origin + window.location.pathname;
+
 
             if (navigator.share) {
                 let imageFile = null;
                 try {
-                    // 1. Intentar cargar la imagen
-                    const response = await fetch('images/social-preview.svg');
+                    // 1. Intentar cargar la imagen (Cambiado a la URL absoluta de GitHub)
+                    const response = await fetch('https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true');
                     if (response.ok) {
                         const blob = await response.blob();
-                        imageFile = new File([blob], 'social-preview.svg', { type: 'image/svg+xml' });
+                        imageFile = new File([blob], 'social-preview.png', { type: 'image/png' });
                     } else {
                         throw new Error('Image fetch failed');
                     }
                 } catch (fetchErr) {
-                    console.warn("No se pudo cargar la imagen social-preview.svg:", fetchErr);
+                    console.warn("No se pudo cargar la imagen social-preview.png:", fetchErr);
                     imageFile = null;
                 }
 
