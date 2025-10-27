@@ -1,7 +1,8 @@
 // --- js/perfil.js ---
 
-import { store } from './store.js';
-import { requestNotificationPermission } from './notifications.js';
+// CORRECCIÓN: Se usa '../' para subir un nivel y encontrar los módulos en la carpeta js/
+import { store } from '../store.js';
+import { requestNotificationPermission } from '../notifications.js';
 
 let tempProfileData = null; 
 let avatarDataUrl = null;
