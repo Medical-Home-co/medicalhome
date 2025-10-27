@@ -1,13 +1,12 @@
 /* --- Variables de Color y Base --- */
 :root {
     --primary-blue: #3A86FF;
-    /* --- MEJORA: Color primario más oscuro para hover --- */
     --primary-blue-dark: #3171e0; 
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F4F7F9;
+    --bg-secondary: #F4F7F9; /* Usaré este como fondo azul claro del splash */
     --text-primary: #1A202C;
-    --text-secondary: #4A5568;
-    --border-color: #E2E8F0;
+    --text-secondary: #4A5568; /* Usaré este para el texto "Cargando..." */
+    --border-color: #E2E8F0; /* Usaré este para el fondo de la barra de progreso */
     --shadow-color: rgba(0, 0, 0, 0.05);
     --sidebar-width: 240px;
     --sidebar-width-collapsed: 70px;
@@ -16,22 +15,20 @@
 
 body.dark-theme {
     --primary-blue: #5a9bff;
-    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
     --primary-blue-dark: #4a88f0;
     --bg-primary: #1A202C;
-    --bg-secondary: #2D3748;
+    --bg-secondary: #2D3748; /* Fondo del splash en modo oscuro */
     --text-primary: #F7FAFC;
-    --text-secondary: #A0AEC0;
-    --border-color: #4A5568;
+    --text-secondary: #A0AEC0; /* Texto "Cargando..." en modo oscuro */
+    --border-color: #4A5568; /* Fondo de la barra en modo oscuro */
     --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
 /* --- Reseteo y Estilos Globales --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* --- MEJORA: Tipografía base y suavizado de fuentes --- */
 html {
-    font-size: 16px; /* Establece una base consistente */
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -42,7 +39,7 @@ body {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     transition: background-color 0.2s, color 0.2s;
-    line-height: 1.5; /* Mejora la legibilidad */
+    line-height: 1.5;
 }
 body.hidden { visibility: hidden; }
 a { text-decoration: none; color: inherit; }
@@ -50,7 +47,6 @@ button { background: none; border: none; cursor: pointer; }
 ul { list-style: none; }
 .hidden { display: none !important; }
 
-/* --- MEJORA: Clase de utilidad para accesibilidad (Screen Reader Only) --- */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -64,10 +60,7 @@ ul { list-style: none; }
 }
 
 
-/* * ============================================
- * ESTRATEGIA RESPONSIVA: UNIDADES FLUIDAS
- * ============================================
- */
+/* --- Modales --- */
 .modal-overlay {
     position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
     display: flex; justify-content: center; align-items: center; z-index: 1000;
@@ -78,10 +71,10 @@ ul { list-style: none; }
     padding: 2rem; 
     border-radius: 12px;
     width: 90%; 
-    max-width: 500px; /* Perfecto: 'max-width' para PC */
+    max-width: 500px;
     text-align: left;
-    max-height: 90vh; /* Límite de altura */
-    overflow-y: auto; /* Activa el scroll si es necesario */
+    max-height: 90vh;
+    overflow-y: auto;
 }
 .modal-logo { width: 60px; height: 60px; margin: 0 auto 1rem; }
 .modal-icon { width: 48px; height: 48px; margin: 0 auto 1rem; color: var(--primary-blue);}
@@ -94,11 +87,9 @@ ul { list-style: none; }
     background-color: var(--bg-secondary); border: 1px solid var(--border-color);
     border-radius: 8px; padding: 0.75rem; min-height: 120px;
     font-family: inherit; font-size: 1rem; color: var(--text-primary);
-    /* --- MEJORA: Transición para foco --- */
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* --- MEJORA: Estilo de foco para Textarea (Accesibilidad) --- */
 .modal-form textarea:focus,
 .modal-form textarea:focus-visible {
     border-color: var(--primary-blue);
@@ -107,19 +98,17 @@ ul { list-style: none; }
 }
 
 
-/* --- Componentes Genéricos --- */
+/* --- Componentes Genéricos (Botones, etc.) --- */
 .button { 
     padding: 0.75rem 1rem; 
     border-radius: 8px; 
     font-weight: 600; 
     transition: all 0.2s; 
-    /* --- MEJORA: Asegurar que el texto no se parta --- */
     white-space: nowrap; 
 }
 .button-primary { background-color: var(--primary-blue); color: white; }
 .button-secondary { background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
 
-/* --- MEJORA: Interactividad de botones (Hover y Active) --- */
 .button-primary:hover {
     background-color: var(--primary-blue-dark);
 }
@@ -127,16 +116,12 @@ ul { list-style: none; }
     background-color: var(--border-color);
 }
 .button:active {
-    /* --- MEJORA: Efecto de "click" --- */
     transform: scale(0.98);
 }
-
-/* --- MEJORA: Accesibilidad (Foco visible para botones) --- */
 .button:focus-visible {
     outline: 3px solid var(--primary-blue);
     outline-offset: 2px;
 }
-
 
 .checkbox-label { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer; justify-content: center; }
 
@@ -144,14 +129,12 @@ ul { list-style: none; }
 .app-shell { display: flex; }
 .main-content {
     flex-grow: 1; 
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     padding: 1.5rem; 
     margin-left: var(--sidebar-width);
     transition: margin-left 0.3s ease;
 }
 .content-header {
     display: flex; justify-content: space-between; align-items: center;
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     margin-bottom: 1rem;
 }
 .content-logo {
@@ -168,37 +151,26 @@ ul { list-style: none; }
     font-size: 0.65rem; font-weight: 700;
 }
 
-/* * ============================================
- * ESTRATEGIA RESPONSIVA: GRID FLUIDO
- * ============================================
- */
 .content-grid {
     display: grid;
-    /* --- MEJORA: Asegurar un mínimo de 300px, ideal para móviles --- */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     gap: 1rem;
 }
-/*-- para poner el boton al frente del titulo--*/
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     margin-bottom: 1rem; 
 }
-/*-----------------*/
 .summary-card {
     display: block; background-color: var(--bg-primary); border-radius: 12px;
     border: 1px solid var(--border-color); 
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     padding: 1rem;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .summary-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px var(--shadow-color); }
 .card-title {
     font-size: 1.1rem; font-weight: 600; 
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     margin-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color); 
     padding-bottom: 0.5rem;
@@ -227,35 +199,25 @@ ul { list-style: none; }
     font-weight: 600;
 }
 .page-form-body {
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     padding: 1rem;
 }
 .form-section-title {
     font-size: 1rem;
     font-weight: 600;
     color: var(--primary-blue);
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
 }
-/* * Esta regla también es responsiva. 
- * 'minmax(250px, 1fr)' crea columnas de 250px que se 
- * ajustan automáticamente. ¡Perfecto!
- */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     gap: 0.75rem;
 }
 
-/* --- MEJORA: Grid específico de 2 columnas --- */
-/* Úsalo para agrupar 'Fecha' y 'Hora', o 'Condiciones Médicas' */
 .grid-2-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     gap: 0.75rem;
 }
 
@@ -277,11 +239,9 @@ ul { list-style: none; }
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
-    /* --- MEJORA: Transición para foco --- */
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* --- MEJORA: Estilo de foco para Inputs (Accesibilidad) --- */
 .form-input:focus,
 .form-input:focus-visible {
     border-color: var(--primary-blue);
@@ -290,8 +250,6 @@ ul { list-style: none; }
     outline: none;
 }
 
-
-/* --- ARREGLO: Forzar 2 columnas en grids de checkboxes (Perfil, Ocular) --- */
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -301,7 +259,6 @@ ul { list-style: none; }
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-    /* --- ARREGLO: Reducción de "espacio muerto" --- */
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
@@ -317,7 +274,8 @@ ul { list-style: none; }
     font-size: 0.8rem;
     font-weight: 600;
     border-radius: 6px;
-    background-color: var(--bg-tertiary);
+    /* background-color: var(--bg-tertiary); (variable no definida, usar secondary) */
+    background-color: var(--bg-secondary); 
     color: var(--text-primary);
 }
 
@@ -337,18 +295,15 @@ ul { list-style: none; }
     width: 40px; 
     height: 40px; 
     border-radius: 50%; 
-    /* SOLUCIÓN: Sombra azul claro */
     box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
 }
 .profile-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
 .nav-links { 
     flex-grow: 1; 
     overflow-y: auto; 
-    /* --- MEJORA: Ocultar scrollbar pero permitir scroll --- */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE y Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
-/* --- MEJORA: Ocultar scrollbar en Chrome/Safari --- */
 .nav-links::-webkit-scrollbar {
     display: none;
 }
@@ -363,13 +318,12 @@ ul { list-style: none; }
 }
 .nav-link:hover { background-color: var(--bg-secondary); }
 .nav-link.active { background-color: var(--primary-blue); color: white; }
-/* --- MEJORA: Accesibilidad (Foco visible para links) --- */
 .nav-link:focus-visible {
     outline: 2px solid var(--primary-blue);
     outline-offset: -2px;
 }
 .nav-link.active:focus-visible {
-    outline: 2px solid var(--bg-primary); /* Contraste sobre azul */
+    outline: 2px solid var(--bg-primary);
 }
 
 
@@ -389,28 +343,21 @@ ul { list-style: none; }
 }
 .collapse-btn:hover { background-color: var(--bg-secondary); }
 
-/* --- INICIO SOLUCIÓN BOTÓN COLAPSAR --- */
-/* 1. Ocultar <i> duplicados de Lucide */
 .collapse-btn > i {
     display: none;
 }
-
-/* 2. Centrar contenido de los <span> */
 .collapse-text-open,
 .collapse-text-closed {
     display: flex;
     align-items: center;
-    justify-content: center; /* Centra icono + texto dentro del span */
-    gap: 0.85rem; /* Espacio entre el icono (img) y el texto */
-    width: 100%; /* Hacemos que ocupe todo el botón */
+    justify-content: center;
+    gap: 0.85rem;
+    width: 100%;
 }
-/* --- FIN SOLUCIÓN BOTÓN COLAPSAR --- */
 
 .collapse-icon-closed, .collapse-text-closed { display: none; }
 
-
-/* --- INICIO SOLUCIÓN ESTADO COLAPSADO --- */
-/* Estado Colapsado */
+/* --- Estado Colapsado --- */
 .app-shell.collapsed .sidebar { width: var(--sidebar-width-collapsed); }
 .app-shell.collapsed .main-content { margin-left: var(--sidebar-width-collapsed); }
 .app-shell.collapsed .sidebar-profile .profile-info, .app-shell.collapsed .nav-link span, .app-shell.collapsed .chevron { display: none; }
@@ -420,19 +367,16 @@ ul { list-style: none; }
 .app-shell.collapsed .nav-divider { margin: 0.5rem; }
 .app-shell.collapsed .footer-actions { flex-direction: column; gap: 0.5rem; padding: 0.5rem 0; }
 
-/* Ocultar "Cerrar" y mostrar "Menú" */
 .app-shell.collapsed .collapse-icon-open, 
 .app-shell.collapsed .collapse-text-open { 
     display: none; 
 }
 .app-shell.collapsed .collapse-icon-closed { 
-    display: none; /* Mantenemos oculto el <i> de lucide */
+    display: none;
 }
 .app-shell.collapsed .collapse-text-closed {
-    display: flex; /* <-- CAMBIO CLAVE: de 'block' a 'flex' */
+    display: flex;
 }
-/* --- FIN SOLUCIÓN ESTADO COLAPSADO --- */
-
 
 /* --- Navegación Móvil (Barra Inferior) --- */
 .mobile-nav {
@@ -443,7 +387,6 @@ ul { list-style: none; }
 .mobile-nav-link {
     flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
     align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-secondary);
-    /* --- MEJORA: Evitar tap-highlight en móviles --- */
     -webkit-tap-highlight-color: transparent;
 }
 .mobile-nav-link.active { color: var(--primary-blue); }
@@ -455,7 +398,6 @@ ul { list-style: none; }
     border-top-left-radius: 12px; border-top-right-radius: 12px;
     max-height: 70vh; overflow-y: auto;
 }
-/* --- ARREGLO: Mostrar botones de footer en menú móvil --- */
 .mobile-menu-content .sidebar-profile { display: none; }
 .mobile-menu-content .sidebar-footer { 
     display: flex;
@@ -463,38 +405,27 @@ ul { list-style: none; }
     padding-top: 0.5rem;
 }
 
-/* * ============================================
- * ESTRATEGIA RESPONSIVA: MEDIA QUERIES
- * ============================================
- */
+/* --- Media Queries (Responsivo) --- */
 @media (max-width: 768px) {
-    /* Oculta el menú lateral de PC */
     .sidebar { display: none; }
     
-    /* El contenido principal ahora ocupa todo el ancho */
     .main-content { 
         margin-left: 0; 
-        /* --- ARREGLO: Reducción de "espacio muerto" --- */
         padding: 1rem; 
-        padding-bottom: 80px; /* Espacio para el menú inferior */
-        /* --- ARREGLO: Evitar overflow horizontal (Notificaciones) --- */
+        padding-bottom: 80px;
         overflow-x: hidden;
     }
     
-    /* Muestra el menú inferior móvil */
     .mobile-nav { display: flex; }
 
-    /* Ejemplo: Hacer que el header de la página sea más simple */
     .page-header {
-        flex-direction: column; /* Pone el título encima del botón */
-        align-items: flex-start; /* Alinea todo a la izquierda */
-        /* --- ARREGLO: Reducción de "espacio muerto" --- */
+        flex-direction: column;
+        align-items: flex-start;
         gap: 0.75rem; 
     }
     
-    /* --- MEJORA: Títulos más pequeños en móvil --- */
     .page-title {
-        font-size: 1.5rem; /* Reducir tamaño de título */
+        font-size: 1.5rem;
     }
     .page-subtitle {
         font-size: 0.95rem;
@@ -503,7 +434,7 @@ ul { list-style: none; }
         font-size: 1.25rem;
     }
 
-    /* Ejemplo: Hacer que el botón "Agregar Registro" ocupe todo el ancho */
+    /* (Botones de 'agregar' a ancho completo) */
     #add-bcm-main-btn, 
     #add-ocular-main-btn, 
     #add-respiratorio-main-btn, 
@@ -513,57 +444,39 @@ ul { list-style: none; }
     #add-respiratorio-initial-btn,
     #add-agenda-initial-btn {
         width: 100%;
-        padding: 0.8rem; /* Botones más grandes para tocar */
+        padding: 0.8rem;
     }
 
-    /* --- ARREGLO: Ocular 'Corrección Óptica' en 2 columnas (para tablet) --- */
     .checkbox-grid-ocular {
         grid-template-columns: 1fr 1fr;
     }
 }
 
-
-/* * ============================================
- * ESTRATEGIA RESPONSIVA: (OPCIONAL) MÁS PUNTOS DE QUIEBRE
- * ============================================
- */
 @media (max-width: 480px) {
-    /* En teléfonos muy pequeños, reduce el padding de los modales */
     .modal-content {
-        padding: 1.5rem 1rem; /* Menos padding a los lados */
-        width: 95%; /* Ocupar casi todo el ancho */
+        padding: 1.5rem 1rem;
+        width: 95%;
     }
 
-    /* Achica los títulos de las páginas */
     .page-title {
         font-size: 1.25rem;
     }
     .page-subtitle {
         font-size: 0.9rem;
     }
-
-    /* * Fuerza a los 'form-grid' a tener una sola columna.
-     */
+    
     .form-grid {
         grid-template-columns: 1fr;
     }
     
-    /* --- ARREGLO: Forzar grids de 2 columnas en móvil --- */
-    /* Para Fecha/Hora y Condiciones Médicas */
-    /* (La regla global .grid-2-cols ya maneja esto) */
-    
-    /* --- ARREGLO: Forzar 1 columna en checkboxes generales en móvil pequeño --- */
     .checkbox-grid {
         grid-template-columns: 1fr; 
     }
     
-    /* --- ARREGLO: Ocular 'Corrección Óptica' MANTIENE 2 columnas --- */
     .checkbox-grid-ocular {
         grid-template-columns: 1fr 1fr;
     }
 }
-/* --- FIN DEL NUEVO BLOQUE --- */
-
 
 /* --- Switch de Tema --- */
 .switch { position: relative; }
@@ -573,85 +486,31 @@ ul { list-style: none; }
   background: var(--bg-secondary); border-radius: 15px;
   cursor: pointer; border: 1px solid var(--border-color);
 }
-
-/* Círculo deslizante (knob) */
 .switch label span:first-child {
   display: block; width: 20px; height: 20px;
   border-radius: 50%; position: absolute; top: 3px; left: 3px;
   transition: transform 0.3s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-
-  /* --- INICIO SOLUCIÓN TOGGLE --- */
-  background-color: white; /* Fondo blanco para el sol */
-  background-image: url('images/icons/sun.svg'); /* Icono de sol por defecto */
-  background-size: 14px 14px; /* Ajusta el tamaño del icono */
+  background-color: white;
+  background-image: url('images/icons/sun.svg');
+  background-size: 14px 14px;
   background-repeat: no-repeat;
   background-position: center;
-  /* --- FIN SOLUCIÓN TOGGLE --- */
 }
-
-/* Estado Oscuro */
 body.dark-theme .switch label span:first-child {
-  /* --- INICIO SOLUCIÓN TOGGLE --- */
-  background-color: var(--bg-secondary); /* Fondo oscuro para la luna */
-  background-image: url('images/icons/moon.svg'); /* Icono de luna */
-  /* --- FIN SOLUCIÓN TOGGLE --- */
+  background-color: var(--bg-secondary);
+  background-image: url('images/icons/moon.svg');
 }
-
-/* Estado 'checked' (deslizamiento) */
 .switch input:checked + label span:first-child {
     transform: translateX(24px);
 }
 
+/* --- Toggle Switch (Recordatorios) --- */
+/* (Estilos duplicados de .switch, se podrían unificar) */
+/* .switch { ... } */
+/* .slider { ... } */
 
-/* --- Estilos para el Toggle Switch (Recordatorios) --- */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 26px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: var(--primary-blue); /* Color cuando está activo */
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-/*------------------- boton citas----*/
-/* --- Estilos para botones de asistencia en Citas --- */
+/* --- Botones de Citas --- */
 .attendance-btn {
     padding: 0.25rem 0.75rem;
     font-size: 0.8rem;
@@ -659,66 +518,47 @@ input:checked + .slider:before {
     border: 1px solid var(--border-color);
 }
 .attendance-btn.attended-yes {
-    background-color: #E8F5E9; /* Verde claro */
+    background-color: #E8F5E9;
     color: #2E7D32;
     border-color: #A5D6A7;
 }
 .attendance-btn.attended-no {
-    background-color: #FFEBEE; /* Rojo claro */
+    background-color: #FFEBEE;
     color: #C62828;
     border-color: #EF9A9A;
 }
 
-/*------------------------------*/
-
-/*----botones notificaciones-------------------*/
-/* === INICIO SOLUCIÓN: Estilo para botón de estado activo === */
-
-/*
-   Define el aspecto del botón que representa el ESTADO ACTUAL
-   (cuando todas están activas o todas inactivas).
-   Usaremos el color primario (azul).
-*/
+/* --- Botones Notificaciones --- */
 .button-state-active {
-    background-color: var(--primary-color) !important; /* Azul primario */
-    color: white !important; /* Texto blanco */
-    border-color: var(--primary-color) !important;
-    /* Puedes añadir otros estilos si quieres, como un borde más grueso */
+    background-color: var(--primary-blue) !important;
+    color: white !important;
+    border-color: var(--primary-blue) !important;
 }
-
-/*
-   Asegúrate de que tu botón secundario sea gris oscuro por defecto.
-   Si ya lo es, esta regla puede no ser necesaria o necesitar ajustes.
-*/
 .button.button-secondary {
-    background-color: var(--bg-secondary); /* Fondo gris/secundario */
-    color: var(--text-secondary);       /* Texto gris */
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
     border-color: var(--border-color);
 }
-.button.button-secondary:hover { /* Estilo hover opcional */
+.button.button-secondary:hover {
      background-color: var(--border-color);
 }
 
-
-/* === FIN SOLUCIÓN === */
-
-/* === INICIO SOLUCIÓN: Estilos específicos Ocular === */
-/* Caja informativa Snellen */
+/* --- Estilos Ocular --- */
 .info-box-ocular {
-    background-color: var(--primary-light); /* Fondo azul claro */
+    /* background-color: var(--primary-light); (variable no definida) */
+    background-color: #eaf2ff; /* Azul muy claro */
     border-left: 4px solid var(--primary-blue);
-    color: var(--text-primary); /* Texto principal */
+    color: var(--text-primary);
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
 }
 body.dark-theme .info-box-ocular {
-    background-color: var(--primary-light); /* Usa la misma variable (azul oscuro) */
-    color: var(--text-primary-dark); /* Texto claro */
+    background-color: var(--bg-secondary);
+    /* color: var(--text-primary-dark); (variable no definida) */
+    color: var(--text-primary);
 }
-
-/* Fila para agregar fechas de examen */
 .examen-date-row {
     display: flex;
     align-items: center;
@@ -726,46 +566,25 @@ body.dark-theme .info-box-ocular {
     margin-bottom: 0.75rem;
 }
 .examen-date-row input {
-    flex-grow: 1; /* Input ocupa el espacio restante */
+    flex-grow: 1;
 }
-/* No es necesario estilo específico para remove-examen-btn si usa button-secondary */
-
-/* Grid para checkboxes de síntomas */
 .checkbox-grid-ocular {
     display: grid;
-    /* Ajusta minmax según necesites para el ancho */
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 0.75rem;
     margin-top: 0.5rem;
 }
-/* === FIN SOLUCIÓN === */
 
-/* === SOLUCIÓN: Iconos en Modo Oscuro === */
-
-/*
-  Esto selecciona todas las imágenes en modo oscuro
-  cuya ruta (src) contenga "images/icons/".
-  No afectará a tus fotos de perfil o imágenes de estado vacío.
-*/
+/* --- Iconos Modo Oscuro --- */
 body.dark-theme img[src*="images/icons/"] {
     filter: invert(1);
 }
-
-/*
-  Asegura que los iconos en botones activos (que ya son blancos
-  sobre fondo azul) no se vean afectados por el filtro
-  y sigan siendo blancos.
-*/
-body.dark-tranme .button-primary img[src*="images/icons/"],
+body.dark-theme .button-primary img[src*="images/icons/"],
 body.dark-theme .nav-link.active img[src*="images/icons/"] {
-    /* El filtro 'invert(1)' los haría negros sobre azul.
-      Los "des-invertimos" y forzamos a blanco puro.
-    */
     filter: invert(1) brightness(2);
 }
 
-/* --- MEJORA: Estilos para Scrollbars (Barras de Desplazamiento) --- */
-/* Funciona en Chrome, Edge, y Safari */
+/* --- Scrollbars --- */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -781,9 +600,96 @@ body.dark-theme .nav-link.active img[src*="images/icons/"] {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-secondary);
 }
-/* Firefox */
 body, .modal-content, .nav-links {
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) var(--bg-secondary);
 }
+
+/* ===== INICIO: Estilos del Splash Screen (Corregidos) ===== */
+/* (Añadido al final del archivo) */
+
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    
+    /* === INICIO DE LA CORRECCIÓN === */
+    /* 1. Oculto por defecto (para PC) */
+    display: none; 
+    /* === FIN DE LA CORRECCIÓN === */
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    visibility: hidden; /* Oculto hasta que se muestre en móvil */
+    opacity: 0;
+}
+
+/* === INICIO DE LA CORRECCIÓN === */
+/* 2. Se muestra SOLO en pantallas móviles (mismo breakpoint que tu nav móvil) */
+@media (max-width: 768px) {
+    .splash-screen {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+    }
+}
+/* === FIN DE LA CORRECCIÓN === */
+
+
+.splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Añadimos !important para sobreescribir el @media query cuando JS lo oculte */
+    display: none !important; 
+}
+
+.splash-logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 2rem;
+    animation: logoPulse 2s infinite ease-in-out;
+}
+
+@keyframes logoPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+
+.progress-bar-container {
+    width: 60%;
+    max-width: 250px;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-blue);
+    border-radius: 4px;
+    animation: indeterminateProgress 2s infinite ease-in-out;
+}
+
+@keyframes indeterminateProgress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.splash-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+/* ===== FIN: Estilos del Splash Screen ===== */
 
