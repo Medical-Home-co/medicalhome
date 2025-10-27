@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedicalHome</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Actualizado el cache-buster a v=1.0.3 -->
+    <link rel="stylesheet" href="style.css?v=1.0.3">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
     </head>
 <body class="hidden">
+
+    <!-- ===== INICIO: Splash Screen HTML (Corregido) ===== -->
+    <!-- Este HTML se mostrará solo en móvil gracias al CSS -->
+    <div id="splash-screen" class="splash-screen">
+        <img src="images/icono.png" alt="Logo" class="splash-logo">
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+        <!-- Texto "Cargando..." añadido -->
+        <p class="splash-text">Cargando...</p>
+    </div>
+    <!-- ===== FIN: Splash Screen HTML ===== -->
 
     <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
@@ -133,3 +146,4 @@
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
+

@@ -1,12 +1,13 @@
 /* --- Variables de Color y Base --- */
 :root {
     --primary-blue: #3A86FF;
+    /* --- MEJORA: Color primario más oscuro para hover --- */
     --primary-blue-dark: #3171e0; 
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F4F7F9; /* Usaré este como fondo azul claro del splash */
+    --bg-secondary: #F4F7F9;
     --text-primary: #1A202C;
-    --text-secondary: #4A5568; /* Usaré este para el texto "Cargando..." */
-    --border-color: #E2E8F0; /* Usaré este para el fondo de la barra de progreso */
+    --text-secondary: #4A5568;
+    --border-color: #E2E8F0;
     --shadow-color: rgba(0, 0, 0, 0.05);
     --sidebar-width: 240px;
     --sidebar-width-collapsed: 70px;
@@ -15,12 +16,13 @@
 
 body.dark-theme {
     --primary-blue: #5a9bff;
+    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
     --primary-blue-dark: #4a88f0;
     --bg-primary: #1A202C;
-    --bg-secondary: #2D3748; /* Fondo del splash en modo oscuro */
+    --bg-secondary: #2D3748;
     --text-primary: #F7FAFC;
-    --text-secondary: #A0AEC0; /* Texto "Cargando..." en modo oscuro */
-    --border-color: #4A5568; /* Fondo de la barra en modo oscuro */
+    --text-secondary: #A0AEC0;
+    --border-color: #4A5568;
     --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -570,21 +572,39 @@ body.dark-theme .info-box-ocular {
 }
 .checkbox-grid-ocular {
     display: grid;
+    /* Ajusta minmax según necesites para el ancho */
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 0.75rem;
     margin-top: 0.5rem;
 }
+/* === FIN SOLUCIÓN === */
 
-/* --- Iconos Modo Oscuro --- */
+/* === SOLUCIÓN: Iconos en Modo Oscuro === */
+
+/*
+  Esto selecciona todas las imágenes en modo oscuro
+  cuya ruta (src) contenga "images/icons/".
+  No afectará a tus fotos de perfil o imágenes de estado vacío.
+*/
 body.dark-theme img[src*="images/icons/"] {
     filter: invert(1);
 }
-body.dark-theme .button-primary img[src*="images/icons/"],
+
+/*
+  Asegura que los iconos en botones activos (que ya son blancos
+  sobre fondo azul) no se vean afectados por el filtro
+  y sigan siendo blancos.
+*/
+body.dark-tranme .button-primary img[src*="images/icons/"],
 body.dark-theme .nav-link.active img[src*="images/icons/"] {
+    /* El filtro 'invert(1)' los haría negros sobre azul.
+      Los "des-invertimos" y forzamos a blanco puro.
+    */
     filter: invert(1) brightness(2);
 }
 
-/* --- Scrollbars --- */
+/* --- MEJORA: Estilos para Scrollbars (Barras de Desplazamiento) --- */
+/* Funciona en Chrome, Edge, y Safari */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -600,13 +620,14 @@ body.dark-theme .nav-link.active img[src*="images/icons/"] {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-secondary);
 }
+/* Funciona en Firefox */
 body, .modal-content, .nav-links {
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) var(--bg-secondary);
 }
 
-/* ===== INICIO: Estilos del Splash Screen (Corregidos) ===== */
-/* (Añadido al final del archivo) */
+/* ===== INICIO: Estilos del Splash Screen (Integrados) ===== */
+/* (Añadido al final del archivo original) */
 
 .splash-screen {
     position: fixed;
@@ -614,12 +635,11 @@ body, .modal-content, .nav-links {
     left: 0;
     width: 100%;
     height: 100%;
+    /* Usamos tus variables de color */
     background-color: var(--bg-secondary);
     
-    /* === INICIO DE LA CORRECCIÓN === */
     /* 1. Oculto por defecto (para PC) */
     display: none; 
-    /* === FIN DE LA CORRECCIÓN === */
 
     flex-direction: column;
     justify-content: center;
@@ -630,7 +650,6 @@ body, .modal-content, .nav-links {
     opacity: 0;
 }
 
-/* === INICIO DE LA CORRECCIÓN === */
 /* 2. Se muestra SOLO en pantallas móviles (mismo breakpoint que tu nav móvil) */
 @media (max-width: 768px) {
     .splash-screen {
@@ -639,8 +658,6 @@ body, .modal-content, .nav-links {
         opacity: 1;
     }
 }
-/* === FIN DE LA CORRECCIÓN === */
-
 
 .splash-screen.hidden {
     opacity: 0;
@@ -667,6 +684,7 @@ body, .modal-content, .nav-links {
     width: 60%;
     max-width: 250px;
     height: 8px;
+    /* Usamos tus variables de color */
     background-color: var(--border-color);
     border-radius: 4px;
     overflow: hidden;
@@ -676,11 +694,14 @@ body, .modal-content, .nav-links {
 .progress-bar {
     width: 100%;
     height: 100%;
+    /* Usamos tus variables de color */
     background-color: var(--primary-blue);
     border-radius: 4px;
+    /* Usamos una animación indeterminada (va y viene) */
     animation: indeterminateProgress 2s infinite ease-in-out;
 }
 
+/* Animación de barra de progreso indeterminada */
 @keyframes indeterminateProgress {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
@@ -688,6 +709,7 @@ body, .modal-content, .nav-links {
 
 .splash-text {
     font-size: 1rem;
+    /* Usamos tus variables de color */
     color: var(--text-secondary);
     font-weight: 500;
 }
