@@ -3,131 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>MedicalHome | Asistente de Salud Personal</title>
-    <meta name="description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar. MedicalHome es tu asistente de salud personal, seguro y privado.">
-    <link rel="canonical" href="https://medical-home-co.github.io/medicalhome/">
-    <meta name="robots" content="index, follow">
-    
-    <meta property="og:title" content="MedicalHome | Asistente de Salud Personal">
-    <meta property="og:description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://medical-home-co.github.io/medicalhome/">
-    <meta property="og:image" content="https://medical-home-co.github.io/medicalhome/images/social-preview.png">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MedicalHome | Asistente de Salud Personal">
-    <meta name="twitter:description" content="Organiza tus medicamentos, citas y seguimientos en un solo lugar.">
-    <meta name="twitter:image" content="https://medical-home-co.github.io/medicalhome/images/social-preview.png">
-
+    <title>MedicalHome</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
-</head>
+    </head>
+<body class="hidden">
 
-<body>
-
-    <style>
-      #manual-splash-screen {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        /* 1. CORRECCIÓN: Fondo claro para coincidir con la imagen */
-        background-color: #F5F6FA; 
-        z-index: 9999;
-        transition: opacity 0.5s ease-out;
-      }
-      #splash-logo {
-        width: 128px;
-        height: 128px;
-        animation: pulse 1.5s infinite ease-in-out;
-      }
-      
-      /* 2. CORRECCIÓN: Estilo del Nombre para coincidir con la imagen */
-      #splash-app-name {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        font-size: 1.5rem; /* ~24px */
-        font-weight: 500; 
-        color: #333; /* Texto oscuro */
-        margin-top: 16px;
-        margin-bottom: 4px;
-      }
-
-      /* 3. CORRECCIÓN: Estilo del Eslogan para fondo claro */
-      #splash-slogan {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        font-size: 1rem; /* ~16px */
-        color: #666; /* Texto gris oscuro */
-        font-weight: 400;
-        margin: 0;
-        text-align: center;
-        padding: 0 1rem;
-        opacity: 0; /* Empezar oculto */
-        animation: fadeIn 1s ease-out 0.5s forwards; 
-      }
-
-      /* 4. CORRECCIÓN: Estilo de la barra de carga para fondo claro */
-      .loading-bar-container {
-        width: 150px;
-        height: 4px;
-        background-color: #E0E0E0; /* Fondo de la barra (gris claro) */
-        border-radius: 2px;
-        margin-top: 24px;
-        overflow: hidden;
-      }
-      .loading-bar {
-        width: 100%;
-        height: 100%;
-        background-color: #3A86FF; /* Color de la barra (tu color de tema) */
-        transform-origin: left;
-        animation: indeterminate-load 1.5s infinite ease-in-out;
-      }
-
-      /* Animaciones */
-      @keyframes pulse {
-        0%   { transform: scale(1); }
-        50%  { transform: scale(1.05); }
-        100% { transform: scale(1); }
-      }
-      @keyframes indeterminate-load {
-        0%   { transform: scaleX(0); transform-origin: left; }
-        45%  { transform: scaleX(1); transform-origin: left; }
-        50%  { transform: scaleX(1); transform-origin: right; }
-        100% { transform: scaleX(0); transform-origin: right; }
-      }
-      @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 0.9; }
-      }
-
-      /* Ocultar splash en navegador */
-      @media (display-mode: browser) {
-        #manual-splash-screen {
-          display: none;
-        }
-      }
-    </style>
-
-    <div id="manual-splash-screen">
-      
-      <img id="splash-logo" src="images/icono.png" alt="MedicalHome Logo">
-      
-      <h1 id="splash-app-name">MedicalHome</h1>
-      
-      <p id="splash-slogan">Tu salud, organizada y en casa</p>
-      
-      <div class="loading-bar-container">
-        <div class="loading-bar"></div>
-      </div>
-      
-    </div>
     <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <img src="images/logo.png" alt="Logo de MedicalHome" class="modal-logo">
@@ -170,7 +53,7 @@
         </div>
     </div>
 
-    <div class="app-shell" style="visibility: hidden;">
+    <div class="app-shell">
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-profile">
