@@ -16,10 +16,7 @@
             <p class="page-subtitle">Gestiona tus recordatorios y alertas</p>
         </div>
     </div>
-<!--------------------------------->
-
-
-    <div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
+<div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
         <div style="flex-shrink: 0; margin-right: 1.5rem;"> 
             <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Control Principal (Interno)</h3>
             <p id="notify-master-subtitle" style="font-size: 0.9rem; color: var(--text-secondary);">...</p>
@@ -29,20 +26,18 @@
 
 
 <div style="display: flex; gap: 0.75rem; flex-grow: 1; justify-content: center;">
-            <button id="notify-activate-all" class="button button-primary" style="padding: 0.6rem 1rem;">Activar Todas</button> 
+            <button id="notify-activate-all" class="button button-secondary" style="padding: 0.6rem 1rem;">Activar Todas</button> 
             <button id="notify-deactivate-all" class="button button-secondary" style="padding: 0.6rem 1rem;">Desactivar Todas</button>
         </div>
 
 <br>
 
 
-<!------------------------------>
-
-    <div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem;">
+<div class="summary-card" style="padding: 1rem 1.5rem; margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
             <div>
-                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Permiso de Notificaciones Push</h3>
-                <p id="push-notifications-status" style="font-size: 0.9rem; color: var(--text-secondary);">Activa el permiso del navegador para recibir alertas.</p>
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Permiso de Notificaciones</h3>
+                <p id="push-notifications-status" style="font-size: 0.9rem; color: var(--text-secondary);">Activa el permiso para recibir alertas.</p>
             </div>
             <button id="activate-push-notifications-btn" class="button button-primary">
                 <i data-lucide="bell-ring"></i>
@@ -50,7 +45,7 @@
             </button>
         </div>
     </div>
-    <h2 class="section-title">Notificaciones Programadas</h2>
+    <h2 class="page-title">Notificaciones Programadas</h2>
     <br>
     <div id="notify-list-container" class="content-grid">
         </div>
@@ -59,6 +54,25 @@
         </div>
 
     <details class="collapsible-info-box">
-        </details>
+        <summary>
+            <img src="images/icons/alerta.gif" alt="Ayuda">
+            <span>Guía de Alertas</span>
+        </summary>
+        <div class="content" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            <p>Las notificaciones de la app funcionan así:</p>
+            <ul style="margin-top: 1rem;">
+                <li>Los <strong>medicamentos</strong> se envían 20 minutos antes de la hora programada.</li>
+                <li>Las <strong>citas médicas</strong> te recordarán 24 horas antes.</li>
+                <li>Las <strong>terapias</strong> envían 2 notificaciones: una 24h antes y otra 2h antes.</li>
+                <li>Las <strong>citas de peso seco</strong> se recordarán 3 días antes y un día antes.</li>
+            </ul>
+            <p style="margin-top: 1rem;">Para recibir notificaciones, asegúrate de tener habilitadas las notificaciones del navegador.</p>
+            
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+            <p><strong>Permiso del Navegador:</strong> Primero, debes conceder permiso a la app para que tu dispositivo pueda mostrar alertas. Si está 'Denegado', ninguna notificación funcionará.</p>
+            <p style="margin-top: 0.75rem;"><strong>Controles Individuales:</strong> Aún si el permiso general está activo, puedes decidir qué recordatorios específicos (medicamentos, citas, etc.) quieres recibir.</p>
+        </div>
+    </details>
 
 </div>
