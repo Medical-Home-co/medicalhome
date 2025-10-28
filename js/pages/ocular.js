@@ -72,7 +72,7 @@ function renderOcularList(data) {
                     </div>
                     <div class="card-actions">
                         <button class="icon-button edit-btn" data-id="${entryId}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${entryId}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${entryId}"><img src="images/icons/trash.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
                 <div class="card-body" style="margin-top: 1rem;">

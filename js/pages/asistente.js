@@ -2,18 +2,15 @@
 let chatHistory = [];
 let systemInstruction = ""; 
 let initialGreeting = "";
-// ¡NUEVO! Esta variable rastreará qué historial guardar/cargar
 let currentAssistantKey = ""; 
+let assistantSwitcher = null; // Para guardar el contenedor del switcher
 
 // --- INICIO: Constantes para la API ---
-
-// Pega tu API Key de Google AI Studio aquí
 const apiKey = "AIzaSyBp4pNNeJNCTKP72pVwhlA7HNk9puHdoxs"; 
-
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
 // ===================================================================
-// Constantes de Personalidad (Rutas ya corregidas)
+// Constantes de Personalidad (Sin cambios)
 // ===================================================================
 const personalities = {
     john: {
@@ -24,7 +21,7 @@ const personalities = {
         3.  **Temas no médicos:** Si te preguntan de otros temas, responde amablemente que tu especialidad es solo la salud y que pueden reiniciar para hablar con otro asistente.
         4.  **Naturalidad:** Evita repetirte y no añadas advertencias en cada mensaje (la interfaz ya la tiene). Responde en español.`,
         imgSrc: "images/john_02.png", 
-        colorClass: "info-john"
+        colorClass: "info-john" 
     },
     yari: {
         greeting: "¡Hola! Soy Yari. ¡Podemos hablar de casi cualquier tema! ¿Qué tienes en mente hoy?",
@@ -57,16 +54,12 @@ const personalities = {
 
 
 // --- Funciones de la Interfaz (Sin cambios) ---
-
 function addMessageToChat(sender, message) {
     const chatWindow = document.getElementById('chat-window');
     if (!chatWindow) return;
-
     const messageDiv = document.createElement('div');
-    // Usamos 'user' y 'model' (asistente) para que coincida con el historial
     messageDiv.className = `chat-message ${sender === 'user' ? 'user' : 'assistant'}-message`;
     messageDiv.textContent = message;
-
     chatWindow.appendChild(messageDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight; 
 }
@@ -74,7 +67,6 @@ function addMessageToChat(sender, message) {
 function showTypingIndicator(show) {
     const chatWindow = document.getElementById('chat-window');
     let indicator = document.getElementById('typing-indicator');
-
     if (show) {
         if (!indicator) {
             indicator = document.createElement('div');
@@ -91,7 +83,7 @@ function showTypingIndicator(show) {
     }
 }
 
-// --- ¡NUEVA FUNCIÓN PARA GUARDAR EL HISTORIAL! ---
+// --- Funciones de Guardado/Llamada a IA (Sin cambios) ---
 function saveChatHistory() {
     if (currentAssistantKey) {
         localStorage.setItem(currentAssistantKey, JSON.stringify(chatHistory));
@@ -99,219 +91,181 @@ function saveChatHistory() {
     }
 }
 
-// --- Llamada REAL a la IA (Modificada para guardar historial) ---
 async function getAIResponse(userMessage) {
-    // 1. Añadir mensaje del usuario al historial para la API
     chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
-    // 2. ¡GUARDAR!
     saveChatHistory();
-
-    // Construir el payload para la API
-    const payload = {
-        contents: chatHistory, 
-        systemInstruction: { 
-            parts: [{ text: systemInstruction }] 
-        },
-    };
-
-    let retries = 0;
-    const maxRetries = 3;
-    let delay = 1000; 
-
+    const payload = { contents: chatHistory, systemInstruction: { parts: [{ text: systemInstruction }] } };
+    let retries = 0; const maxRetries = 3; let delay = 1000; 
     while (retries < maxRetries) {
         try {
-            console.log("Enviando a Gemini:", JSON.stringify(payload)); 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!response.ok) {
-                if (response.status === 429 || response.status >= 500) {
-                     throw new Error(`API Error ${response.status}`);
-                } else {
-                    const errorData = await response.json();
-                    console.error("Error de API (no reintento):", errorData);
-                    const errorMessage = errorData?.error?.message || `Error ${response.status}`;
-                     const friendlyError = `Lo siento, hubo un problema al procesar tu solicitud (${errorMessage}). Por favor, intenta de nuevo más tarde.`;
-                     // 3. Añadir error al historial
-                     chatHistory.push({ role: 'model', parts: [{ text: friendlyError }] });
-                     // 4. ¡GUARDAR!
-                     saveChatHistory();
-                    return friendlyError;
-                }
+                if (response.status === 429 || response.status >= 500) { throw new Error(`API Error ${response.status}`); }
+                else { const errorData = await response.json(); const errorMessage = errorData?.error?.message || `Error ${response.status}`; const friendlyError = `Lo siento, hubo un problema al procesar tu solicitud (${errorMessage}). Por favor, intenta de nuevo más tarde.`; chatHistory.push({ role: 'model', parts: [{ text: friendlyError }] }); saveChatHistory(); return friendlyError; }
             }
-
             const result = await response.json();
-            console.log("Respuesta de Gemini:", JSON.stringify(result)); 
-
             const candidate = result.candidates?.[0];
             let aiMessage = "Lo siento, no pude generar una respuesta."; 
-
-            if (candidate && candidate.content?.parts?.[0]?.text) {
-                aiMessage = candidate.content.parts[0].text;
-            } else if (candidate?.finishReason === 'SAFETY') {
-                 aiMessage = "No puedo responder a esa pregunta debido a nuestras políticas de seguridad.";
-            } else {
-                 console.error("Respuesta inesperada de la API:", result);
-            }
-
-            // 5. Añadir respuesta de la IA al historial
+            if (candidate && candidate.content?.parts?.[0]?.text) { aiMessage = candidate.content.parts[0].text; }
+            else if (candidate?.finishReason === 'SAFETY') { aiMessage = "No puedo responder a esa pregunta debido a nuestras políticas de seguridad."; }
             chatHistory.push({ role: 'model', parts: [{ text: aiMessage }] });
-            // 6. ¡GUARDAR!
             saveChatHistory();
             return aiMessage; 
-
         } catch (error) {
-            console.error(`Intento ${retries + 1} fallido:`, error);
-            retries++;
-            if (retries >= maxRetries) {
-                const networkError = "Lo siento, estoy teniendo problemas de conexión. Por favor, intenta de nuevo más tarde.";
-                // 7. Añadir error de red al historial
-                chatHistory.push({ role: 'model', parts: [{ text: networkError }] });
-                // 8. ¡GUARDAR!
-                saveChatHistory();
-                return networkError;
-            }
-             await new Promise(resolve => setTimeout(resolve, delay));
-             delay *= 2; 
+            console.error(`Intento ${retries + 1} fallido:`, error); retries++;
+            if (retries >= maxRetries) { const networkError = "Lo siento, estoy teniendo problemas de conexión. Por favor, intenta de nuevo más tarde."; chatHistory.push({ role: 'model', parts: [{ text: networkError }] }); saveChatHistory(); return networkError; }
+            await new Promise(resolve => setTimeout(resolve, delay)); delay *= 2; 
         }
     }
-     const finalError = "Lo siento, no pude obtener una respuesta después de varios intentos.";
-     // 9. Añadir error final al historial
-     chatHistory.push({ role: 'model', parts: [{ text: finalError }] });
-     // 10. ¡GUARDAR!
-     saveChatHistory();
-     return finalError;
+    const finalError = "Lo siento, no pude obtener una respuesta después de varios intentos.";
+    chatHistory.push({ role: 'model', parts: [{ text: finalError }] });
+    saveChatHistory();
+    return finalError;
 }
 
-// --- Función Principal de Envío (Sin cambios) ---
 const handleSendMessage = async () => {
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-chat-btn');
     if (!chatInput) return;
-
     const message = chatInput.value.trim();
     if (message) {
         addMessageToChat('user', message);
         chatInput.value = '';
-        chatInput.disabled = true; 
-        sendBtn.disabled = true;  
+        chatInput.disabled = true; sendBtn.disabled = true;  
         chatInput.style.height = 'auto'; 
-
         showTypingIndicator(true);
-
-        // getAIResponse AHORA se encarga de guardar
-        // el mensaje del usuario y la respuesta de la IA
         const aiResponse = await getAIResponse(message);
-
         showTypingIndicator(false);
         addMessageToChat('assistant', aiResponse);
-
-        chatInput.disabled = false; 
-        sendBtn.disabled = false;  
+        chatInput.disabled = false; sendBtn.disabled = false;  
         chatInput.focus(); 
     }
 };
 
+// ===================================================================
+// --- FUNCIONES SWITCHER (createAssistantSwitcher sin cambios) ---
+// ===================================================================
+
+function createAssistantSwitcher() {
+    if (document.getElementById('assistant-switcher-container')) return;
+    assistantSwitcher = document.createElement('div');
+    assistantSwitcher.id = 'assistant-switcher-container';
+    assistantSwitcher.className = 'assistant-switcher'; 
+    for (const key in personalities) {
+        const p = personalities[key];
+        const img = document.createElement('img');
+        img.id = `switch-${key}`;
+        img.src = p.imgSrc;
+        img.alt = key;
+        img.className = 'switch-avatar';
+        img.addEventListener('click', () => {
+            if (currentAssistantKey !== `chatHistory_${key}`) {
+                startChat(p, key); // Llama a startChat global
+            }
+        });
+        assistantSwitcher.appendChild(img);
+    }
+    const pageHeader = document.querySelector('.page-header');
+    // CORRECCIÓN: Usar insertBefore para ponerlo ANTES del <br>
+    const lineBreak = pageHeader.nextElementSibling; // El <br>
+    pageHeader.parentNode.insertBefore(assistantSwitcher, lineBreak); 
+    assistantSwitcher.style.display = 'none';
+}
+
+
+/**
+ * Actualiza la UI del switcher:
+ * - Pone el activo a color y le añade la clase 'active-[key]'.
+ * - Pone los demás en escala de grises y les quita la clase 'active-*'.
+ */
+function setActiveAssistantSwitcher(activeKey) {
+    if (!assistantSwitcher) return;
+    
+    const avatars = assistantSwitcher.querySelectorAll('.switch-avatar');
+    avatars.forEach(img => {
+        const key = img.alt; // Obtenemos la key (john, yari, etc.) del alt
+        
+        // Limpiar clases activas de todos
+        img.classList.remove('active-john', 'active-yari', 'active-danilejo', 'active-marian');
+
+        if (key === activeKey) {
+            img.classList.remove('grayscale');
+            img.classList.add(`active-${key}`); // Añadir la clase específica
+        } else {
+            img.classList.add('grayscale');
+            // img.classList.remove(`active-${key}`); // Ya se limpiaron arriba
+        }
+    });
+}
 
 // ===================================================================
 // ¡FUNCIÓN INIT MODIFICADA!
 // ===================================================================
 export function init() {
-    // Obtener elementos de la PANTALLA DE SELECCIÓN
+    createAssistantSwitcher();
     const selectorScreen = document.getElementById('personality-selector');
     const btnJohn = document.getElementById('btn-john');
     const btnYari = document.getElementById('btn-yari');
     const btnDanilejo = document.getElementById('btn-danilejo');
     const btnMarian = document.getElementById('btn-marian');
-
-    // Obtener elementos de la PANTALLA DE CHAT
     const chatContainer = document.getElementById('chat-container');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-chat-btn');
     const chatWindow = document.getElementById('chat-window');
 
-    // Obtener elementos del INFO-BOX
-    const infoBox = document.getElementById('info-box');
-    const infoImg = document.getElementById('info-box-img');
-    const infoText = document.getElementById('info-box-text');
-
-    // Asegurarse de que el chat esté oculto al inicio
     if(chatContainer) chatContainer.style.display = 'none';
+    if(assistantSwitcher) assistantSwitcher.style.display = 'none';
 
-    // Función que se llamará al elegir una personalidad
-    // ¡MODIFICADO! Ahora acepta una "key" (ej: "john")
-    const startChat = (personality, key) => {
-        // 1. Establecer las variables globales
-        currentAssistantKey = `chatHistory_${key}`; // ej: "chatHistory_john"
+    // ¡IMPORTANTE! Hacer startChat global para que los avatares puedan llamarla
+    window.startChat = (personality, key) => {
+        currentAssistantKey = `chatHistory_${key}`; 
         systemInstruction = personality.instruction;
 
-        // 2. Ocultar el selector y mostrar el chat
         if(selectorScreen) selectorScreen.style.display = 'none';
         if(chatContainer) chatContainer.style.display = 'flex'; 
+        if(assistantSwitcher) assistantSwitcher.style.display = 'flex'; 
 
-        // 3. --- ¡LÓGICA DE CARGA DE HISTORIAL! ---
+        setActiveAssistantSwitcher(key); // ¡LLAMADA CLAVE!
+
         if(chatWindow){
-            chatWindow.innerHTML = ''; // Limpiar chat para recargar
+            chatWindow.innerHTML = ''; 
             const savedHistory = localStorage.getItem(currentAssistantKey);
-
             if (savedHistory) {
-                // Si hay historial, cárgalo
-                console.log(`Historial encontrado para ${currentAssistantKey}, cargando...`);
                 chatHistory = JSON.parse(savedHistory);
-                // Volver a dibujar el chat guardado
                 chatHistory.forEach(message => {
-                    // message.role es 'user' o 'model'
-                    // addMessageToChat espera 'user' o 'assistant'
                     const sender = message.role === 'user' ? 'user' : 'assistant';
                     addMessageToChat(sender, message.parts[0].text);
                 });
             } else {
-                // Si NO hay historial, usa el saludo inicial
-                console.log(`No hay historial para ${currentAssistantKey}, creando uno nuevo.`);
                 initialGreeting = personality.greeting;
-                chatHistory = [
-                    { role: 'model', parts: [{ text: initialGreeting }] }
-                ];
+                chatHistory = [ { role: 'model', parts: [{ text: initialGreeting }] } ];
                 addMessageToChat('assistant', initialGreeting);
-                saveChatHistory(); // Guarda el saludo inicial
+                saveChatHistory(); 
             }
         }
         
-        // 4. --- Actualizar el Info-Box ---
-        if (infoBox && infoImg) {
-            infoImg.src = personality.imgSrc;
-            infoImg.style.display = 'block';
-            infoBox.classList.remove('info-john', 'info-yari', 'info-danilejo', 'info-marian');
-            infoBox.classList.add(personality.colorClass);
-        }
-
-        // 5. Añadir los event listeners del chat
+        sendBtn?.removeEventListener('click', handleSendMessage);
+        chatInput?.removeEventListener('keydown', handleKeydown);
+        chatInput?.removeEventListener('input', handleInput);
+        
         sendBtn?.addEventListener('click', handleSendMessage);
-        chatInput?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-            }
-        });
+        chatInput?.addEventListener('keydown', handleKeydown);
+        chatInput?.addEventListener('input', handleInput);
 
-        // Auto-ajustar altura del textarea
-        chatInput?.addEventListener('input', () => {
-            if (!chatInput) return;
-            chatInput.style.height = 'auto';
-            chatInput.style.height = (chatInput.scrollHeight) + 'px';
-        });
-
-        // 6. Poner foco en el input del chat
         chatInput?.focus();
     };
+    
+    const handleKeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
+    };
+    const handleInput = () => {
+        const chatInput = document.getElementById('chat-input');
+        if (!chatInput) return;
+        chatInput.style.height = 'auto'; chatInput.style.height = (chatInput.scrollHeight) + 'px';
+    };
 
-    // Asignar los clics de los botones de personalidad
-    // ¡MODIFICADO! Pasa la clave de texto para el localStorage
-    btnJohn?.addEventListener('click', () => startChat(personalities.john, 'john'));
-    btnYari?.addEventListener('click', () => startChat(personalities.yari, 'yari'));
-    btnDanilejo?.addEventListener('click', () => startChat(personalities.danilejo, 'danilejo'));
-    btnMarian?.addEventListener('click', () => startChat(personalities.marian, 'marian'));
+    btnJohn?.addEventListener('click', () => window.startChat(personalities.john, 'john'));
+    btnYari?.addEventListener('click', () => window.startChat(personalities.yari, 'yari'));
+    btnDanilejo?.addEventListener('click', () => window.startChat(personalities.danilejo, 'danilejo'));
+    btnMarian?.addEventListener('click', () => window.startChat(personalities.marian, 'marian'));
 }

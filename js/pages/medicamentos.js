@@ -40,11 +40,10 @@ function renderMedsList() {
                     </div>
                     <div style="display: flex; gap: 0.5rem;">
                         <button class="icon-button edit-btn" data-id="${med.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${med.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${med.id}"><img src="images/icons/trash-2.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
                 <div style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">Recordatorios</span>
                     <label class="switch">
                         <input type="checkbox" class="notify-toggle" data-id="${med.id}" ${med.notify ? 'checked' : ''}> 
                         <span class="slider"></span>

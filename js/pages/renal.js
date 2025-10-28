@@ -63,7 +63,7 @@ function createAndAppendBcmCard(record, container) {
 
     // (Asumiendo que usas SVG inline o tus rutas de imágenes funcionan)
     const editIcon = `<img src="images/icons/edit.svg" alt="Editar">`;
-    const trashIcon = `<img src="images/icons/trash.svg" alt="Eliminar">`;
+    const trashIcon = `<img src="images/icons/trash.svg" class="icon-delete" alt="Eliminar">`;
 
     // Construir HTML de la sección de Peso (SIEMPRE presente)
     const weightHTML = `

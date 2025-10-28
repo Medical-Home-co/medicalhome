@@ -53,7 +53,8 @@ function renderTerapiasList() {
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                         <button class="icon-button edit-btn" data-id="${terapia.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${terapia.id}"><img src="images/icons/trash.svg" alt="Eliminar"></button>
+                        
+                        <button class="icon-button delete-btn" data-id="${terapia.id}"><img src="images/icons/trash.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
                 <div class="card-footer" style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -65,7 +66,6 @@ function renderTerapiasList() {
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                         <span style="font-size: 0.9rem; font-weight: 600;">Recordatorio</span>
                          <label class="switch">
                             <input type="checkbox" class="notify-toggle" data-id="${terapia.id}" ${isNotifyChecked}> 
                             <span class="slider"></span>
@@ -90,12 +90,19 @@ function attachEventListeners() {
     newContainer.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-btn');
         const attendanceBtn = e.target.closest('.attendance-btn');
+        const editBtn = e.target.closest('.edit-btn'); // Añadir listener para editar
 
         if (deleteBtn) {
-            const terapiaId = parseInt(deleteBtn.dataset.id, 10);
-            tempTerapiasDB = tempTerapiasDB.filter(t => t.id !== terapiaId);
-            store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
-            renderTerapiasList();
+            // ===============================================
+            // --- CORRECCIÓN AQUÍ ---
+            // Añadir la confirmación antes de borrar
+            // ===============================================
+            if (confirm('¿Eliminar esta terapia?')) {
+                const terapiaId = parseInt(deleteBtn.dataset.id, 10);
+                tempTerapiasDB = tempTerapiasDB.filter(t => t.id !== terapiaId);
+                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
+                renderTerapiasList();
+            } // <-- Cierre del if (confirm)
         } else if (attendanceBtn) {
             const container = attendanceBtn.closest('.attendance-buttons');
             const terapiaId = parseInt(container.dataset.id, 10);
@@ -108,6 +115,12 @@ function attachEventListeners() {
                 container.querySelectorAll('.attendance-btn').forEach(btn => btn.classList.remove('attended-yes', 'attended-no'));
                 attendanceBtn.classList.add(action === 'yes' ? 'attended-yes' : 'attended-no');
             }
+        } else if (editBtn) { // Lógica para editar
+             const terapiaId = parseInt(editBtn.dataset.id, 10);
+             const terapiaToEdit = tempTerapiasDB.find(t => t.id === terapiaId);
+             if (terapiaToEdit) {
+                 openFormModal(terapiaToEdit); // Llamar a openFormModal con los datos
+             }
         }
     });
 
@@ -129,9 +142,9 @@ function attachEventListeners() {
 
 
 // --- Función principal que se ejecuta al cargar la página ---
+// --- MODIFICADA para incluir edición ---
 export function init() {
-    // <-- Cargar desde el store
-    tempTerapiasDB = store.getTerapias();
+    tempTerapiasDB = store.getTerapias() || []; // Cargar desde el store
 
     const formModal = document.getElementById('terapias-form-modal');
     const addTerapiasInitialBtn = document.getElementById('add-terapia-initial-btn');
@@ -140,11 +153,32 @@ export function init() {
     const terapiaForm = document.getElementById('terapia-form');
     const terapiaTypeSelect = document.getElementById('terapia-type');
     const ambulatorioFields = document.getElementById('ambulatorio-fields');
+    const formTitle = document.getElementById('terapia-form-title'); // Para cambiar el título
 
-    function openFormModal() {
+    // Función para abrir/cerrar modal (Modificada para edición)
+    window.openFormModal = (terapia = null) => { // Hacerla global para attachEventListeners
         terapiaForm.reset();
         document.getElementById('terapia-id').value = '';
         ambulatorioFields.classList.add('hidden');
+        formTitle.textContent = 'Agregar Terapia'; // Título por defecto
+
+        if (terapia) { // Si se pasa una terapia, rellenar el formulario
+            formTitle.textContent = 'Editar Terapia';
+            document.getElementById('terapia-id').value = terapia.id;
+            document.getElementById('terapia-name').value = terapia.name || '';
+            document.getElementById('terapia-date').value = terapia.date || '';
+            document.getElementById('terapia-time').value = terapia.time || '';
+            document.getElementById('terapia-professional').value = terapia.professional || '';
+            document.getElementById('terapia-type').value = terapia.type || 'domiciliario';
+            // Mostrar campos ambulatorios si es necesario
+            if (terapia.type === 'ambulatorio') {
+                ambulatorioFields.classList.remove('hidden');
+                document.getElementById('terapia-entity').value = terapia.entity || '';
+                document.getElementById('terapia-address').value = terapia.address || '';
+                document.getElementById('terapia-phone').value = terapia.phone || '';
+            }
+        }
+
         formModal.classList.remove('hidden');
     }
 
@@ -152,8 +186,8 @@ export function init() {
         formModal.classList.add('hidden');
     }
 
-    addTerapiasInitialBtn.addEventListener('click', openFormModal);
-    addTerapiasMainBtn.addEventListener('click', openFormModal);
+    addTerapiasInitialBtn.addEventListener('click', () => openFormModal()); // Abrir modal vacío
+    addTerapiasMainBtn.addEventListener('click', () => openFormModal()); // Abrir modal vacío
     cancelTerapiaBtn.addEventListener('click', closeFormModal);
 
     terapiaTypeSelect.addEventListener('change', (e) => {
@@ -167,8 +201,11 @@ export function init() {
     terapiaForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData(terapiaForm);
-        const newTerapia = {
-            id: Date.now(),
+        const terapiaIdValue = document.getElementById('terapia-id').value;
+        const id = terapiaIdValue ? parseInt(terapiaIdValue, 10) : Date.now(); // Usar ID existente o crear nuevo
+
+        const terapiaData = {
+            id: id,
             name: formData.get('name'),
             date: formData.get('date'),
             time: formData.get('time'),
@@ -177,13 +214,24 @@ export function init() {
             entity: formData.get('entity'),
             address: formData.get('address'),
             phone: formData.get('phone'),
-            attended: null,
-            notify: true // <-- Usa 'notify', true por defecto
+            attended: null, // Estado inicial de asistencia
+            notify: true    // Estado inicial de notificación
         };
-        
-        newTerapia.location = newTerapia.type === 'ambulatorio' ? newTerapia.entity : 'Domicilio';
+        terapiaData.location = terapiaData.type === 'ambulatorio' ? terapiaData.entity : 'Domicilio';
 
-        tempTerapiasDB.push(newTerapia);
+
+        const existingIndex = terapiaIdValue ? tempTerapiasDB.findIndex(t => t.id === id) : -1;
+
+        if (existingIndex > -1) {
+            // Es edición: mantener estado 'attended' y 'notify'
+            terapiaData.attended = tempTerapiasDB[existingIndex].attended;
+            terapiaData.notify = tempTerapiasDB[existingIndex].notify;
+            tempTerapiasDB[existingIndex] = terapiaData;
+        } else {
+            // Es nuevo: añadir
+            tempTerapiasDB.push(terapiaData);
+        }
+
         store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
         closeFormModal();
         renderTerapiasList();

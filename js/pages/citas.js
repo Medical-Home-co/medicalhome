@@ -54,7 +54,7 @@ function renderCitasList() {
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                         <button class="icon-button edit-btn" data-id="${entryId}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${entryId}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${entryId}"><img src="images/icons/trash-2.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
                 <div class="card-footer" style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -67,7 +67,6 @@ function renderCitasList() {
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                         <span style="font-size: 0.9rem; font-weight: 600;">Recordatorio</span>
                          <label class="switch">
                             <input type="checkbox" class="notify-toggle" data-id="${entryId}" ${isNotifyChecked}>
                             <span class="slider"></span>

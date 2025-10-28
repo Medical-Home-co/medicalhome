@@ -60,7 +60,7 @@ function renderArtritisList() {
                     </div>
                     <div class="card-actions" style="display: flex; gap: 0.5rem;">
                         <button class="icon-button edit-btn" data-id="${rec.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash-2.svg" alt="Eliminar"></button>
+                        <button class="icon-button delete-btn" data-id="${rec.id}"><img src="images/icons/trash-2.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
                 <div class="card-body">
