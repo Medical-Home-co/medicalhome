@@ -507,6 +507,7 @@ ul { list-style: none; }
 }
 
 /* --- Switch de Tema --- */
+/* (Este es el estilo para el switch de tema en el sidebar) */
 .switch { position: relative; }
 .switch input { display: none; }
 .switch label {
@@ -534,9 +535,94 @@ body.dark-theme .switch label span:first-child {
 }
 
 /* --- Toggle Switch (Recordatorios) --- */
-/* (Estilos duplicados de .switch, se podrían unificar) */
-/* .switch { ... } */
-/* .slider { ... } */
+/* ================================================================
+  --- INICIO: CORRECCIÓN v3 (Color sutil, knob blanco, icono negro) ---
+  ================================================================
+*/
+
+/* Contenedor del toggle */
+label.switch {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle; 
+    width: 52px;  /* Tamaño +2px */
+    height: 28px; /* Tamaño +2px */
+}
+label.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Fondo (slider) */
+label.switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-secondary); /* Color 'off' (fondo) */
+    border: 1px solid var(--border-color);
+    transition: .4s;
+    border-radius: 15px;
+}
+
+/* Círculo (knob) */
+label.switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px; /* Tamaño +2px */
+    width: 22px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-radius: 50%;
+    transition: .4s;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    
+    /* Icono 'OFF' (bell-off.svg) */
+    background-image: url('images/icons/bell-off.svg');
+    background-size: 14px 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* Modo oscuro: knob 'OFF' */
+body.dark-theme label.switch .slider:before {
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* --- Estado 'ON' (Checked) --- */
+
+/* Fondo (slider) 'ON' */
+label.switch input:checked + .slider {
+    /* CORRECCIÓN: Verde sutil (tomado de tu paleta 'attended-yes') */
+    background-color: #A5D6A7; 
+    border-color: #A5D6A7;
+}
+
+/* Mueve el knob 'ON' */
+label.switch input:checked + .slider:before {
+    transform: translateX(26px);
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-color: transparent;
+
+    /* Icono 'ON' (bell-ring.svg) */
+    background-image: url('images/icons/bell-ring.svg');
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* Modo oscuro: knob 'ON' */
+body.dark-theme label.switch input:checked + .slider:before {
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-color: transparent;
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+/* === FIN: CORRECCIÓN v3 === */
+
 
 /* --- Botones de Citas --- */
 .attendance-btn {
@@ -1130,3 +1216,132 @@ body.dark-theme .icon-whatsapp {
 }
 
 /* ===== FIN: ESTILOS PARA ASISTENTE VIRTUAL ===== */
+
+/* =================================================================== */
+/* ===== INICIO: CORRECCIONES ASISTENTE VIRTUAL (v7 - Colores Sombra) ===== */
+/* =================================================================== */
+
+/* --- Variables de Color con Transparencia para Sombras --- */
+:root {
+    /* (Tus variables originales --color-john, etc., se mantienen) */
+    --color-john-t60: rgba(58, 134, 255, 0.6); /* Azul 60% opacidad */
+    --color-john-t40: rgba(58, 134, 255, 0.4); /* Azul 40% opacidad */
+    --color-yari-t60: rgba(37, 211, 102, 0.6); /* Verde 60% opacidad */
+    --color-yari-t40: rgba(37, 211, 102, 0.4); /* Verde 40% opacidad */
+    --color-danilejo-t60: rgba(155, 89, 182, 0.6); /* Morado 60% opacidad */
+    --color-danilejo-t40: rgba(155, 89, 182, 0.4); /* Morado 40% opacidad */
+    --color-marian-t60: rgba(230, 126, 34, 0.6); /* Naranja 60% opacidad */
+    --color-marian-t40: rgba(230, 126, 34, 0.4); /* Naranja 40% opacidad */
+}
+
+
+/* --- 1. Hover de selección más notorio (Sin cambios) --- */
+.personality-button:hover {
+    transform: translateY(-5px) scale(1.03); 
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+.personality-button:hover::before {
+    opacity: 0.3; 
+}
+
+/* --- 2. Switcher de Avatares (SIN contenedor) --- */
+.assistant-switcher {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem; 
+    margin-bottom: 1.5rem; 
+}
+
+.switch-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent; /* Borde transparente por defecto */
+}
+
+.switch-avatar.grayscale {
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transform: scale(0.9);
+}
+
+.switch-avatar.grayscale:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Estado base del avatar activo (sin sombra específica aún) */
+.switch-avatar:not(.grayscale) {
+    transform: scale(1.1);
+    /* CORRECCIÓN: Quitamos la sombra azul genérica de aquí */
+    /* box-shadow: ... quitado ...; */ 
+}
+
+/* --- ¡NUEVO! Sombras y Bordes Específicos por Asistente --- */
+.switch-avatar.active-john {
+    border-color: var(--color-john);
+    box-shadow: 0 0 15px 5px var(--color-john-t60), inset 0 0 8px 2px var(--color-john-t40);
+}
+.switch-avatar.active-yari {
+    border-color: var(--color-yari);
+    box-shadow: 0 0 15px 5px var(--color-yari-t60), inset 0 0 8px 2px var(--color-yari-t40);
+}
+.switch-avatar.active-danilejo {
+    border-color: var(--color-danilejo);
+    box-shadow: 0 0 15px 5px var(--color-danilejo-t60), inset 0 0 8px 2px var(--color-danilejo-t40);
+}
+.switch-avatar.active-marian {
+    border-color: var(--color-marian);
+    box-shadow: 0 0 15px 5px var(--color-marian-t60), inset 0 0 8px 2px var(--color-marian-t40);
+}
+
+
+/* --- 3. Selector de Personalidad (SIN contenedor) (Sin cambios) --- */
+#personality-selector {
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    margin-bottom: 1.5rem; 
+}
+.personality-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 600px; 
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Estilos .personality-button sin cambios */
+
+
+/* --- 4. Corrección Vista Móvil (2x2) (Sin cambios) --- */
+@media (max-width: 480px) {
+    .personality-options {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .profile-image-container {
+        width: 80px;
+        height: 80px;
+    }
+    .personality-button h4 {
+        font-size: 1.1rem;
+    }
+    .personality-button p {
+        font-size: 0.8rem;
+        height: 4em; 
+    }
+    .assistant-switcher {
+        gap: 1rem;
+    }
+    .switch-avatar {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ===== FIN: CORRECCIONES ASISTENTE VIRTUAL (v7 - Colores Sombra) ===== */
