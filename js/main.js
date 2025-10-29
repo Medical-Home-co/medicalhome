@@ -1,8 +1,34 @@
 /* --- js/main.js --- */
 import { store } from './store.js';
 
+// --- INICIO: MODIFICACIÓN MODO INVITADO ---
+// Funciones globales para controlar el modal de advertencia
+
+// 1. Declarar la variable aquí
+let guestWarningModal; 
+
+window.showGuestWarningModal = () => {
+    // 2. Comprobar si existe antes de usarla
+    if (!guestWarningModal) {
+        guestWarningModal = document.getElementById('guest-warning-modal');
+    }
+    guestWarningModal?.classList.remove('hidden');
+}
+window.hideGuestWarningModal = () => {
+    if (!guestWarningModal) {
+        guestWarningModal = document.getElementById('guest-warning-modal');
+    }
+    guestWarningModal?.classList.add('hidden');
+}
+// --- FIN: MODIFICACIÓN MODO INVITADO ---
+
+
 document.addEventListener('DOMContentLoaded', async () => { // Convertido a async
-    /* ... (Código inicial sin cambios: lucide, body, appShell, appContent) ... */
+    // --- INICIO: MODIFICACIÓN MODO INVITADO ---
+    // 3. Asignar la variable DESPUÉS de que el DOM cargue
+    guestWarningModal = document.getElementById('guest-warning-modal');
+    // --- FIN: MODIFICACIÓN MODO INVITADO ---
+
     if (window.lucide) { try { lucide.createIcons(); } catch(e){} }
     const body = document.body;
     const appShell = document.querySelector('.app-shell');
@@ -87,30 +113,74 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
     window.addEventListener('hashchange', handleNavigation);
 
     /* --- Lógica Modales (Bienvenida, etc.) --- */
-    /* ... (código modal bienvenida sin cambios) ... */
-    const welcomeModal = document.getElementById('welcome-modal'); if (welcomeModal) { const guestBtn = document.getElementById('guest-btn'); const createUserBtn = document.getElementById('create-user-btn'); const dontShowAgainCheckbox = document.getElementById('dont-show-again'); const welcomeModalShown = localStorage.getItem('welcomeModalShown'); let hasUserData = false; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key !== 'theme' && key !== 'welcomeModalShown') { hasUserData = true; break; } } if (!welcomeModalShown && !hasUserData) { welcomeModal.classList.remove('hidden'); } else { welcomeModal.classList.add('hidden'); } function closeModal(isGuestAction = false) { if (dontShowAgainCheckbox && dontShowAgainCheckbox.checked && !isGuestAction) { try { localStorage.setItem('welcomeModalShown', 'true'); } catch (error) { console.error("Error localStorage:", error); } } welcomeModal.classList.add('hidden'); } guestBtn?.addEventListener('click', () => { closeModal(true); store.loadGuestData(); window.location.hash = '#dashboard'; handleNavigation(); }); createUserBtn?.addEventListener('click', () => { closeModal(); const theme = localStorage.getItem('theme'); localStorage.clear(); if (theme) localStorage.setItem('theme', theme); localStorage.setItem('welcomeModalShown', 'true'); sessionStorage.setItem('openProfileModal', 'true'); window.location.hash = '#perfil'; handleNavigation(); }); } else { console.warn("#welcome-modal no encontrado"); }
+    const welcomeModal = document.getElementById('welcome-modal'); 
+    if (welcomeModal) { 
+        const guestBtn = document.getElementById('guest-btn'); 
+        const createUserBtn = document.getElementById('create-user-btn'); 
+        const dontShowAgainCheckbox = document.getElementById('dont-show-again'); 
+        const welcomeModalShown = localStorage.getItem('welcomeModalShown'); 
+        
+        let hasUserData = false; 
+        for (let i = 0; i < localStorage.length; i++) { 
+            const key = localStorage.key(i); 
+            // --- INICIO: MODIFICACIÓN MODO INVITADO ---
+            // El modo invitado no cuenta como "datos de usuario" para este modal
+            if (key !== 'theme' && key !== 'welcomeModalShown' && key !== 'medicalHome-userMode') { 
+            // --- FIN: MODIFICACIÓN MODO INVITADO ---
+                hasUserData = true; 
+                break; 
+            } 
+        } 
+        
+        if (!welcomeModalShown && !hasUserData) { 
+            welcomeModal.classList.remove('hidden'); 
+        } else { 
+            welcomeModal.classList.add('hidden'); 
+        } 
+        
+        function closeModal(isGuestAction = false) { 
+            if (dontShowAgainCheckbox && dontShowAgainCheckbox.checked && !isGuestAction) { 
+                try { localStorage.setItem('welcomeModalShown', 'true'); } catch (error) { console.error("Error localStorage:", error); } 
+            } 
+            welcomeModal.classList.add('hidden'); 
+        } 
+        
+        guestBtn?.addEventListener('click', () => { 
+            closeModal(true); 
+            store.loadGuestData(); // ¡Esta función ahora recarga la página!
+        }); 
+        
+        createUserBtn?.addEventListener('click', () => { 
+            closeModal(); 
+            const theme = localStorage.getItem('theme'); 
+            localStorage.clear(); 
+            if (theme) localStorage.setItem('theme', theme); 
+            localStorage.setItem('welcomeModalShown', 'true'); 
+            sessionStorage.setItem('openProfileModal', 'true'); 
+            window.location.hash = '#perfil'; 
+            handleNavigation(); 
+        }); 
+    } else { console.warn("#welcome-modal no encontrado"); }
     
     /* --- (Resto de listeners sin cambios) --- */
-    /* ... (código idéntico al anterior) ... */
-    // --- ARREGLO: Mover Lógica de Modales a delegación de eventos ---
     const aboutModal = document.getElementById('about-modal'); 
     const reportModal = document.getElementById('report-modal'); 
     
     function openModal(modal) { modal?.classList.remove('hidden'); } 
     function closeModalOnClick(modal) { modal?.classList.add('hidden'); } 
     
-    // Quitar listeners antiguos
-    // const aboutBtn = document.getElementById('about-btn'); 
-    // const reportBtn = document.getElementById('report-btn'); 
-    // aboutBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(aboutModal); }); 
-    // reportBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(reportModal); }); 
+    document.querySelectorAll('.close-modal-btn').forEach(btn => { 
+        btn.addEventListener('click', () => { 
+            const modalToClose = btn.closest('.modal-overlay'); 
+            closeModalOnClick(modalToClose); 
+        }); 
+    }); 
     
-    document.querySelectorAll('.close-modal-btn').forEach(btn => { btn.addEventListener('click', () => { const modalToClose = btn.closest('.modal-overlay'); closeModalOnClick(modalToClose); }); }); 
-    const reportForm = document.getElementById('report-form'); reportForm?.addEventListener('submit', (e) => { e.preventDefault(); const textElement = document.getElementById('report-text'); const text = textElement ? textElement.value : ''; window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte MedicalHome&body=${encodeURIComponent(text)}`; closeModalOnClick(reportModal); });
-    const collapseBtn = document.querySelector('.collapse-btn'); if (collapseBtn) { collapseBtn.addEventListener('click', () => { appShell?.classList.toggle('collapsed'); const isCollapsed = appShell?.classList.contains('collapsed'); collapseBtn.setAttribute('aria-expanded', !isCollapsed); }); }
+    const reportForm = document.getElementById('report-form'); 
+    reportForm?.addEventListener('submit', (e) => { e.preventDefault(); const textElement = document.getElementById('report-text'); const text = textElement ? textElement.value : ''; window.location.href = `mailto:viviraplicaciones@gmail.com?subject=Reporte MedicalHome&body=${encodeURIComponent(text)}`; closeModalOnClick(reportModal); });
     
-    // Quitar listener de accordion antiguo
-    // document.body.addEventListener('click', (e) => { const accordionToggle = e.target.closest('.accordion-toggle'); if (accordionToggle) { e.preventDefault(); const parentItem = accordionToggle.closest('.nav-item-accordion'); parentItem?.classList.toggle('open'); } });
+    const collapseBtn = document.querySelector('.collapse-btn'); 
+    if (collapseBtn) { collapseBtn.addEventListener('click', () => { appShell?.classList.toggle('collapsed'); const isCollapsed = appShell?.classList.contains('collapsed'); collapseBtn.setAttribute('aria-expanded', !isCollapsed); }); }
     
     const mobileMenuBtn = document.getElementById('mobile-menu-btn'); 
     const mobileMenuModal = document.getElementById('mobile-menu-modal'); 
@@ -126,23 +196,20 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
                     const clonedNav = desktopNav.cloneNode(true); 
                     mobileMenuContent.appendChild(clonedNav); 
                     
-                    // --- ARREGLO: Clonar también el Footer ---
                     const desktopFooter = document.querySelector('.sidebar-nav > .sidebar-footer');
                     if (desktopFooter) {
                         const clonedFooter = desktopFooter.cloneNode(true);
                         mobileMenuContent.appendChild(clonedFooter);
                         
-                        // --- ARREGLO: Re-enganchar listener del theme toggle clonado ---
                         const mobileToggle = clonedFooter.querySelector('#theme-toggle-desktop');
                         if (mobileToggle) {
-                            mobileToggle.id = 'theme-toggle-mobile'; // Darle un nuevo ID
+                            mobileToggle.id = 'theme-toggle-mobile'; 
                             mobileToggle.addEventListener('change', () => {
                                 body.classList.toggle('dark-theme');
                                 localStorage.setItem('theme', mobileToggle.checked ? 'dark' : 'light');
                             });
                         }
                     }
-                    // --- FIN ARREGLO ---
                     
                     isMenuCloned = true; 
                 } catch (error) { console.error("Error clonando menú:", error); } 
@@ -154,7 +221,6 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
         
         if (mobileMenuContent) { 
             mobileMenuContent.addEventListener('click', (e) => { 
-                // --- ARREGLO: No cerrar el modal si se hace click en un accordion ---
                 if (e.target.closest('a') && !e.target.closest('.accordion-toggle')) {
                     mobileMenuModal.classList.add('hidden'); 
                 }
@@ -175,11 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
         }); 
     }
     
-    // Quitar listener de share antiguo
-    // document.querySelectorAll('a[href="#share"]').forEach(shareLink => { ... });
-
     // --- ARREGLO: Listener de BODY para delegación de eventos ---
-    // Esto maneja clicks en botones de PC y Móvil (clonados)
     document.body.addEventListener('click', async (e) => {
         // 1. Lógica de Modales
         const aboutBtn = e.target.closest('#about-btn');
@@ -203,22 +265,19 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
             parentItem?.classList.toggle('open');
         }
 
-        // --- INICIO: Lógica de Compartir Mejorada ---
+        // 3. Lógica de Compartir Mejorada
         const shareLink = e.target.closest('a[href="#share"]');
         if (shareLink) {
             e.preventDefault();
             
             const shareTitle = 'MedicalHome';
             const shareText = '¡Descubre MedicalHome, tu asistente de salud personal!';
-            // --- INICIO: Corrección - Re-agregamos la URL ---
             const shareUrl = window.location.origin + window.location.pathname;
-            // --- FIN: Corrección - Re-agregamos la URL ---
 
 
             if (navigator.share) {
                 let imageFile = null;
                 try {
-                    // 1. Intentar cargar la imagen desde la URL absoluta
                     const response = await fetch('https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true');
                     if (response.ok) {
                         const blob = await response.blob();
@@ -232,50 +291,66 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
                 }
 
                 try {
-                    // --- INICIO: Corrección - Re-agregamos la URL ---
                     const shareData = {
                         title: shareTitle,
                         text: shareText,
-                        url: shareUrl, // Propiedad URL re-agregada
+                        url: shareUrl, 
                     };
-                    // --- FIN: Corrección - Re-agregamos la URL ---
 
                     if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-                        // 2. Intentar compartir con imagen
                         shareData.files = [imageFile];
                         await navigator.share(shareData);
                     } else {
-                        // 3. Compartir solo texto (fallback si no se puede compartir archivos o falló la carga)
                         await navigator.share({
                             title: shareTitle,
                             text: shareText,
-                            url: shareUrl // Propiedad URL re-agregada
+                            url: shareUrl
                         });
                     }
                 } catch (err) {
-                    // Ignorar errores AbortError (el usuario canceló)
                     if (err.name !== 'AbortError') {
                         console.error('Error al usar navigator.share:', err);
                     }
                 }
 
             } else {
-                // 4. Fallback para navegadores sin API de Share (ej. PC)
-                // --- INICIO: Corrección - Volvemos a copiar la URL ---
                 try { 
-                    await navigator.clipboard.writeText(shareUrl); // Copiamos la URL
-                    // NO USAR ALERT.
+                    await navigator.clipboard.writeText(shareUrl); 
                     console.log('¡Enlace de la app copiado al portapapeles!');
                 } catch (err) { 
                     console.error('No se pudo copiar el enlace.'); 
                 }
-                // --- FIN: Corrección - Volvemos a copiar la URL ---
             }
         }
-        // --- FIN: Lógica de Compartir Mejorada ---
     });
     // --- FIN ARREGLO ---
 
+    // --- INICIO: MODIFICACIÓN MODO INVITADO ---
+    // Lógica para el botón "Crear Usuario" del *nuevo* modal de advertencia
+    const guestWarningCreateBtn = document.getElementById('guest-warning-create-btn');
+    if (guestWarningCreateBtn) {
+        guestWarningCreateBtn.addEventListener('click', () => {
+            console.log("Cambiando de Invitado a Crear Usuario...");
+            
+            // 1. Ocultar el modal
+            hideGuestWarningModal();
+
+            // 2. Limpiar la sesión de invitado (misma lógica que el botón "Crear Usuario" del welcome-modal)
+            const theme = localStorage.getItem('theme'); 
+            localStorage.clear(); 
+            if (theme) localStorage.setItem('theme', theme); 
+            localStorage.setItem('welcomeModalShown', 'true'); 
+            
+            // 3. Preparar para abrir el formulario de perfil
+            sessionStorage.setItem('openProfileModal', 'true'); 
+            
+            // 4. Navegar a la página de perfil y forzar recarga
+            // La recarga es crucial para limpiar el estado de la app
+            window.location.hash = '#perfil'; 
+            window.location.reload();
+        });
+    }
+    // --- FIN: MODIFICACIÓN MODO INVITADO ---
     
     // --- SOLUCIÓN: Actualizar Sidebar al Cargar ---
     try {
@@ -297,6 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
     }
     // --- FIN SOLUCIÓN ---
 
+    
     await handleNavigation(); // Carga inicial
 
     // --- INICIO: Corrección Splash Screen ---
@@ -309,4 +385,3 @@ document.addEventListener('DOMContentLoaded', async () => { // Convertido a asyn
     }
     // --- FIN: Corrección Splash Screen ---
 });
-
