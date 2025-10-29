@@ -1,0 +1,44 @@
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Gráficas de Seguimiento</h2>
+            <p class="page-subtitle">Visualiza la evolución de tus datos de salud.</p>
+        </div>
+        </div>
+
+    <div class="content-grid" style="grid-template-columns: 1fr;">
+
+        <div class="summary-card">
+            <h3 class="card-title">Seguimiento Cardíaco</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="graficoCardiaco"></canvas>
+            </div>
+            <p id="cardiaco-no-data" class="hidden" style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">No hay suficientes datos para mostrar el gráfico.</p>
+        </div>
+
+        <div class="summary-card">
+            <h3 class="card-title">Seguimiento Diabetes (Glucosa)</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="graficoDiabetes"></canvas>
+            </div>
+             <p id="diabetes-no-data" class="hidden" style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">No hay suficientes datos para mostrar el gráfico.</p>
+        </div>
+
+        <div class="summary-card">
+            <h3 class="card-title">Seguimiento Renal (Peso y Ganancia)</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="graficoPesoRenal"></canvas>
+            </div>
+             <p id="renal-no-data" class="hidden" style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">No hay suficientes datos para mostrar el gráfico.</p>
+        </div>
+
+        <div class="summary-card">
+            <h3 class="card-title">Seguimiento Artritis (Nivel de Dolor)</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="graficoArtritisDolor"></canvas>
+            </div>
+             <p id="artritis-no-data" class="hidden" style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">No hay suficientes datos para mostrar el gráfico.</p>
+        </div>
+
+    </div>
+</div>
