@@ -1386,3 +1386,52 @@ body.dark-theme .icon-whatsapp {
 }
 
 /* ===== FIN: Estilos Modal Advertencia Invitado (Corregido) ===== */
+
+/* =================================================================== */
+/* ===== INICIO: THEMING DEL CHAT POR ASISTENTE ===== */
+/* =================================================================== */
+
+/* --- Colores Base (ya los tienes) --- */
+/* :root {
+    --color-john: #3A86FF;
+    --color-yari: #25D366;
+    --color-danilejo: #9b59b6;
+    --color-marian: #e67e22;
+} */
+
+/* --- Estilos Temáticos --- */
+
+/* 1. Mensajes del Usuario */
+.chatting-with-john .user-message { background-color: var(--color-john); }
+.chatting-with-yari .user-message { background-color: var(--color-yari); }
+.chatting-with-danilejo .user-message { background-color: var(--color-danilejo); }
+.chatting-with-marian .user-message { background-color: var(--color-marian); }
+/* Asegurar color de texto blanco para contraste */
+.user-message { color: white !important; }
+
+/* 2. Botón Enviar */
+.chatting-with-john #send-chat-btn { background-color: var(--color-john); border-color: var(--color-john); }
+.chatting-with-yari #send-chat-btn { background-color: var(--color-yari); border-color: var(--color-yari); }
+.chatting-with-danilejo #send-chat-btn { background-color: var(--color-danilejo); border-color: var(--color-danilejo); }
+.chatting-with-marian #send-chat-btn { background-color: var(--color-marian); border-color: var(--color-marian); }
+/* Estado Hover para el botón (oscurecer ligeramente) */
+.chatting-with-john #send-chat-btn:hover { background-color: #3171e0; border-color: #3171e0; } /* Ajusta si tienes variables dark */
+.chatting-with-yari #send-chat-btn:hover { background-color: #1da851; border-color: #1da851; }
+.chatting-with-danilejo #send-chat-btn:hover { background-color: #8243a0; border-color: #8243a0; }
+.chatting-with-marian #send-chat-btn:hover { background-color: #c96e1c; border-color: #c96e1c; }
+
+/* 3. Borde del Input al Enfocar (Opcional) */
+.chatting-with-john #chat-input:focus { border-color: var(--color-john); box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3); }
+.chatting-with-yari #chat-input:focus { border-color: var(--color-yari); box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.3); }
+.chatting-with-danilejo #chat-input:focus { border-color: var(--color-danilejo); box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.3); }
+.chatting-with-marian #chat-input:focus { border-color: var(--color-marian); box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.3); }
+
+/* 4. Info Box (Ya tenías clases como info-john, info-yari, etc.) */
+/* Puedes ajustar estas clases si quieres que cambien más cosas */
+.info-box.info-john { border-left-color: var(--color-john); /* Ya cambia fondo y texto */ }
+.info-box.info-yari { border-left-color: var(--color-yari); /* Ya cambia fondo y texto */ }
+.info-box.info-danilejo { border-left-color: var(--color-danilejo); /* Ya cambia fondo y texto */ }
+.info-box.info-marian { border-left-color: var(--color-marian); /* Ya cambia fondo y texto */ }
+
+
+/* ===== FIN: THEMING DEL CHAT POR ASISTENTE ===== */

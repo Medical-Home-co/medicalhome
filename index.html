@@ -5,60 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedicalHome</title>
 
-    <!-- INICIO: Etiquetas SEO y Open Graph -->
-    <!-- NOTA: Para que 'og:image' y 'og:url' funcionen correctamente en producción,
-         debes reemplazar la ruta relativa 'images/icono.png' por una URL ABSOLUTA 
-         (ej: https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true) -->
-    <meta name="description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
     
-    <!-- Open Graph (para WhatsApp, Facebook, etc.) -->
+    <meta name="description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
     <meta property="og:title" content="MedicalHome">
     <meta property="og:description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
-    <meta property="og:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true"> <!-- Usar un PNG es más compatible -->
-    <meta property="og:url" content=""> <!-- Poner tu URL absoluta aquí -->
+    <meta property="og:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true">
+    <meta property="og:url" content=""> 
     <meta property="og:type" content="website">
-    
-    <!-- Twitter Card (para X) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="MedicalHome">
     <meta name="twitter:description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
-    <meta name="twitter:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true"> 
-<!-- Usar un PNG es más compatible -->
+    <meta name="twitter:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true">
 
-    <!-- FIN: Etiquetas SEO y Open Graph -->
-
-    <!-- Actualizado el cache-buster a v=1.0.4 -->
-    <link rel="stylesheet" href="style.css?v=1.0.4">
+    
+    <link rel="stylesheet" href="style.css?v=1.0.5"> 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
-    </head>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    
+
+</head>
 <body class="hidden">
 
-    <!-- ===== INICIO: Splash Screen HTML (Corregido) ===== -->
+    
     <div id="splash-screen" class="splash-screen">
         <img src="images/icono.png" alt="Logo" class="splash-logo">
         <div class="progress-bar-container">
             <div class="progress-bar"></div>
         </div>
-        <!-- Texto del nombre de la app añadido -->
-        <br><br><br><br><br><br><br><br>
-       <!-- <p class="splash-text" id="splash-app-name">MedicalHome</p>-->
         <p class="splash-text" id="splash-slogan">Tu asistente de salud personal</p>
     </div>
-    <!-- ===== FIN: Splash Screen HTML ===== -->
 
+    
     <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <img src="images/logo.png" alt="Logo de MedicalHome" class="modal-logo">
             <h2 class="modal-title">Bienvenido a MedicalHome</h2>
             <p class="modal-subtitle">Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos en un solo lugar, de forma segura y privada.</p>
-            <div class="modal-actions">
+            <div class="modal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <button id="guest-btn" class="button button-secondary">Explorar como invitado</button>
                 <button id="create-user-btn" class="button button-primary">Crear Usuario</button>
             </div>
-            <div class="modal-footer">
-                <label class="checkbox-label">
+            <div class="modal-footer" style="text-align: center;">
+                <label class="checkbox-label" style="justify-content: center;">
                     <input type="checkbox" id="dont-show-again"> No volver a mostrar
                 </label>
             </div>
@@ -71,7 +63,7 @@
             <h2 class="modal-title">Sobre VivirAplicaciones</h2>
             <p class="modal-subtitle">Somos una organización sin ánimo de lucro centrada en desarrollar tecnología accesible para pacientes y personas con condiciones de salud delicadas, buscando mejorar su calidad de vida a través de herramientas intuitivas y seguras.</p>
             <div class="modal-actions">
-                 <button class="button button-primary close-modal-btn">Cerrar</button>
+                 <button class="button button-primary close-modal-btn" style="width: 100%;">Cerrar</button>
             </div>
         </div>
     </div>
@@ -81,7 +73,7 @@
            <h2 class="modal-title"> Reportar un Fallo</h2>
             <p class="modal-subtitle">Si has encontrado un error o tienes una sugerencia, por favor, descríbelo a continuación. Tu ayuda es muy valiosa para nosotros.</p>
             <form id="report-form" class="modal-form">
-                <textarea id="report-text" placeholder="Describe el problema o la sugerencia aquí..." required></textarea>
+                <textarea id="report-text" class="form-input" placeholder="Describe el problema o la sugerencia aquí..." required></textarea>
                 <div class="modal-actions" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <button type="submit" class="button button-primary" style="width: 100%;">Enviar Reporte</button>
                     <button type="button" class="button button-secondary close-modal-btn" style="width: 100%;">Cancelar</button>
@@ -90,7 +82,10 @@
         </div>
     </div>
 
+    
     <div class="app-shell">
+        
+
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-profile">
@@ -99,77 +94,110 @@
                         <span class="profile-name" id="sidebar-username">Hola, Invitado</span>
                     </div>
                 </div>
+
+              <!-- INICIO: MENÚ LATERAL REORDENADO -->
                 <ul class="nav-links">
+                    
+
+                    <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
                     <li><a href="#dashboard" class="nav-link active"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
-                   <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
+                    <li><a href="#graficas" class="nav-link"><img src="images/icons/chart-area.svg" class="nav-icon-img" alt="Gráficas"><span>Gráficas</span></a></li>
+
                     <hr class="nav-divider">
-                   <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
-                   <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
+
+                    <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
+                    <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
                     <li><a href="#terapias" class="nav-link"><img src="images/icons/accessibility.svg" class="nav-icon-img" alt="Terapias"><span>Terapias</span></a></li>
+
+                    <hr class="nav-divider">
+
                     <li class="nav-item-accordion">
                         <a href="#" class="nav-link accordion-toggle">
-                            <span><img src="images/icons/microscope.svg" class="nav-icon-img" alt="Condición Médica"> Condición Médica</span><img src="images/icons/chevron-down.svg" class="chevron nav-icon-img" alt="Desplegar">
-                            
+                            <span><img src="images/icons/microscope.svg" class="nav-icon-img" alt="Condición Médica"> Condición Médica</span>
+                            <img src="images/icons/chevron-down.svg" class="chevron nav-icon-img" alt="Desplegar">
                         </a>
                         <ul class="sub-menu">
                             <li><a href="#renal" class="nav-link sub-link"><img src="images/icons/bean.svg" class="nav-icon-img" alt="Renal"> BCM (Renal)</a></li>
                             <li><a href="#cardiaco" class="nav-link sub-link"><img src="images/icons/heart.svg" class="nav-icon-img" alt="Cardiaco"> Cardiaco</a></li>
                             <li><a href="#diabetes" class="nav-link sub-link"><img src="images/icons/candy.svg" class="nav-icon-img" alt="Diabetes"> Diabetes</a></li>
                             <li><a href="#artritis" class="nav-link sub-link"><img src="images/icons/dumbbell.svg" class="nav-icon-img" alt="Artritis"> Artritis</a></li>
-                           <li><a href="#tea" class="nav-link sub-link"><img src="images/icons/puzzle.svg" class="nav-icon-img" alt="TEA"> TEA</a></li>
-                           <li><a href="#respiratorio" class="nav-link sub-link"><img src="images/icons/wind.svg" class="nav-icon-img" alt="Respiratorio"> Respiratorio</a></li>
-                           <li><a href="#gastrico" class="nav-link sub-link"><img src="images/icons/hospital.svg" class="nav-icon-img" alt="Gástrico"> Gástrico</a></li>
-                           <li><a href="#ocular" class="nav-link sub-link"><img src="images/icons/scan-eye.svg" class="nav-icon-img" alt="Ocular"> Ocular</a></li>
+                            <li><a href="#tea" class="nav-link sub-link"><img src="images/icons/puzzle.svg" class="nav-icon-img" alt="TEA"> TEA</a></li>
+                            <li><a href="#respiratorio" class="nav-link sub-link"><img src="images/icons/wind.svg" class="nav-icon-img" alt="Respiratorio"> Respiratorio</a></li>
+                            <li><a href="#gastrico" class="nav-link sub-link"><img src="images/icons/hospital.svg" class="nav-icon-img" alt="Gástrico"> Gástrico</a></li>
+                            <li><a href="#ocular" class="nav-link sub-link"><img src="images/icons/scan-eye.svg" class="nav-icon-img" alt="Ocular"> Ocular</a></li>
                             <li><a href="#general" class="nav-link sub-link"><img src="images/icons/clipboard-list.svg" class="nav-icon-img" alt="General"> General</a></li>
                         </ul>
                     </li>
+
                     <hr class="nav-divider">
-                    <li><a href="#agenda" class="nav-link"><img src="images/icons/book-user.svg" class="nav-icon-img" alt="Agenda"><span>Agenda</span></a></li>
+
                     <li><a href="#asistente-ia" class="nav-link"><img src="images/icons/bot.svg" class="nav-icon-img" alt="Asistente Virtual"><span>Asistente Virtual</span></a></li>
-                   <li><a href="#bienestar" class="nav-link"><img src="images/icons/flower-2.svg" class="nav-icon-img" alt="Bienestar"><span>Bienestar</span></a></li>
-                    <hr class="nav-divider">
+                    <li><a href="#agenda" class="nav-link"><img src="images/icons/book-user.svg" class="nav-icon-img" alt="Agenda"><span>Agenda</span></a></li>
+                    <li><a href="#bienestar" class="nav-link"><img src="images/icons/flower-2.svg" class="nav-icon-img" alt="Bienestar"><span>Bienestar</span></a></li>
                     <li><a href="#notificaciones" class="nav-link"><img src="images/icons/bell.svg" class="nav-icon-img" alt="Notificaciones"><span>Notificaciones</span></a></li>
-                    <li><a href="#share" class="nav-link"><img src="images/icons/share-2.svg" class="nav-icon-img" alt="Compartir App"><span>Compartir App</span></a></li>
+
+                    <hr class="nav-divider">
+
                     <li><a href="#about" class="nav-link" id="about-btn"><img src="images/marca.png" class="nav-icon-img"/><span>Quiénes somos</span></a></li>
+                    <li><a href="#share" class="nav-link"><img src="images/icons/share-2.svg" class="nav-icon-img" alt="Compartir App"><span>Compartir App</span></a></li>
                     <li><a href="#report" class="nav-link" id="report-btn"><img src="images/icons/shield-alert.svg" class="nav-icon-img" alt="Reportar fallo"><span>Reportar fallo</span></a></li>
+
                 </ul>
+                
+
 
                 <div class="sidebar-footer">
-                    <div class="switch">
-                        <input type="checkbox" id="theme-toggle-desktop">
-                        <label for="theme-toggle-desktop"><span></span><span></span></label>
+                    <div class="footer-actions">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tema</span>
+                        <div class="switch">
+                             <input type="checkbox" id="theme-toggle-desktop">
+                             <label for="theme-toggle-desktop"><span></span><span></span></label>
+                        </div>
                     </div>
                     <hr class="nav-divider">
-                   <a href="#logout" class="nav-link"><img src="images/icons/log-out.svg" class="nav-icon-img" alt="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+                    
+
+                   <a href="#logout" class="nav-link logout-btn"><img src="images/icons/log-out.svg" class="nav-icon-img" alt="Cerrar Sesión"><span>Cerrar Sesión</span></a>
                     <hr class="nav-divider">
-                    <button class="collapse-btn" aria-expanded="true" aria-label="Cerrar menú">
-                         
-                        <span class="collapse-text-open"><img src="images/icons/chevrons-left.svg" class="collapse-icon-open nav-icon-img" alt="Cerrar">Cerrar</span>
-                        <span class="collapse-text-closed"><img src="images/icons/menu.svg" class="collapse-icon-closed nav-icon-img" alt="Menú">Menú</span>
+                    <button class="collapse-btn" aria-expanded="true" aria-label="Colapsar menú">
+                        <span class="collapse-text-open"><img src="images/icons/chevrons-left.svg" class="nav-icon-img" alt="Cerrar">Cerrar</span>
+                        <span class="collapse-text-closed"><img src="images/icons/menu.svg" class="nav-icon-img" alt="Menú"></span>
                     </button>
                 </div>
             </nav>
         </aside>
 
+        
+
         <main id="app-content" class="main-content">
-            </main>
+            
+
+        </main>
     </div>
 
-    <nav class="mobile-nav" align="center">
+    
+    <nav class="mobile-nav">
         <a href="#dashboard" class="mobile-nav-link active"> <span><img src="images/icons/layout-grid.svg" alt="Resumen"><br>Resumen</span> </a>
         <a href="#medicamentos" class="mobile-nav-link"> <span><img src="images/icons/pill.svg" alt="Medicamentos"><br>Med/tos</span> </a>
         <a href="#citas" class="mobile-nav-link"> <span><img src="images/icons/calendar-days.svg" alt="Citas"><br>Citas</span> </a>
+        
+
         <button id="mobile-menu-btn" class="mobile-nav-link"> <span><img src="images/icons/menu.svg" alt="Menú"><br>Menú</span> </button>
     </nav>
 
+    
     <div id="mobile-menu-modal" class="modal-overlay hidden">
         <div class="mobile-menu-content">
-            </div>
+            
+
+        </div>
     </div>
-<!-------------------- model invitado------------------>
-<div id="guest-warning-modal" class="modal-overlay hidden">
+
+    
+
+    <div id="guest-warning-modal" class="modal-overlay hidden">
         <div class="modal-content" style="text-align: center; max-width: 450px;">
-            <img src="images/icons/user-plus.svg" alt="Crear Usuario" class="modal-icon" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: var(--primary-blue);">
+            <img src="images/icons/user-plus.svg" alt="Crear Usuario" class="modal-icon">
             <h2 class="modal-title">Función solo para usuarios</h2>
             <p class="modal-subtitle">Estás explorando como invitado. Para guardar tus propios datos, crear registros o editar la información, necesitas crear un perfil de usuario.</p>
             <div class="modal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -178,11 +206,8 @@
             </div>
         </div>
     </div>
-    <script type="module" src="js/main.js"></script>
-</body>
-</html>
-<!-------------------fin model--------------------------->
-    <script type="module" src="js/main.js"></script>
-</body>
-</html>
 
+    
+    <script type="module" src="js/main.js?v=1.0.5"></script> 
+</body>
+</html>
