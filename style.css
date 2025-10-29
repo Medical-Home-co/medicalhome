@@ -1345,3 +1345,44 @@ body.dark-theme .icon-whatsapp {
 }
 
 /* ===== FIN: CORRECCIONES ASISTENTE VIRTUAL (v7 - Colores Sombra) ===== */
+/* ===== INICIO: Estilos Modal Advertencia Invitado (Corregido) ===== */
+
+/* 1. Borde Rojo Claro para el Contenido del Modal */
+#guest-warning-modal .modal-content {
+    /* Usamos las variables de color --danger-light que ya tienes */
+    border: 3px solid var(--danger-light-border);
+    /* Quitamos la animación de aquí */
+    /* Asegurarnos que la sombra no sea roja */
+    box-shadow: 0 10px 25px var(--shadow-color);
+}
+
+/* 2. Título en Azul Primario (Sin cambios) */
+#guest-warning-modal .modal-title {
+    color: var(--primary-blue);
+}
+
+/* 3. Animación Palpitante SOLO para el Icono */
+#guest-warning-modal .modal-icon {
+    /* Aplicamos la animación 'pulseIcon' */
+    animation: pulseIcon 1.5s infinite ease-in-out;
+    /* Asegurarnos que el color base del icono sea el azul primario */
+    color: var(--primary-blue);
+}
+
+/* 4. Definición de la Animación 'pulseIcon' (Más sutil, solo escala) */
+@keyframes pulseIcon {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.15); /* Crece un poco más */
+        opacity: 0.8; /* Se atenúa ligeramente */
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===== FIN: Estilos Modal Advertencia Invitado (Corregido) ===== */

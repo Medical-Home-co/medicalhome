@@ -166,7 +166,22 @@
         <div class="mobile-menu-content">
             </div>
     </div>
-
+<!-------------------- model invitado------------------>
+<div id="guest-warning-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center; max-width: 450px;">
+            <img src="images/icons/user-plus.svg" alt="Crear Usuario" class="modal-icon" style="width: 48px; height: 48px; margin: 0 auto 1rem; color: var(--primary-blue);">
+            <h2 class="modal-title">Función solo para usuarios</h2>
+            <p class="modal-subtitle">Estás explorando como invitado. Para guardar tus propios datos, crear registros o editar la información, necesitas crear un perfil de usuario.</p>
+            <div class="modal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button class="button button-secondary close-modal-btn" style="width: 100%;">Seguir Explorando</button>
+                <button id="guest-warning-create-btn" class="button button-primary" style="width: 100%;">Crear Usuario</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
+<!-------------------fin model--------------------------->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
