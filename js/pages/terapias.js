@@ -1,8 +1,11 @@
 // --- pages/terapias.js ---
-import { store } from '../store.js'; // <-- Importar el store
+import { store } from '../store.js';
+// --- INICIO ALARMAS ---
+import { syncAlarmWithFirestore, deleteAlarmFromFirestore } from '../alarm-manager.js';
+// --- FIN ALARMAS ---
 
-// La DB ahora se carga desde el store en init()
 let tempTerapiasDB = [];
+let terapiaForm, formModal, ambulatorioFields, formTitle;
 
 // --- Función para renderizar la lista de terapias ---
 function renderTerapiasList() {
@@ -10,6 +13,11 @@ function renderTerapiasList() {
     const emptyState = document.getElementById('terapias-empty-state');
     const addTerapiasMainBtn = document.getElementById('add-terapia-main-btn');
 
+    if (!listContainer || !emptyState || !addTerapiasMainBtn) {
+        console.warn("Elementos UI Terapias faltan.");
+        return;
+    }
+    
     listContainer.innerHTML = '';
 
     if (tempTerapiasDB.length === 0) {
@@ -29,10 +37,9 @@ function renderTerapiasList() {
             const date = new Date(terapia.date + 'T00:00:00');
             const formattedDate = date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
-            // <-- Usa 'notify'
             const isNotifyChecked = terapia.notify ? 'checked' : '';
             const locationInfo = terapia.type === 'ambulatorio' 
-                ? `${terapia.entity} - ${terapia.address}` 
+                ? `${terapia.entity || 'N/A'} - ${terapia.address || 'N/A'}` 
                 : 'Domicilio';
 
             terapiaCard.innerHTML = `
@@ -53,7 +60,6 @@ function renderTerapiasList() {
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                         <button class="icon-button edit-btn" data-id="${terapia.id}"><img src="images/icons/edit.svg" alt="Editar"></button>
-                        
                         <button class="icon-button delete-btn" data-id="${terapia.id}"><img src="images/icons/trash.svg" class="icon-delete" alt="Eliminar"></button>
                     </div>
                 </div>
@@ -76,55 +82,81 @@ function renderTerapiasList() {
             listContainer.appendChild(terapiaCard);
         });
     }
-    attachEventListeners(); // Re-attach listeners after rendering
+    attachEventListeners();
 }
 
-// --- Función para manejar los eventos de la página ---
+function openFormModal(terapia = null) {
+    if (!terapiaForm) return;
+    terapiaForm.reset();
+    document.getElementById('terapia-id').value = '';
+    ambulatorioFields.classList.add('hidden');
+    formTitle.textContent = 'Agregar Terapia';
+
+    if (terapia) {
+        formTitle.textContent = 'Editar Terapia';
+        document.getElementById('terapia-id').value = terapia.id;
+        document.getElementById('terapia-name').value = terapia.name || '';
+        document.getElementById('terapia-date').value = terapia.date || '';
+        document.getElementById('terapia-time').value = terapia.time || '';
+        document.getElementById('terapia-professional').value = terapia.professional || '';
+        document.getElementById('terapia-type').value = terapia.type || 'domiciliario';
+        if (terapia.type === 'ambulatorio') {
+            ambulatorioFields.classList.remove('hidden');
+            document.getElementById('terapia-entity').value = terapia.entity || '';
+            document.getElementById('terapia-address').value = terapia.address || '';
+            document.getElementById('terapia-phone').value = terapia.phone || '';
+        }
+    }
+    formModal.classList.remove('hidden');
+}
+
+function closeFormModal() {
+    formModal.classList.add('hidden');
+}
+
 function attachEventListeners() {
-    // Clonar para limpiar listeners
     const listContainer = document.getElementById('terapias-list-container');
+    if (!listContainer) return;
     const newContainer = listContainer.cloneNode(true);
     listContainer.parentNode.replaceChild(newContainer, listContainer);
 
-    // Listener general en el contenedor (delegación)
     newContainer.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-btn');
         const attendanceBtn = e.target.closest('.attendance-btn');
-        const editBtn = e.target.closest('.edit-btn'); // Añadir listener para editar
+        const editBtn = e.target.closest('.edit-btn');
 
         if (deleteBtn) {
-            // ===============================================
-            // --- CORRECCIÓN AQUÍ ---
-            // Añadir la confirmación antes de borrar
-            // ===============================================
             if (confirm('¿Eliminar esta terapia?')) {
                 const terapiaId = parseInt(deleteBtn.dataset.id, 10);
                 tempTerapiasDB = tempTerapiasDB.filter(t => t.id !== terapiaId);
-                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
+                store.saveTerapias(tempTerapiasDB);
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    deleteAlarmFromFirestore(terapiaId, 'terapia');
+                }
+                // --- FIN ALARMAS ---
                 renderTerapiasList();
-            } // <-- Cierre del if (confirm)
+            }
         } else if (attendanceBtn) {
             const container = attendanceBtn.closest('.attendance-buttons');
             const terapiaId = parseInt(container.dataset.id, 10);
             const action = attendanceBtn.dataset.action;
             const terapia = tempTerapiasDB.find(t => t.id === terapiaId);
-            if (terapia) {
+            if (terapia && (terapia.attended !== (action === 'yes'))) {
                 terapia.attended = (action === 'yes');
-                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
-                // Actualizar UI del botón
+                store.saveTerapias(tempTerapiasDB);
                 container.querySelectorAll('.attendance-btn').forEach(btn => btn.classList.remove('attended-yes', 'attended-no'));
                 attendanceBtn.classList.add(action === 'yes' ? 'attended-yes' : 'attended-no');
             }
-        } else if (editBtn) { // Lógica para editar
+        } else if (editBtn) {
              const terapiaId = parseInt(editBtn.dataset.id, 10);
              const terapiaToEdit = tempTerapiasDB.find(t => t.id === terapiaId);
              if (terapiaToEdit) {
-                 openFormModal(terapiaToEdit); // Llamar a openFormModal con los datos
+                 openFormModal(terapiaToEdit);
              }
         }
     });
 
-    // Listener para el toggle (change event)
     newContainer.addEventListener('change', (e) => {
         const notifyToggle = e.target.closest('.notify-toggle');
         if (notifyToggle) {
@@ -132,62 +164,39 @@ function attachEventListeners() {
             const isChecked = notifyToggle.checked;
             const terapia = tempTerapiasDB.find(t => t.id === terapiaId);
             if (terapia) {
-                terapia.notify = isChecked; // <-- Usa 'notify'
-                store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
-                console.log('Recordatorio terapia actualizado:', terapia);
+                terapia.notify = isChecked;
+                store.saveTerapias(tempTerapiasDB);
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    syncAlarmWithFirestore(terapia, 'terapia');
+                }
+                // --- FIN ALARMAS ---
             }
         }
     });
 }
 
 
-// --- Función principal que se ejecuta al cargar la página ---
-// --- MODIFICADA para incluir edición ---
 export function init() {
-    tempTerapiasDB = store.getTerapias() || []; // Cargar desde el store
+    tempTerapiasDB = store.getTerapias() || [];
 
-    const formModal = document.getElementById('terapias-form-modal');
+    formModal = document.getElementById('terapias-form-modal');
     const addTerapiasInitialBtn = document.getElementById('add-terapia-initial-btn');
     const addTerapiasMainBtn = document.getElementById('add-terapia-main-btn');
     const cancelTerapiaBtn = document.getElementById('cancel-terapia-btn');
-    const terapiaForm = document.getElementById('terapia-form');
+    terapiaForm = document.getElementById('terapia-form');
     const terapiaTypeSelect = document.getElementById('terapia-type');
-    const ambulatorioFields = document.getElementById('ambulatorio-fields');
-    const formTitle = document.getElementById('terapia-form-title'); // Para cambiar el título
-
-    // Función para abrir/cerrar modal (Modificada para edición)
-    window.openFormModal = (terapia = null) => { // Hacerla global para attachEventListeners
-        terapiaForm.reset();
-        document.getElementById('terapia-id').value = '';
-        ambulatorioFields.classList.add('hidden');
-        formTitle.textContent = 'Agregar Terapia'; // Título por defecto
-
-        if (terapia) { // Si se pasa una terapia, rellenar el formulario
-            formTitle.textContent = 'Editar Terapia';
-            document.getElementById('terapia-id').value = terapia.id;
-            document.getElementById('terapia-name').value = terapia.name || '';
-            document.getElementById('terapia-date').value = terapia.date || '';
-            document.getElementById('terapia-time').value = terapia.time || '';
-            document.getElementById('terapia-professional').value = terapia.professional || '';
-            document.getElementById('terapia-type').value = terapia.type || 'domiciliario';
-            // Mostrar campos ambulatorios si es necesario
-            if (terapia.type === 'ambulatorio') {
-                ambulatorioFields.classList.remove('hidden');
-                document.getElementById('terapia-entity').value = terapia.entity || '';
-                document.getElementById('terapia-address').value = terapia.address || '';
-                document.getElementById('terapia-phone').value = terapia.phone || '';
-            }
-        }
-
-        formModal.classList.remove('hidden');
+    ambulatorioFields = document.getElementById('ambulatorio-fields');
+    formTitle = document.getElementById('terapia-form-title');
+    
+    if (!formModal || !terapiaForm || !addTerapiasInitialBtn || !addTerapiasMainBtn || !cancelTerapiaBtn || !terapiaTypeSelect || !ambulatorioFields) {
+        console.error("Faltan elementos HTML esenciales en terapias.html.");
+        document.getElementById('terapias-empty-state')?.classList.remove('hidden');
+        return;
     }
 
-    function closeFormModal() {
-        formModal.classList.add('hidden');
-    }
-
-    addTerapiasInitialBtn.addEventListener('click', () => openFormModal()); // Abrir modal vacío
-    addTerapiasMainBtn.addEventListener('click', () => openFormModal()); // Abrir modal vacío
+    addTerapiasInitialBtn.addEventListener('click', () => openFormModal(null));
+    addTerapiasMainBtn.addEventListener('click', () => openFormModal(null));
     cancelTerapiaBtn.addEventListener('click', closeFormModal);
 
     terapiaTypeSelect.addEventListener('change', (e) => {
@@ -202,7 +211,7 @@ export function init() {
         e.preventDefault();
         const formData = new FormData(terapiaForm);
         const terapiaIdValue = document.getElementById('terapia-id').value;
-        const id = terapiaIdValue ? parseInt(terapiaIdValue, 10) : Date.now(); // Usar ID existente o crear nuevo
+        const id = terapiaIdValue ? parseInt(terapiaIdValue, 10) : Date.now();
 
         const terapiaData = {
             id: id,
@@ -214,25 +223,29 @@ export function init() {
             entity: formData.get('entity'),
             address: formData.get('address'),
             phone: formData.get('phone'),
-            attended: null, // Estado inicial de asistencia
-            notify: true    // Estado inicial de notificación
+            attended: null,
+            notify: true
         };
         terapiaData.location = terapiaData.type === 'ambulatorio' ? terapiaData.entity : 'Domicilio';
-
 
         const existingIndex = terapiaIdValue ? tempTerapiasDB.findIndex(t => t.id === id) : -1;
 
         if (existingIndex > -1) {
-            // Es edición: mantener estado 'attended' y 'notify'
             terapiaData.attended = tempTerapiasDB[existingIndex].attended;
             terapiaData.notify = tempTerapiasDB[existingIndex].notify;
             tempTerapiasDB[existingIndex] = terapiaData;
         } else {
-            // Es nuevo: añadir
             tempTerapiasDB.push(terapiaData);
         }
 
-        store.saveTerapias(tempTerapiasDB); // <-- GUARDAR
+        store.saveTerapias(tempTerapiasDB);
+        
+        // --- INICIO ALARMAS (CORREGIDO) ---
+        if (!store.isGuestMode()) {
+            syncAlarmWithFirestore(terapiaData, 'terapia');
+        }
+        // --- FIN ALARMAS ---
+        
         closeFormModal();
         renderTerapiasList();
     });

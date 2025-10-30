@@ -1,50 +1,52 @@
+/* --- pages/login.js --- */
 import { auth } from '../firebase-config.js';
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 export function init() {
+    console.log("Cargado js/pages/login.js");
+
     const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const toggleBtn = document.getElementById('auth-toggle-btn');
-    
-    let isLogin = false;
+    const loginError = document.getElementById('login-error');
 
-    toggleBtn.addEventListener('click', () => {
-        isLogin = !isLogin;
-        loginForm.classList.toggle('hidden', !isLogin);
-        registerForm.classList.toggle('hidden', isLogin);
-        
-        document.getElementById('auth-title').textContent = isLogin ? 'Inicia Sesión' : 'Crea tu Cuenta';
-        document.getElementById('auth-subtitle').textContent = isLogin ? 'Bienvenido de nuevo.' : 'Empieza a gestionar tu salud hoy.';
-        document.getElementById('auth-toggle-text').textContent = isLogin ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?';
-        toggleBtn.textContent = isLogin ? 'Crea una Cuenta' : 'Inicia Sesión';
-    });
-
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const identifier = registerForm.identifier.value;
-        const password = registerForm.password.value;
-        const errorMsg = document.getElementById('register-error');
-        const email = `${identifier}@medicalhome.app`;
-
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-        } catch (error) {
-            errorMsg.textContent = 'Error: ' + error.message;
-            errorMsg.classList.remove('hidden');
-        }
-    });
+    if (!loginForm) {
+        console.error("No se encontró el formulario de login.");
+        return;
+    }
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const identifier = loginForm.identifier.value;
-        const password = loginForm.password.value;
-        const errorMsg = document.getElementById('login-error');
-        const email = `${identifier}@medicalhome.app`;
+        const email = loginForm.elements.identifier.value;
+        const password = loginForm.elements.password.value;
+        loginError.classList.add('hidden'); // Ocultar error previo
 
         try {
-            await auth.signInWithEmailAndPassword(email, password);
+            console.log("Intentando iniciar sesión...");
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            console.log("¡Sesión iniciada!", userCredential.user);
+            
+            // Éxito: Redirigir al dashboard y recargar
+            sessionStorage.removeItem('openProfileModal'); // Limpiar por si acaso
+            window.location.hash = '#dashboard';
+            window.location.reload(); // Forzar recarga para actualizar todo el estado (sidebar, etc.)
+            
         } catch (error) {
-            errorMsg.textContent = 'Error: ' + error.message;
-            errorMsg.classList.remove('hidden');
+            console.error("Error en login:", error.code, error.message);
+            loginError.textContent = getFirebaseErrorMessage(error);
+            loginError.classList.remove('hidden');
         }
     });
+
+    // Función para traducir errores de Firebase
+    function getFirebaseErrorMessage(error) {
+        switch (error.code) {
+            case 'auth/invalid-email':
+                return 'El correo electrónico no es válido.';
+            case 'auth/invalid-credential':
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+                return 'Credenciales incorrectas. Verifica tu correo y contraseña.';
+            default:
+                return 'Ocurrió un error. Intenta de nuevo.';
+        }
+    }
 }

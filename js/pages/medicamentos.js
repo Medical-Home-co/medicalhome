@@ -1,9 +1,11 @@
 /* --- pages/medicamentos.js --- */
-import { store } from '../store.js'; // <-- 1. Importar store
+import { store } from '../store.js';
+// --- INICIO ALARMAS ---
+import { syncAlarmWithFirestore, deleteAlarmFromFirestore } from '../alarm-manager.js';
+// --- FIN ALARMAS ---
 
-// 2. Variable local para los datos
 let currentMedsData = [];
-let formModal, form, frequencySelect, schedulesContainer, customFrequencyContainer; // Elementos
+let formModal, form, frequencySelect, schedulesContainer, customFrequencyContainer;
 
 function renderMedsList() {
     const listContainer = document.getElementById('meds-list-container');
@@ -13,14 +15,13 @@ function renderMedsList() {
     
     listContainer.innerHTML = '';
 
-    // 3. Usar la variable cargada del store
     if (currentMedsData.length === 0) {
         emptyState.classList.remove('hidden'); listContainer.classList.add('hidden'); addMedMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden'); listContainer.classList.remove('hidden'); addMedMainBtn.classList.remove('hidden');
         
         currentMedsData.forEach(med => {
-            const medCard = document.createElement('div'); // 'medCard' definido aquí
+            const medCard = document.createElement('div');
             medCard.className = 'summary-card';
             medCard.style.padding = '1rem';
 
@@ -50,11 +51,10 @@ function renderMedsList() {
                     </label>
                 </div>
             `;
-            // SOLUCIÓN: Usar medCard, no card.
             listContainer.appendChild(medCard); 
         });
     }
-    attachEventListeners(); // 4. Llamar a listeners
+    attachEventListeners();
 }
 
 function openFormModal(medToEdit = null) {
@@ -105,16 +105,23 @@ function handleFormSubmit(e) {
         id: id, name: formData.get('name'), dose: formData.get('dose'),
         frequencyValue: formData.get('frequency'), frequencyText: frequencySelect.options[frequencySelect.selectedIndex].text.split('(')[0].trim(),
         schedules: schedules, notes: formData.get('notes'),
-        notify: true // Default 'notify' a true
+        notify: true
     };
 
     if (medIdValue) {
         const index = currentMedsData.findIndex(m => m.id === id);
-        if (index > -1) { newMed.notify = currentMedsData[index].notify; currentMedsData[index] = newMed; } // Mantener estado de notify
+        if (index > -1) { newMed.notify = currentMedsData[index].notify; currentMedsData[index] = newMed; }
     } else {
         currentMedsData.push(newMed);
     }
-    store.saveMeds(currentMedsData); // <-- 5. GUARDAR
+    store.saveMeds(currentMedsData);
+    
+    // --- INICIO ALARMAS (CORREGIDO) ---
+    if (!store.isGuestMode()) {
+        syncAlarmWithFirestore(newMed, 'medicamento');
+    }
+    // --- FIN ALARMAS ---
+    
     closeFormModal();
     renderMedsList();
 }
@@ -130,10 +137,16 @@ function attachEventListeners() {
         const medIdStr = deleteBtn?.dataset.id || editBtn?.dataset.id;
         if (!medIdStr) return;
         const medId = parseInt(medIdStr, 10);
+        
         if (deleteBtn) {
             if (confirm('¿Eliminar este medicamento?')) {
                 currentMedsData = currentMedsData.filter(m => m.id !== medId);
-                store.saveMeds(currentMedsData); // <-- 5. GUARDAR
+                store.saveMeds(currentMedsData);
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    deleteAlarmFromFirestore(medId, 'medicamento');
+                }
+                // --- FIN ALARMAS ---
                 renderMedsList();
             }
         } else if (editBtn) {
@@ -148,13 +161,21 @@ function attachEventListeners() {
             const medId = parseInt(notifyToggle.dataset.id, 10);
             const isChecked = notifyToggle.checked;
             const med = currentMedsData.find(m => m.id === medId);
-            if (med) { med.notify = isChecked; store.saveMeds(currentMedsData); /* <-- 5. GUARDAR */ }
+            if (med) { 
+                med.notify = isChecked; 
+                store.saveMeds(currentMedsData);
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    syncAlarmWithFirestore(med, 'medicamento');
+                }
+                // --- FIN ALARMAS ---
+            }
         }
     });
 }
 
 export function init() {
-    currentMedsData = store.getMeds() || []; // <-- 6. Cargar desde store
+    currentMedsData = store.getMeds() || [];
     console.log("Cargado js/pages/medicamentos.js (conectado a store)");
 
     formModal = document.getElementById('meds-form-modal');
@@ -166,11 +187,10 @@ export function init() {
     schedulesContainer = document.getElementById('med-schedules-container');
     customFrequencyContainer = document.getElementById('custom-frequency-container');
 
-    // SOLUCIÓN: Comprobación de elementos
     if (!formModal || !form || !addInitialBtn || !addMainBtn || !cancelMedBtn || !frequencySelect || !schedulesContainer || !customFrequencyContainer) {
         console.error("Faltan elementos HTML esenciales en medicamentos.html.");
-        document.getElementById('meds-empty-state')?.classList.remove('hidden'); // Mostrar estado vacío
-        return; // Detener ejecución
+        document.getElementById('meds-empty-state')?.classList.remove('hidden');
+        return;
     }
 
     addInitialBtn.addEventListener('click', () => openFormModal());

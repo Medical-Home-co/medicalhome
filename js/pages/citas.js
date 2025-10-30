@@ -1,5 +1,8 @@
 /* --- pages/citas.js --- */
 import { store } from '../store.js';
+// --- INICIO ALARMAS ---
+import { syncAlarmWithFirestore, deleteAlarmFromFirestore } from '../alarm-manager.js';
+// --- FIN ALARMAS ---
 
 let currentCitasData = [];
 let formModal, form;
@@ -12,32 +15,30 @@ function renderCitasList() {
 
     listContainer.innerHTML = '';
 
-    if (!currentCitasData || currentCitasData.length === 0) { // Verificación añadida
+    if (!currentCitasData || currentCitasData.length === 0) {
         emptyState.classList.remove('hidden'); listContainer.classList.add('hidden'); addCitaMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden'); listContainer.classList.remove('hidden'); addCitaMainBtn.classList.remove('hidden');
-        const sortedData = [...currentCitasData].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00'))); // Próximas primero
+        const sortedData = [...currentCitasData].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+        
         sortedData.forEach(cita => {
             if (!cita || cita.id === undefined || cita.id === null) {
                 console.warn("Registro de cita inválido encontrado:", cita);
-                return; // Saltar registro inválido
+                return;
             }
 
             const citaCard = document.createElement('div');
             citaCard.className = 'summary-card'; citaCard.style.padding = '1rem';
             let formattedDate = 'Fecha inválida';
             try { if(cita.date) formattedDate = new Date(cita.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); } catch(e) {}
-            const isNotifyChecked = (cita.notify !== false) ? 'checked' : ''; // Default a true si no está definido
+            const isNotifyChecked = (cita.notify !== false) ? 'checked' : '';
 
-            // Indicador de Peso Seco
             const dryWeightIndicator = cita.isDryWeightAppointment ? '<span style="font-weight: bold; color: var(--primary-blue); font-size: 0.8em; margin-left: 5px;">[Peso Seco]</span>' : '';
-
-            const entryId = cita.id.toString(); // Asegurar ID como string para data-id
+            const entryId = cita.id.toString();
 
             citaCard.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                     <div>
-                        
                         <h3 style="font-size: 1.1rem; font-weight: 600;">${cita.name || 'Cita'} ${dryWeightIndicator}</h3>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">${cita.doctor || 'Sin profesional'}</p>
                         <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
@@ -60,7 +61,6 @@ function renderCitasList() {
                 <div class="card-footer" style="border-top: 1px solid var(--border-color); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 0.9rem; font-weight: 600;">¿Asistió?</span>
-                        
                         <div class="attendance-buttons" style="display: flex; gap: 0.5rem;">
                             <button class="button attendance-btn ${cita.attended === true ? 'attended-yes' : ''}" data-id="${entryId}" data-action="yes">Sí</button>
                             <button class="button attendance-btn ${cita.attended === false ? 'attended-no' : ''}" data-id="${entryId}" data-action="no">No</button>
@@ -129,6 +129,13 @@ function handleFormSubmit(e) {
         currentCitasData.push(data);
     }
     store.saveCitas(currentCitasData);
+    
+    // --- INICIO ALARMAS (CORREGIDO) ---
+    if (!store.isGuestMode()) {
+        syncAlarmWithFirestore(data, 'cita');
+    }
+    // --- FIN ALARMAS ---
+
     closeFormModal();
     renderCitasList();
 }
@@ -137,12 +144,11 @@ function attachEventListeners() {
     const listContainer = document.getElementById('citas-list-container');
     if (!listContainer) return;
 
-    // Usar delegación de eventos para todos los clics dentro del contenedor
     listContainer.addEventListener('click', (e) => {
-        const button = e.target.closest('button'); // Capturar cualquier botón
+        const button = e.target.closest('button');
         if (!button) return;
 
-        const idStr = button.dataset.id; // Obtener ID directamente del botón clickeado
+        const idStr = button.dataset.id;
         if (!idStr) return;
         const citaId = parseInt(idStr, 10);
 
@@ -150,7 +156,12 @@ function attachEventListeners() {
             if (confirm('¿Eliminar esta cita?')) {
                 currentCitasData = currentCitasData.filter(c => c.id !== citaId);
                 store.saveCitas(currentCitasData);
-                renderCitasList(); // Re-renderizar después de borrar
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    deleteAlarmFromFirestore(citaId, 'cita');
+                }
+                // --- FIN ALARMAS ---
+                renderCitasList();
             }
         } else if (button.classList.contains('edit-btn')) {
             const citaToEdit = currentCitasData.find(c => c.id === citaId);
@@ -158,17 +169,15 @@ function attachEventListeners() {
         } else if (button.classList.contains('attendance-btn')) {
             const action = button.dataset.action;
             const cita = currentCitasData.find(c => c.id === citaId);
-            if (cita && cita.attended !== (action === 'yes')) {
+            if (cita && (cita.attended !== (action === 'yes'))) {
                 cita.attended = (action === 'yes');
                 store.saveCitas(currentCitasData);
-                // Actualizar UI del botón específico
                 button.closest('.attendance-buttons').querySelectorAll('.attendance-btn').forEach(btn => btn.classList.remove('attended-yes', 'attended-no'));
                 button.classList.add(action === 'yes' ? 'attended-yes' : 'attended-no');
             }
         }
     });
 
-    // Listener para los toggles de notificación
     listContainer.addEventListener('change', (e) => {
         const notifyToggle = e.target.closest('.notify-toggle');
         if (notifyToggle) {
@@ -180,6 +189,11 @@ function attachEventListeners() {
             if (cita) {
                 cita.notify = isChecked;
                 store.saveCitas(currentCitasData);
+                // --- INICIO ALARMAS (CORREGIDO) ---
+                if (!store.isGuestMode()) {
+                    syncAlarmWithFirestore(cita, 'cita');
+                }
+                // --- FIN ALARMAS ---
             }
         }
     });
@@ -207,6 +221,6 @@ export function init() {
     cancelCitaBtn.addEventListener('click', closeFormModal);
     form.addEventListener('submit', handleFormSubmit);
 
-    renderCitasList(); // Render inicial
-    attachEventListeners(); // Adjuntar listeners una vez
+    renderCitasList();
+    attachEventListeners();
 }
