@@ -1,5 +1,14 @@
-/* --- js/main.js --- */
+/* --- js/main.js (Corregido) --- */
 import { store } from './store.js';
+
+// --- IMPORTACIONES DE FIREBASE (AÑADIDAS) ---
+// Importar los servicios principales desde tu config
+import { auth, db, messaging } from './firebase-config.js';
+// Importar funciones específicas que usaremos
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { getToken } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
 
 // --- Funciones Globales Modal Invitado ---
 let guestWarningModal;
@@ -11,6 +20,44 @@ window.hideGuestWarningModal = () => {
     if (!guestWarningModal) guestWarningModal = document.getElementById('guest-warning-modal');
     guestWarningModal?.classList.add('hidden');
 }
+
+/**
+ * -------------------------------------------------------------------
+ * NUEVA FUNCIÓN: REGISTRAR TOKEN FCM
+ * Esta es la lógica que faltaba para las notificaciones.
+ * -------------------------------------------------------------------
+ */
+async function registrarTokenFCM(userId) {
+    try {
+        // 1. Pedir permiso y obtener el token
+        console.log("Solicitando permiso para notificaciones...");
+        
+        // ¡IMPORTANTE! Reemplaza esto con tu clave VAPID de Firebase
+        const fcmToken = await getToken(messaging, { 
+            vapidKey: "BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I" 
+        }); 
+
+        if (fcmToken) {
+            console.log("Token de dispositivo obtenido:", fcmToken);
+            
+            // 2. Definir la ruta en Firestore
+            const tokenRef = doc(db, "users", userId, "fcmTokens", fcmToken);
+            
+            // 3. Guardarlo en la base de datos
+            await setDoc(tokenRef, { 
+                registeredAt: new Date() 
+            });
+
+            console.log("Token FCM guardado en Firestore exitosamente!");
+
+        } else {
+            console.log("No se pudo obtener el token. El usuario no dio permiso.");
+        }
+    } catch (err) {
+        console.error("Error al obtener o guardar el token FCM:", err);
+    }
+}
+// -------------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', async () => {
     guestWarningModal = document.getElementById('guest-warning-modal'); // Asignar aquí
@@ -85,18 +132,16 @@ document.addEventListener('DOMContentLoaded', async () => {
               console.log("Cerrando sesión...");
               localStorage.clear();
               sessionStorage.clear();
-              // Importar auth solo para el logout de Firebase
-              import('./firebase-config.js').then(async (firebase) => {
-                  try {
-                      await firebase.auth.signOut();
-                      console.log("Sesión de Firebase cerrada.");
-                  } catch (e) {
-                      console.error("Error cerrando sesión de Firebase:", e);
-                  } finally {
-                      window.location.hash = '';
-                      window.location.reload();
-                  }
-              });
+              // --- CORRECCIÓN DE LOGOUT (v9) ---
+              try {
+                  await signOut(auth); // Usar la función signOut importada
+                  console.log("Sesión de Firebase cerrada.");
+              } catch (e) {
+                  console.error("Error cerrando sesión de Firebase:", e);
+              } finally {
+                  window.location.hash = '';
+                  window.location.reload();
+              }
               return;
          }
          else {
@@ -120,8 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleNavigation() {
         // --- LÓGICA DE PROTECCIÓN DE RUTAS ---
-        // Importar auth aquí para verificar el estado de inicio de sesión
-        const { auth } = await import('./firebase-config.js');
+        // (Usamos el 'auth' importado al inicio)
         const user = auth.currentUser;
         let hash = window.location.hash.substring(1) || 'dashboard'; // Default
 
@@ -311,22 +355,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyTheme(currentTheme || 'light');
     themeToggleDesktop?.addEventListener('change', toggleTheme);
 
-     /* --- Lógica Logout --- */
-     function handleLogout() {
+     /* --- Lógica Logout (CORREGIDA) --- */
+     async function handleLogout() {
          if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-              // No borramos localStorage, solo cerramos sesión
               sessionStorage.clear();
-              import('./firebase-config.js').then(async (firebase) => {
-                  try {
-                      await firebase.auth.signOut();
-                      console.log("Sesión de Firebase cerrada.");
-                  } catch (e) {
-                      console.error("Error cerrando sesión de Firebase:", e);
-                  } finally {
-                      window.location.hash = '#login';
-                      window.location.reload();
-                  }
-              });
+              // --- CORRECCIÓN DE LOGOUT (v9) ---
+              try {
+                  await signOut(auth); // Usar la función signOut importada
+                  console.log("Sesión de Firebase cerrada.");
+              } catch (e) {
+                  console.error("Error cerrando sesión de Firebase:", e);
+              } finally {
+                  window.location.hash = '#login';
+                  window.location.reload();
+              }
          }
      }
      document.querySelectorAll('.logout-btn').forEach(btn => {
@@ -396,8 +438,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Error al actualizar sidebar:", e);
     }
 
-    // --- Carga Inicial ---
-    await handleNavigation();
+    // -----------------------------------------------------------------
+    // --- CARGA INICIAL Y LISTENER DE AUTH (AÑADIDO) ---
+    // -----------------------------------------------------------------
+    
+    // Este listener se dispara cuando el estado de auth cambia (login/logout)
+    // y también una vez al cargar la página.
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // Usuario ha iniciado sesión
+            console.log("Auth state changed: Usuario logueado", user.uid);
+            // ¡REGISTRAMOS EL TOKEN!
+            await registrarTokenFCM(user.uid);
+        } else {
+            // Usuario ha cerrado sesión
+            console.log("Auth state changed: Usuario deslogueado");
+        }
+        
+        // Una vez que sabemos el estado de auth, cargamos la navegación.
+        // Esto reemplaza la llamada a handleNavigation() que estaba al final.
+        await handleNavigation();
+    });
+
 
     // --- Ocultar Splash Screen ---
     if (splashScreen) {
