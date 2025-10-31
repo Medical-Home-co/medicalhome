@@ -1,4 +1,4 @@
-// --- firebase-messaging-sw.js ---
+// --- firebase-messaging-sw.js (Ruta de iconos corregida) ---
 // ¡CÓDIGO CORREGIDO! Usa importScripts y la v9-compat
 
 // 1. Importar los scripts de Firebase (estilo v9-compat)
@@ -30,9 +30,11 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    // Asegúrate que esta ruta sea correcta desde la raíz de tu sitio
-    icon: '/medicalhome/assets/icons/icon-192x192.png', 
-    badge: '/medicalhome/assets/icons/icon-72x72.png'
+    
+    // --- CORRECCIÓN ---
+    // Rutas actualizadas según tu indicación
+    icon: 'images/icons/icon-192x192.png', 
+    badge: 'images/icons/icon-72x72.png'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
