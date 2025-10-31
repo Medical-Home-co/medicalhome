@@ -1,4 +1,4 @@
-/* --- functions/index.js (Corregido) --- */
+/* --- functions/index.js --- */
 
 // Importar los módulos de Firebase
 const {onSchedule} = require("firebase-functions/v2/scheduler");
@@ -70,7 +70,8 @@ exports.sendScheduledNotifications = onSchedule(
           notification: {
             title: alarm.title || "Recordatorio de MedicalHome",
             body: alarm.body || "Tienes un nuevo recordatorio.",
-            icon: "images/icons/icon-192x192.png", // Usa tu ruta de iconos
+            // Ruta de tu icono
+            icon: "images/icons/icon-192x192.png", 
           },
           token: token,
         };
@@ -109,4 +110,3 @@ exports.sendScheduledNotifications = onSchedule(
     }
     return null;
   });
-// LA LLAVE EXTRA QUE ESTABA AQUÍ FUE ELIMINADA
