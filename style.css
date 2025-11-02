@@ -1435,3 +1435,123 @@ body.dark-theme .icon-whatsapp {
 
 
 /* ===== FIN: THEMING DEL CHAT POR ASISTENTE ===== */
+
+/* ========================================================== */
+/* === INICIO: NUEVOS ESTILOS MODAL DE AUTENTICACIÓN === */
+/* ========================================================== */
+.auth-modal-content {
+    max-width: 420px;
+    text-align: center;
+}
+.auth-divider {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 1.25rem 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+.auth-divider::before { margin-right: 1rem; }
+.auth-divider::after { margin-left: 1rem; }
+
+.button-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    font-weight: 600;
+}
+.button-google:hover {
+    background-color: var(--bg-secondary);
+}
+.google-icon {
+    width: 20px;
+    height: 20px;
+}
+body.dark-theme .button-google {
+    background-color: var(--bg-primary); /* Fondo oscuro */
+    color: var(--text-primary); /* Texto claro */
+}
+body.dark-theme .button-google:hover {
+    background-color: var(--bg-secondary);
+}
+
+.auth-link {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+}
+.auth-link:hover {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+
+/* ========================================================== */
+/* === INICIO: NUEVOS ESTILOS "TOAST" (Aviso) === */
+/* ========================================================== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+.toast-notification {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    animation: slideInDown 0.3s ease-out;
+    
+    /* El color azul claro que pediste */
+    background-color: #EBF4FF; /* Azul muy claro */
+    border: 1px solid #BEE3F8; /* Borde azul claro */
+    color: #2C5282; /* Texto azul oscuro */
+    font-weight: 500;
+}
+body.dark-theme .toast-notification {
+    background-color: #2A4365; /* Fondo azul oscuro */
+    border: 1px solid #4A5568;
+    color: #EBF4FF; /* Texto azul claro */
+}
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+.toast-notification.exiting {
+    animation: fadeOut 0.3s ease-in forwards;
+}

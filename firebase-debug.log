@@ -1,88 +1,87 @@
-[debug] [2025-10-20T16:50:05.535Z] ----------------------------------------------------------------------
-[debug] [2025-10-20T16:50:05.538Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\pc\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login
-[debug] [2025-10-20T16:50:05.539Z] CLI Version:   14.20.0
-[debug] [2025-10-20T16:50:05.539Z] Platform:      win32
-[debug] [2025-10-20T16:50:05.539Z] Node Version:  v22.18.0
-[debug] [2025-10-20T16:50:05.539Z] Time:          Mon Oct 20 2025 11:50:05 GMT-0500 (hora estándar de Colombia)
-[debug] [2025-10-20T16:50:05.539Z] ----------------------------------------------------------------------
+[debug] [2025-11-02T03:55:41.209Z] ----------------------------------------------------------------------
+[debug] [2025-11-02T03:55:41.212Z] Command:       C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2025-11-02T03:55:41.213Z] CLI Version:   14.23.0
+[debug] [2025-11-02T03:55:41.213Z] Platform:      win32
+[debug] [2025-11-02T03:55:41.213Z] Node Version:  v20.19.5
+[debug] [2025-11-02T03:55:41.213Z] Time:          Sat Nov 01 2025 22:55:41 GMT-0500 (hora estándar de Colombia)
+[debug] [2025-11-02T03:55:41.213Z] ----------------------------------------------------------------------
 [debug] 
-[info] i  The Firebase CLI’s MCP server feature can optionally make use of Gemini in Firebase. Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
+[debug] [2025-11-02T03:55:41.475Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-02T03:55:41.476Z] > authorizing via signed-in user (johnbeta1977@gmail.com)
+[debug] [2025-11-02T03:55:41.476Z] [iam] checking project medicalhomeapp-1a68b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-11-02T03:55:41.478Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:41.478Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:41.479Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions [none]
+[debug] [2025-11-02T03:55:41.479Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions x-goog-quota-user=projects/medicalhomeapp-1a68b
+[debug] [2025-11-02T03:55:41.480Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-11-02T03:55:42.275Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions 200
+[debug] [2025-11-02T03:55:42.275Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-11-02T03:55:42.276Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:42.276Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:42.276Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-11-02T03:55:42.276Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-11-02T03:55:42.852Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-11-02T03:55:42.852Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-11-02T03:55:42.853Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:42.853Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:42.853Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b [none]
+[debug] [2025-11-02T03:55:43.240Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b 200
+[debug] [2025-11-02T03:55:43.240Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b {"projectId":"medicalhomeapp-1a68b","projectNumber":"312247676705","displayName":"MedicalHomeApp","name":"projects/medicalhomeapp-1a68b","resources":{"hostingSite":"medicalhomeapp-1a68b"},"state":"ACTIVE","etag":"1_afcb8294-550d-4922-9c32-7c889546162a"}
 [info] 
-[info] i  Firebase optionally collects CLI and Emulator Suite usage and error reporting information to help improve our products. Data is collected in accordance with Google's privacy policy (https://policies.google.com/privacy) and is not used to identify you. 
+[info] === Deploying to 'medicalhomeapp-1a68b'...
 [info] 
-[info] i  To change your preferences at any time, run `firebase logout` and `firebase login` again. 
-[info] 
-[info] Visit this URL on this device to log in:
-[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=482193882&redirect_uri=http%3A%2F%2Flocalhost%3A9005
-[info] 
-[info] Waiting for authentication...
-[debug] [2025-10-20T16:52:04.333Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
-[debug] [2025-10-20T16:52:04.334Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
-[debug] [2025-10-20T16:52:04.667Z] *** [apiv2] error from fetch(https://accounts.google.com/o/oauth2/token, {"headers":{},"method":"POST","body":{"_overheadLength":543,"_valueLength":208,"_valuesToMeasure":[],"writable":false,"readable":true,"dataSize":0,"maxDataSize":2097152,"pauseStreams":true,"_released":true,"_streams":[],"_currentStream":null,"_insideLoop":false,"_pendingNext":false,"_boundary":"--------------------------28733195d099a61ec12e7784","_events":{},"_eventsCount":1}}): FetchError: request to https://accounts.google.com/o/oauth2/token failed, reason: getaddrinfo EAI_AGAIN accounts.google.com
-[debug] [2025-10-20T16:52:04.669Z] Token Fetch Error: FirebaseError: Failed to make request to https://accounts.google.com/o/oauth2/token
-    at RetryOperation._fn (C:\Users\pc\AppData\Roaming\npm\node_modules\firebase-tools\lib\apiv2.js:261:31)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+[info] i  deploying functions, hosting 
+[debug] [2025-11-02T03:55:43.246Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.247Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.247Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b [none]
+[debug] [2025-11-02T03:55:43.437Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b 200
+[debug] [2025-11-02T03:55:43.437Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b {"projectNumber":"312247676705","projectId":"medicalhomeapp-1a68b","lifecycleState":"ACTIVE","name":"MedicalHomeApp","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-10-16T17:33:43.029868Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-11-02T03:55:43.442Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.442Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.442Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig [none]
+[debug] [2025-11-02T03:55:43.788Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig 200
+[debug] [2025-11-02T03:55:43.788Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig {"projectId":"medicalhomeapp-1a68b","storageBucket":"medicalhomeapp-1a68b.firebasestorage.app"}
+[debug] [2025-11-02T03:55:43.789Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.789Z] Checked if tokens are valid: true, expires at: 1762059293067
+[debug] [2025-11-02T03:55:43.789Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs [none]
+[debug] [2025-11-02T03:55:44.359Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs 200
+[debug] [2025-11-02T03:55:44.360Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs {}
+[debug] [2025-11-02T03:55:44.362Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2025-11-02T03:55:45.629Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.15.0",
+    "eslint-plugin-promise": "^6.0.0"
+  },
+  "private": true
+}
+[debug] [2025-11-02T03:55:45.630Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-11-02T03:55:45.631Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-11-02T03:55:45.641Z] Found firebase-functions binary at 'C:\MEDICALHOME\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8843
 
-For CI servers and headless environments, generate a new token with firebase login:ci
-[debug] [2025-10-20T16:52:04.680Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
-[debug] [2025-10-20T16:52:04.681Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"c9162f72-1b93-42f1-b6d0-16d1af151a7f"}
-[debug] [2025-10-20T16:52:05.203Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
-[debug] [2025-10-20T16:52:05.203Z] <<< [apiv2][body] POST https://auth.firebase.tools/attest {"token":"rqB9_-a7DSux-CGs_jPFWkuMfR9hftSnF4FZjO0P51A"}
-[info] 
-[info] To sign in to the Firebase CLI:
-[info] 
-[info] 1. Take note of your session ID:
-[info] 
-[info]    C9162
-[info] 
-[info] 2. Visit the URL below on any device and follow the instructions to get your code:
-[info] 
-[info]    https://auth.firebase.tools/login?code_challenge=sxHDVWnq6hC_tgrYcy_JfYWoCBL6zF2teNmYfNUSu6o&session=c9162f72-1b93-42f1-b6d0-16d1af151a7f&attest=rqB9_-a7DSux-CGs_jPFWkuMfR9hftSnF4FZjO0P51A
-[info] 
-[info] 3. Paste or enter the authorization code below once you have it:
-[info] 
-[debug] [2025-10-20T16:55:40.564Z] ----------------------------------------------------------------------
-[debug] [2025-10-20T16:55:40.568Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\pc\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login
-[debug] [2025-10-20T16:55:40.568Z] CLI Version:   14.20.0
-[debug] [2025-10-20T16:55:40.569Z] Platform:      win32
-[debug] [2025-10-20T16:55:40.569Z] Node Version:  v22.18.0
-[debug] [2025-10-20T16:55:40.569Z] Time:          Mon Oct 20 2025 11:55:40 GMT-0500 (hora estándar de Colombia)
-[debug] [2025-10-20T16:55:40.569Z] ----------------------------------------------------------------------
-[debug] 
-[info] i  The Firebase CLI’s MCP server feature can optionally make use of Gemini in Firebase. Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
-[info] 
-[info] i  Firebase optionally collects CLI and Emulator Suite usage and error reporting information to help improve our products. Data is collected in accordance with Google's privacy policy (https://policies.google.com/privacy) and is not used to identify you. 
-[info] 
-[info] i  To change your preferences at any time, run `firebase logout` and `firebase login` again. 
-[info] 
-[info] Visit this URL on this device to log in:
-[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=815063752&redirect_uri=http%3A%2F%2Flocalhost%3A9005
-[info] 
-[info] Waiting for authentication...
-[debug] [2025-10-20T16:56:19.285Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
-[debug] [2025-10-20T16:56:19.285Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
-[debug] [2025-10-20T16:56:19.390Z] *** [apiv2] error from fetch(https://accounts.google.com/o/oauth2/token, {"headers":{},"method":"POST","body":{"_overheadLength":543,"_valueLength":208,"_valuesToMeasure":[],"writable":false,"readable":true,"dataSize":0,"maxDataSize":2097152,"pauseStreams":true,"_released":true,"_streams":[],"_currentStream":null,"_insideLoop":false,"_pendingNext":false,"_boundary":"--------------------------6aefb6b1cf03031cd0c41cac","_events":{},"_eventsCount":1}}): FetchError: request to https://accounts.google.com/o/oauth2/token failed, reason: getaddrinfo EAI_AGAIN accounts.google.com
-[debug] [2025-10-20T16:56:19.390Z] Token Fetch Error: FirebaseError: Failed to make request to https://accounts.google.com/o/oauth2/token
-    at RetryOperation._fn (C:\Users\pc\AppData\Roaming\npm\node_modules\firebase-tools\lib\apiv2.js:261:31)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
-
-For CI servers and headless environments, generate a new token with firebase login:ci
-[debug] [2025-10-20T16:56:19.396Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
-[debug] [2025-10-20T16:56:19.397Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"60077606-d77a-4cc5-a302-c0e381c5a9a8"}
-[debug] [2025-10-20T16:56:19.807Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
-[debug] [2025-10-20T16:56:19.807Z] <<< [apiv2][body] POST https://auth.firebase.tools/attest {"token":"zkYGnjsvtaKGrLQA7zeHLScSjHM9_Ctn9pXmj-M3mIA"}
-[info] 
-[info] To sign in to the Firebase CLI:
-[info] 
-[info] 1. Take note of your session ID:
-[info] 
-[info]    60077
-[info] 
-[info] 2. Visit the URL below on any device and follow the instructions to get your code:
-[info] 
-[info]    https://auth.firebase.tools/login?code_challenge=l3-OZPlscYCeOUbA8035K7QwgiLLbENrpKISo-C7OCY&session=60077606-d77a-4cc5-a302-c0e381c5a9a8&attest=zkYGnjsvtaKGrLQA7zeHLScSjHM9_Ctn9pXmj-M3mIA
-[info] 
-[info] 3. Paste or enter the authorization code below once you have it:
-[info] 
+[error] 

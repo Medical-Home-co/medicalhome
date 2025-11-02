@@ -18,7 +18,7 @@
     <meta name="twitter:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true">
 
     
-    <link rel="stylesheet" href="style.css?v=1.0.5"> 
+    <link rel="stylesheet" href="style.css?v=1.0.6"> 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
@@ -40,23 +40,44 @@
     </div>
 
     
-    <div id="welcome-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <img src="images/logo.png" alt="Logo de MedicalHome" class="modal-logo">
-            <h2 class="modal-title">Bienvenido a MedicalHome</h2>
-            <p class="modal-subtitle">Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos en un solo lugar, de forma segura y privada.</p>
-            <div class="modal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <button id="guest-btn" class="button button-secondary">Explorar como invitado</button>
-                <button id="create-user-btn" class="button button-primary">Crear Usuario</button>
-            </div>
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-content auth-modal-content">
+            <img src="images/logo.png" alt="MedicalHome Logo" class="modal-logo">
+            <h2 class="modal-title">Bienvenido</h2>
+            <p class="modal-subtitle">Tu asistente personal de salud.</p>
+            
+            <form id="auth-form" class="modal-form">
+                <div class="form-group">
+                    <label for="auth-email">Email</label>
+                    <input type="email" id="auth-email" placeholder="tu@email.com" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">Contraseña</label>
+                    <input type="password" id="auth-password" placeholder="Tu contraseña" class="form-input" required>
+                </div>
+                
+                <p id="auth-error" class="text-red-500 text-sm hidden" style="margin-top: -0.5rem; margin-bottom: 0.5rem;"></p>
+
+                <div class="modal-actions" style="grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <button type="submit" id="auth-login-btn" class="button button-primary">Iniciar Sesión</button>
+                    <a href="#perfil" id="auth-register-link" class="button button-secondary">Crear Usuario</a>
+                </div>
+
+                <div class="auth-divider">o</div>
+                
+                <button type="button" id="auth-google-btn" class="button button-google">
+                    <img src="images/icons/google.svg" alt="Google" class="google-icon">
+                    <span>Continuar con Google</span>
+                </button>
+            </form>
+
             <div class="modal-footer" style="text-align: center;">
-                <label class="checkbox-label" style="justify-content: center;">
-                    <input type="checkbox" id="dont-show-again"> No volver a mostrar
-                </label>
+                <button type="button" id="auth-guest-btn" class="auth-link">Explorar como invitado</button>
+                <span style="color: var(--text-secondary); margin: 0 0.5rem;">·</span>
+                <button type="button" id="auth-forgot-btn" class="auth-link">¿Olvidaste tu contraseña?</button>
             </div>
         </div>
     </div>
-
     <div id="about-modal" class="modal-overlay hidden">
         <div class="modal-content" style="text-align: center;">
             <img src="images/marca.png" alt="Logo de VivirAplicaciones" class="modal-logo">
@@ -95,8 +116,7 @@
                     </div>
                 </div>
 
-              <!-- INICIO: MENÚ LATERAL REORDENADO -->
-                <ul class="nav-links">
+              <ul class="nav-links">
                     
 
                     <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
@@ -209,7 +229,7 @@
         </div>
     </div>
 
-    
-    <script type="module" src="js/main.js?v=1.0.5"></script> 
+    <div id="toast-container" class="toast-container"></div>
+    <script type="module" src="js/main.js?v=1.0.6"></script> 
 </body>
 </html>
