@@ -1,13 +1,20 @@
-/* --- js/pages/perfil.js --- */
+/* --- js/pages/perfil.js (Corregido) --- */
 import { store } from '../store.js';
-import { requestNotificationPermission } from '../notifications.js';
+// import { requestNotificationPermission } from '../notifications.js'; // Esta función no existe
+
 // --- INICIO AUTH ---
 import { auth } from '../firebase-config.js';
 import { 
     createUserWithEmailAndPassword, 
     updateProfile 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js"; // <-- CORREGIDO
 // --- FIN AUTH ---
+
+// --- INICIO FIRESTORE ---
+import { db } from '../firebase-config.js';
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js"; // <-- CORREGIDO
+// --- FIN FIRESTORE ---
+
 
 let tempProfileData = null; 
 let avatarDataUrl = null;
@@ -18,9 +25,9 @@ function renderProfileSummary() {
     const summaryContainer = document.getElementById('profile-summary-container');
     const emptyState = document.getElementById('profile-empty-state');
     const editBtn = document.getElementById('edit-profile-main-btn');
-    const activateNotificationsBtn = document.getElementById('activate-notifications-btn'); 
+    // const activateNotificationsBtn = document.getElementById('activate-notifications-btn'); 
     
-    if (!summaryContainer || !emptyState || !editBtn || !activateNotificationsBtn) {
+    if (!summaryContainer || !emptyState || !editBtn) {
         console.warn("Elementos principales del resumen de perfil no encontrados.");
         return;
     }
@@ -29,12 +36,12 @@ function renderProfileSummary() {
         summaryContainer.classList.add('hidden');
         emptyState.classList.remove('hidden');
         editBtn.classList.add('hidden');
-        activateNotificationsBtn.classList.add('hidden');
+        // activateNotificationsBtn.classList.add('hidden');
     } else {
         summaryContainer.classList.remove('hidden');
         emptyState.classList.add('hidden');
         editBtn.classList.remove('hidden');
-        activateNotificationsBtn.classList.remove('hidden');
+        // activateNotificationsBtn.classList.remove('hidden');
         
         // --- Lógica para rellenar los datos del resumen ---
         const personalDataEl = document.getElementById('personal-data-summary');
@@ -164,10 +171,52 @@ function openFormModal(profileData) {
 
     } else { // Creando perfil nuevo
          document.getElementById('profile-form-title').textContent = 'Crear Perfil';
-         // Habilitar campos de email y contraseña
-         if(emailInput) { emailInput.disabled = false; emailInput.style.backgroundColor = 'var(--bg-secondary)'; }
-         if(passwordInput) { passwordInput.disabled = false; passwordInput.placeholder = "Contraseña (mín. 6 caracteres) *"; passwordInput.required = true; }
-         if(confirmPasswordInput) { confirmPasswordInput.disabled = false; confirmPasswordInput.placeholder = "Confirmar Contraseña *"; confirmPasswordInput.required = true; }
+         form.reset(); // Asegurar que esté limpio
+         
+         const currentUser = auth.currentUser;
+         if (currentUser && currentUser.providerData[0]?.providerId === 'google.com') {
+             // Es un usuario de Google completando su perfil
+             console.log("Rellenando perfil para usuario de Google...");
+             
+             if(emailInput) { 
+                 emailInput.value = currentUser.email || '';
+                 emailInput.disabled = true; // No pueden cambiar el email de Google
+                 emailInput.style.backgroundColor = 'var(--border-color)';
+             }
+             if(passwordInput) { 
+                 passwordInput.disabled = true; 
+                 passwordInput.placeholder = "Autenticado con Google"; 
+                 passwordInput.required = false; 
+             }
+             if(confirmPasswordInput) { 
+                 confirmPasswordInput.disabled = true; 
+                 confirmPasswordInput.placeholder = "Autenticado con Google"; 
+                 confirmPasswordInput.required = false; 
+             }
+             
+             form.elements.fullName.value = currentUser.displayName || '';
+             if (currentUser.photoURL && avatarPreview) {
+                 avatarPreview.src = currentUser.photoURL;
+                 avatarDataUrl = currentUser.photoURL;
+             }
+             
+         } else {
+             // Es un usuario nuevo creando con Email/Pass
+             if(emailInput) { 
+                 emailInput.disabled = false; 
+                 emailInput.style.backgroundColor = 'var(--bg-secondary)'; 
+             }
+             if(passwordInput) { 
+                 passwordInput.disabled = false; 
+                 passwordInput.placeholder = "Contraseña (solo números) *"; 
+                 passwordInput.required = true; 
+             }
+             if(confirmPasswordInput) { 
+                 confirmPasswordInput.disabled = false; 
+                 confirmPasswordInput.placeholder = "Confirmar Contraseña *"; 
+                 confirmPasswordInput.required = true; 
+             }
+         }
     }
     formModal?.classList.remove('hidden');
 }
@@ -187,7 +236,7 @@ function renderAlergiaTag(alergia) {
     
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
-    removeBtn.textContent = '×'; // Usar un 'x' más bonito
+    removeBtn.textContent = '×';
     removeBtn.style.marginLeft = '5px';
     removeBtn.style.fontSize = '1.1em';
     removeBtn.style.color = 'var(--danger-color)';
@@ -195,7 +244,6 @@ function renderAlergiaTag(alergia) {
 
     removeBtn.onclick = (e) => {
         e.target.parentElement.remove();
-        // No es necesario modificar tempProfileData aquí, se leerá del DOM al guardar
     };
     tag.appendChild(removeBtn);
     alergiasList.appendChild(tag);
@@ -212,12 +260,25 @@ export function init() {
     
     console.log("Perfil DOM listo. Inicializando...");
     
-    tempProfileData = store.getProfile();
+    const localProfile = store.getProfile();
+    const currentUser = auth.currentUser;
+
+    if (localProfile) {
+        tempProfileData = localProfile;
+    } else if (currentUser) {
+        tempProfileData = {
+            fullName: currentUser.displayName,
+            email: currentUser.email,
+            avatar: currentUser.photoURL
+        };
+    } else {
+        tempProfileData = null;
+    }
 
     const addInitialBtn = document.getElementById('add-profile-initial-btn');
     const editBtn = document.getElementById('edit-profile-main-btn');
     const cancelBtn = document.getElementById('cancel-profile-btn');
-    const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
+    // const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
     const avatarUpload = document.getElementById('avatar-upload');
     const avatarPreview = document.getElementById('avatar-preview');
     const renalCheckbox = form.querySelector('input[name="conditions"][value="renal"]');
@@ -268,10 +329,10 @@ export function init() {
     editBtn?.addEventListener('click', () => openFormModal(tempProfileData));
     cancelBtn?.addEventListener('click', closeFormModal);
 
-    activateNotificationsBtn?.addEventListener('click', (e) => {
-        e.preventDefault(); 
-        requestNotificationPermission();
-    });
+    // activateNotificationsBtn?.addEventListener('click', (e) => {
+    //     e.preventDefault(); 
+    //     requestNotificationPermission();
+    // });
 
     // --- Evento SUBMIT (CORREGIDO) ---
     form.addEventListener('submit', async (e) => {
@@ -280,10 +341,9 @@ export function init() {
         const password = form.elements.password.value;
         const confirmPassword = form.elements.confirmPassword.value;
 
-        // Es un usuario nuevo si NO hay perfil local O si NO hay usuario de Firebase
-        const isNewUser = (tempProfileData === null) || (auth.currentUser === null);
+        const isNewUserCreation = (auth.currentUser === null);
 
-        if (isNewUser && password !== confirmPassword) {
+        if (isNewUserCreation && password !== confirmPassword) {
             alert('Las contraseñas no coinciden.');
             return;
         }
@@ -292,7 +352,6 @@ export function init() {
         const data = Object.fromEntries(formData.entries());
         
         data.conditions = formData.getAll('conditions');
-        // Leer alergias del DOM
         data.alergias = Array.from(document.querySelectorAll('#alergias-list .tag')).map(tag => tag.textContent.slice(0, -1)); // Quitar la 'x'
 
         if (data.conditions.includes('renal')) {
@@ -304,53 +363,64 @@ export function init() {
         
         data.avatar = avatarDataUrl || tempProfileData?.avatar;
 
-        // --- INICIO LÓGICA DE AUTENTICACIÓN (CORREGIDA) ---
-        if (isNewUser) {
-            // 1. Es un usuario nuevo, crear cuenta en Firebase
-            try {
+        // --- LÓGICA DE AUTENTICACIÓN Y GUARDADO (MODIFICADA) ---
+        try {
+            let user;
+            
+            if (isNewUserCreation) {
+                // 1. Creando usuario con Email/Pass
                 console.log("Creando usuario en Firebase Auth...");
                 const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-                console.log("Usuario de Firebase creado:", userCredential.user);
-
-                await updateProfile(auth.currentUser, { displayName: data.fullName });
-
-                tempProfileData = data;
-                store.saveProfile(tempProfileData);
+                user = userCredential.user;
+                await updateProfile(user, { displayName: data.fullName, photoURL: data.avatar });
                 
-                closeFormModal();
-                renderProfileSummary();
-                updateMainMenu(tempProfileData.conditions);
+            } else {
+                // 2. Usuario existente (Google o Email) guardando/actualizando perfil
+                user = auth.currentUser;
+                if (!user) {
+                    alert("Error: No hay usuario autenticado. Por favor, inicia sesión de nuevo.");
+                    window.location.hash = '';
+                    window.location.reload();
+                    return;
+                }
                 
-                alert("¡Perfil creado exitosamente!");
-                window.location.hash = '#dashboard';
-                window.location.reload();
-
-            } catch (error) {
-                console.error("Error al crear usuario en Firebase:", error);
-                alert(`Error al crear usuario: ${getFirebaseErrorMessage(error)}`);
-                return;
+                if (user.displayName !== data.fullName || user.photoURL !== data.avatar) {
+                    await updateProfile(user, { displayName: data.fullName, photoURL: data.avatar });
+                }
             }
-        } else {
-            // 2. Es un usuario existente (ya logueado) editando su perfil
-            // Preservar email y pass (que no están en el form si está deshabilitado)
-            data.email = tempProfileData.email; 
-            data.password = tempProfileData.password;
 
-            tempProfileData = data;
-            store.saveProfile(tempProfileData);
+            // --- Guardar perfil en Firestore ---
+            console.log(`Guardando perfil en Firestore para ${user.uid}...`);
+            const profileRef = doc(db, "users", user.uid);
             
-            if (auth.currentUser && auth.currentUser.displayName !== tempProfileData.fullName) {
-                 await updateProfile(auth.currentUser, { displayName: tempProfileData.fullName });
-            }
+            const profileData = { ...data };
+            delete profileData.password;
+            delete profileData.confirmPassword;
+            delete profileData['avatar-upload'];
+            profileData.uid = user.uid;
+            
+            await setDoc(profileRef, profileData);
+            console.log("Perfil guardado en Firestore.");
+
+            // Guardar en LocalStorage
+            store.saveProfile(profileData);
+            tempProfileData = profileData;
             
             closeFormModal();
             renderProfileSummary();
             updateMainMenu(tempProfileData.conditions);
             
-            alert("Perfil actualizado.");
-            window.location.reload(); // Recargar para actualizar sidebar
+            alert("¡Perfil guardado exitosamente!");
+            sessionStorage.setItem('loginSuccess', 'true'); // Para el aviso
+            window.location.hash = '#perfil';
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Error al crear/guardar perfil:", error);
+            alert(`Error: ${getFirebaseErrorMessage(error)}`);
+            return;
         }
-        // --- FIN LÓGICA DE AUTENTICACIÓN ---
+        // --- FIN LÓGICA DE AUTENTICACIÓN Y GUARDADO ---
     });
 
     // --- Renderizado y actualización inicial ---
@@ -364,12 +434,8 @@ export function init() {
     // --- Lógica del Welcome Modal ---
     if (sessionStorage.getItem('openProfileModal') === 'true') {
         sessionStorage.removeItem('openProfileModal');
-        // Abrir modal solo si el usuario NO está logueado Y no tiene perfil local
-        if (!auth.currentUser && !tempProfileData) {
-            openFormModal(null);
-        } else if (auth.currentUser && !tempProfileData) {
-            // Caso: Logueado pero sin perfil local (ej. 2do dispositivo)
-            openFormModal(null);
+        if (!store.getProfile() || !store.getProfile().eps) {
+            openFormModal(tempProfileData); 
         }
     }
 }

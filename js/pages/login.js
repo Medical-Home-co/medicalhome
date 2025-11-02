@@ -1,6 +1,6 @@
-/* --- pages/login.js --- */
+/* --- pages/login.js (Corregido) --- */
 import { auth } from '../firebase-config.js';
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js"; // <-- CORREGIDO
 
 export function init() {
     console.log("Cargado js/pages/login.js");
