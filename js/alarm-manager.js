@@ -1,4 +1,4 @@
-/* --- js/alarm-manager.js --- */
+/* --- js/alarm-manager.js (Corregido) --- */
 import { db, auth } from './firebase-config.js'; // Importa desde tu config
 // --- CORRECCIÓN: Usar la misma versión 12.4.0 que firebase-config.js ---
 import { doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
@@ -25,7 +25,13 @@ export async function syncAlarmWithFirestore(item, type) {
         console.error("Error crítico: la conexión a Firestore (db) no está definida en alarm-manager.");
         return;
     }
-    const alarmCollection = `user_alarms/${user.uid}/alarms`;
+
+    // -----------------------------------------------------------------
+    // --- CORRECCIÓN CRÍTICA ---
+    // La ruta debe coincidir con la CollectionGroup de tu Cloud Function
+    const alarmCollection = `users/${user.uid}/alarms`;
+    // -----------------------------------------------------------------
+    
     const alarmId = `${type}-${item.id}`;
     const alarmRef = doc(db, alarmCollection, alarmId);
 
@@ -101,7 +107,12 @@ export async function deleteAlarmFromFirestore(itemId, type) {
 
     const user = auth.currentUser;
     const alarmId = `${type}-${itemId}`;
-    const alarmRef = doc(db, `user_alarms/${user.uid}/alarms`, alarmId);
+
+    // -----------------------------------------------------------------
+    // --- CORRECCIÓN CRÍTICA ---
+    // La ruta debe coincidir con la CollectionGroup de tu Cloud Function
+    const alarmRef = doc(db, `users/${user.uid}/alarms`, alarmId);
+    // -----------------------------------------------------------------
 
     try {
         await deleteDoc(alarmRef);
