@@ -11,9 +11,12 @@ let assistantSwitcher = null; // Para guardar el contenedor del switcher
 // --- INICIO: Constantes para la API ---
 // Asegúrate de reemplazar "TU_API_KEY_AQUI" con tu clave real
 const apiKey = "AIzaSyBp4pNNeJNCTKP72pVwhlA7HNk9puHdoxs"; // ¡OJO! No expongas claves reales en código público
-const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-// Modelo actualizado a gemini-1.5-flash-latest (recomendado)
-// --- FIN: Constantes para la API ---
+
+// ===================================================================
+// --- SOLUCIÓN (Item 3): API y Modelo actualizados a versión estable v1
+// ===================================================================
+const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+// ===================================================================
 
 
 // ===================================================================
@@ -107,10 +110,8 @@ function saveChatHistory() {
     if (currentAssistantKey) {
         try {
             localStorage.setItem(currentAssistantKey, JSON.stringify(chatHistory));
-            // console.log(`Historial guardado en ${currentAssistantKey}`);
         } catch (error) {
             console.error("Error al guardar historial:", error);
-            // Podrías notificar al usuario si el localStorage está lleno
         }
     }
 }
@@ -120,13 +121,22 @@ async function getAIResponse(userMessage) {
     chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
     saveChatHistory(); // Guardar el mensaje del usuario inmediatamente
 
-    // Preparar el payload para la API
+    // ===================================================================
+    // --- SOLUCIÓN (Item 3): Formato de payload para v1/gemini-pro
+    // ===================================================================
+    // El modelo v1 no usa 'systemInstruction'.
+    // Debemos insertarlo al principio del array 'contents'.
+    const apiContents = [
+        { role: 'user', parts: [{ text: systemInstruction }] },
+        { role: 'model', parts: [{ text: "Entendido. Estoy listo para ayudarte." }] }
+    ];
+
     const payload = {
-        contents: chatHistory,
-        systemInstruction: { parts: [{ text: systemInstruction }] }
-        // Podrías añadir safetySettings si necesitas ser más estricto/permisivo
-        // generationConfig: { temperature: 0.7, maxOutputTokens: 1000 } // Ejemplo
+        // Concatenar la instrucción del sistema con el historial de chat
+        contents: apiContents.concat(chatHistory)
+        // 'systemInstruction' (eliminado)
     };
+    // ===================================================================
 
     let retries = 0;
     const maxRetries = 3;
@@ -143,17 +153,15 @@ async function getAIResponse(userMessage) {
             });
 
             if (!response.ok) {
-                // Manejar errores específicos de la API (rate limit, server error)
                 if (response.status === 429 || response.status >= 500) {
                     console.warn(`API Error ${response.status}. Reintentando...`);
                     throw new Error(`API Error ${response.status}`); // Forzar reintento
                 } else {
-                    // Otros errores (ej: 400 Bad Request por API Key inválida)
                     const errorData = await response.json();
                     const errorMessage = errorData?.error?.message || `Error ${response.status}`;
                     console.error("Error no recuperable de API:", errorMessage);
                     const friendlyError = `Lo siento, hubo un problema técnico (${errorMessage}). Verifica tu conexión o inténtalo más tarde.`;
-                    // Añadir error al historial local como mensaje del modelo
+                    
                     chatHistory.push({ role: 'model', parts: [{ text: friendlyError }] });
                     saveChatHistory();
                     showTypingIndicator(false);
@@ -163,7 +171,7 @@ async function getAIResponse(userMessage) {
 
             const result = await response.json();
             const candidate = result.candidates?.[0];
-            let aiMessage = "Lo siento, no pude generar una respuesta en este momento."; // Mensaje por defecto
+            let aiMessage = "Lo siento, no pude generar una respuesta en este momento.";
 
             if (candidate && candidate.content?.parts?.[0]?.text) {
                 aiMessage = candidate.content.parts[0].text;
@@ -177,7 +185,6 @@ async function getAIResponse(userMessage) {
                 console.warn("Respuesta inesperada de la API:", result);
             }
 
-            // Añadir respuesta (o mensaje de error/seguridad) al historial
             chatHistory.push({ role: 'model', parts: [{ text: aiMessage }] });
             saveChatHistory();
             showTypingIndicator(false);
@@ -194,10 +201,10 @@ async function getAIResponse(userMessage) {
                 return networkError;
             }
             await new Promise(resolve => setTimeout(resolve, delay));
-            delay *= 2; // Incrementar espera exponencial
+            delay *= 2;
         }
     }
-     // Este punto no debería alcanzarse si el bucle funciona, pero por si acaso:
+    
     showTypingIndicator(false);
     const finalError = "Lo siento, no pude obtener una respuesta después de varios intentos.";
     chatHistory.push({ role: 'model', parts: [{ text: finalError }] });
@@ -209,31 +216,29 @@ async function getAIResponse(userMessage) {
 const handleSendMessage = async () => {
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-chat-btn');
-    if (!chatInput || !sendBtn) return; // Añadir chequeo de sendBtn
+    if (!chatInput || !sendBtn) return;
 
     const message = chatInput.value.trim();
 
     if (message) {
-        addMessageToChat('user', message); // Mostrar mensaje del usuario
-        chatInput.value = ''; // Limpiar input
-        chatInput.disabled = true; // Deshabilitar mientras responde
+        addMessageToChat('user', message);
+        chatInput.value = '';
+        chatInput.disabled = true;
         sendBtn.disabled = true;
-        chatInput.style.height = 'auto'; // Resetear altura
+        chatInput.style.height = 'auto';
 
-        const aiResponse = await getAIResponse(message); // Obtener respuesta (ya muestra indicador)
+        const aiResponse = await getAIResponse(message);
 
-        // showTypingIndicator(false); // getAIResponse ya lo oculta
-        addMessageToChat('assistant', aiResponse); // Mostrar respuesta IA
+        addMessageToChat('assistant', aiResponse);
 
-        chatInput.disabled = false; // Rehabilitar input
+        chatInput.disabled = false;
         sendBtn.disabled = false;
-        chatInput.focus(); // Devolver foco al input
+        chatInput.focus();
     }
 };
 
 // --- Funciones del Switcher de Avatares ---
 function createAssistantSwitcher() {
-    // Evitar crear el switcher si ya existe
     if (document.getElementById('assistant-switcher-container')) {
         assistantSwitcher = document.getElementById('assistant-switcher-container');
         return;
@@ -241,20 +246,18 @@ function createAssistantSwitcher() {
 
     assistantSwitcher = document.createElement('div');
     assistantSwitcher.id = 'assistant-switcher-container';
-    assistantSwitcher.className = 'assistant-switcher'; // Clase para estilos CSS
+    assistantSwitcher.className = 'assistant-switcher';
 
     for (const key in personalities) {
         const p = personalities[key];
         const img = document.createElement('img');
         img.id = `switch-${key}`;
-        img.src = p.imgSrc; // Usar la imagen definida en personalities
-        img.alt = key; // Usar la clave (john, yari...) como alt
+        img.src = p.imgSrc;
+        img.alt = key;
         img.className = 'switch-avatar';
-        img.title = `Hablar con ${key.charAt(0).toUpperCase() + key.slice(1)}`; // Tooltip
+        img.title = `Hablar con ${key.charAt(0).toUpperCase() + key.slice(1)}`;
         img.addEventListener('click', () => {
-            // Solo cambiar si se hace clic en un asistente DIFERENTE al actual
             if (currentPersonalityKey !== key) {
-                // Llamar a startChat global (definida en init)
                 if (window.startChat) {
                     window.startChat(p, key);
                 }
@@ -263,7 +266,6 @@ function createAssistantSwitcher() {
         assistantSwitcher.appendChild(img);
     }
 
-    // Insertar el switcher DESPUÉS del page-header
     const pageHeader = document.querySelector('.page-header');
     if (pageHeader && pageHeader.parentNode) {
         pageHeader.parentNode.insertBefore(assistantSwitcher, pageHeader.nextSibling);
@@ -271,7 +273,7 @@ function createAssistantSwitcher() {
         console.error("No se encontró .page-header para insertar el switcher.");
     }
 
-    assistantSwitcher.style.display = 'none'; // Oculto inicialmente
+    assistantSwitcher.style.display = 'none';
 }
 
 function setActiveAssistantSwitcher(activeKey) {
@@ -279,17 +281,15 @@ function setActiveAssistantSwitcher(activeKey) {
 
     const avatars = assistantSwitcher.querySelectorAll('.switch-avatar');
     avatars.forEach(img => {
-        const key = img.alt; // Obtenemos la key (john, yari, etc.) del alt
+        const key = img.alt;
 
-        // Limpiar clases activas de todos los avatares
         img.classList.remove('active-john', 'active-yari', 'active-danilejo', 'active-marian');
 
         if (key === activeKey) {
             img.classList.remove('grayscale');
-            img.classList.add(`active-${key}`); // Añadir la clase específica del activo
+            img.classList.add(`active-${key}`);
         } else {
             img.classList.add('grayscale');
-            // La clase activa ya se quitó arriba
         }
     });
 }
@@ -297,110 +297,95 @@ function setActiveAssistantSwitcher(activeKey) {
 // --- Función Principal (init) ---
 export function init() {
     console.log("Cargado js/pages/asistente.js (v8 - Theming y Layout)");
-    createAssistantSwitcher(); // Crear (o encontrar) el switcher
+    createAssistantSwitcher();
 
-    // Referencias a elementos
     const selectorScreen = document.getElementById('personality-selector');
     const chatContainer = document.getElementById('chat-container');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-chat-btn');
     const chatWindow = document.getElementById('chat-window');
 
-    // Ocultar chat y switcher al inicio
     if(chatContainer) chatContainer.style.display = 'none';
     if(assistantSwitcher) assistantSwitcher.style.display = 'none';
-    if(selectorScreen) selectorScreen.style.display = 'block'; // Asegurar que el selector se vea
+    if(selectorScreen) selectorScreen.style.display = 'block';
 
     // --- Definir startChat como función global ---
     window.startChat = (personality, key) => {
-        currentAssistantKey = `chatHistory_${key}`; // Clave para localStorage
-        currentPersonalityKey = key; // Clave para theming y lógica (john, yari...)
+        currentAssistantKey = `chatHistory_${key}`;
+        currentPersonalityKey = key;
         systemInstruction = personality.instruction;
 
         console.log(`Iniciando chat con: ${key}`);
 
-        // Ocultar selector, mostrar chat y switcher
         if(selectorScreen) selectorScreen.style.display = 'none';
-        if(chatContainer) chatContainer.style.display = 'flex'; // Usar flex para layout interno
-        if(assistantSwitcher) assistantSwitcher.style.display = 'flex'; // Usar flex para centrar avatares
+        if(chatContainer) chatContainer.style.display = 'flex';
+        if(assistantSwitcher) assistantSwitcher.style.display = 'flex';
 
-        // Aplicar clase de tema al contenedor del chat
         if (chatContainer) {
             chatContainer.classList.remove('chatting-with-john', 'chatting-with-yari', 'chatting-with-danilejo', 'chatting-with-marian');
             chatContainer.classList.add(`chatting-with-${key}`);
             console.log(`Clase de tema añadida: chatting-with-${key}`);
         }
 
-        // Marcar el avatar activo en el switcher
         setActiveAssistantSwitcher(key);
 
-        // Limpiar ventana de chat y cargar historial o saludo inicial
         if(chatWindow){
-            chatWindow.innerHTML = ''; // Limpiar mensajes anteriores
+            chatWindow.innerHTML = '';
             const savedHistory = localStorage.getItem(currentAssistantKey);
             if (savedHistory) {
                 try {
                     chatHistory = JSON.parse(savedHistory);
-                    // Asegurarse que el historial tenga el formato correcto
                     if (!Array.isArray(chatHistory) || chatHistory.some(m => !m.role || !m.parts)) {
                         console.warn("Historial guardado inválido, iniciando de cero.");
-                        chatHistory = []; // Resetear si está corrupto
+                        chatHistory = [];
                     }
                 } catch (e) {
                     console.error("Error parseando historial, iniciando de cero.", e);
-                    chatHistory = []; // Resetear si hay error de parseo
+                    chatHistory = [];
                 }
 
-                // Renderizar historial si es válido
                 if (chatHistory.length > 0) {
                      chatHistory.forEach(message => {
                         const sender = message.role === 'user' ? 'user' : 'assistant';
-                        // Asegurarse que parts[0].text exista
                         addMessageToChat(sender, message.parts?.[0]?.text || '[Mensaje inválido]');
                     });
                 }
             } else {
-                 chatHistory = []; // Asegurar que empezamos con historial vacío si no hay guardado
+                 chatHistory = [];
             }
 
-             // Si el historial está vacío (sea porque no había o estaba corrupto), añadir saludo
             if (chatHistory.length === 0) {
                 initialGreeting = personality.greeting;
                 chatHistory = [ { role: 'model', parts: [{ text: initialGreeting }] } ];
                 addMessageToChat('assistant', initialGreeting);
-                saveChatHistory(); // Guardar el saludo inicial
+                saveChatHistory();
             }
 
-            // Scroll al final después de cargar
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // Reasignar listeners de input y botón (limpiando los anteriores)
         sendBtn?.removeEventListener('click', handleSendMessage);
         chatInput?.removeEventListener('keydown', handleKeydown);
-        chatInput?.removeEventListener('input', handleInput); // Para auto-resize
+        chatInput?.removeEventListener('input', handleInput);
 
         sendBtn?.addEventListener('click', handleSendMessage);
         chatInput?.addEventListener('keydown', handleKeydown);
         chatInput?.addEventListener('input', handleInput);
 
-        chatInput?.focus(); // Poner foco en el input
+        chatInput?.focus();
     };
 
     // --- Helper Functions para Listeners ---
     const handleKeydown = (e) => {
-        // Enviar con Enter (sin Shift)
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // Prevenir salto de línea
+            e.preventDefault();
             handleSendMessage();
         }
     };
     const handleInput = () => {
-        // Auto-resize textarea
         const chatInput = document.getElementById('chat-input');
         if (!chatInput) return;
-        chatInput.style.height = 'auto'; // Resetear altura
-        // Ajustar altura al contenido, hasta un máximo (ej: 150px)
+        chatInput.style.height = 'auto';
         const maxHeight = 150;
         chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px';
     };
@@ -411,22 +396,18 @@ export function init() {
     document.getElementById('btn-danilejo')?.addEventListener('click', () => window.startChat(personalities.danilejo, 'danilejo'));
     document.getElementById('btn-marian')?.addEventListener('click', () => window.startChat(personalities.marian, 'marian'));
 
-     // Revisar si hay un chat activo guardado en sessionStorage (para recargas)
      const lastActiveAssistant = sessionStorage.getItem('lastActiveAssistant');
      if (lastActiveAssistant && personalities[lastActiveAssistant]) {
          console.log("Restaurando último asistente activo:", lastActiveAssistant);
-         // Esperar un instante para que el DOM esté listo
          setTimeout(() => {
              window.startChat(personalities[lastActiveAssistant], lastActiveAssistant);
          }, 0);
      } else {
-         // Si no hay asistente activo, asegurar que el selector se muestre
          if (selectorScreen) selectorScreen.style.display = 'block';
          if (chatContainer) chatContainer.style.display = 'none';
          if (assistantSwitcher) assistantSwitcher.style.display = 'none';
      }
 
-     // Guardar asistente activo en sessionStorage antes de recargar/cerrar
      window.addEventListener('beforeunload', () => {
          if (currentPersonalityKey) {
              sessionStorage.setItem('lastActiveAssistant', currentPersonalityKey);

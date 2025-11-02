@@ -1,9 +1,13 @@
 // SOLUCIÓN: Importar el store
 import { store } from '../store.js';
 
+// === INICIO SOLUCIÓN (Item 2): Variable para el select ===
+let medSelect;
+// === FIN SOLUCIÓN ===
+
 // --- Funciones de Renderizado ---
-// SOLUCIÓN: Aceptar datos como argumento
 function renderGeneralList(data) {
+    // ... (Tu función de renderizado de lista sigue igual) ...
     const listContainer = document.getElementById('general-list-container');
     const emptyState = document.getElementById('general-empty-state');
     const addMainBtn = document.getElementById('add-general-main-btn');
@@ -11,17 +15,15 @@ function renderGeneralList(data) {
     if (!listContainer || !emptyState || !addMainBtn) return;
     listContainer.innerHTML = '';
 
-    // SOLUCIÓN: Usar la longitud de los datos pasados
     if (data.length === 0) {
         emptyState.classList.remove('hidden');
-        listContainer.classList.add('hidden'); // Ocultar grid
+        listContainer.classList.add('hidden');
         addMainBtn.classList.add('hidden');
     } else {
         emptyState.classList.add('hidden');
-        listContainer.classList.remove('hidden'); // Mostrar grid
+        listContainer.classList.remove('hidden');
         addMainBtn.classList.remove('hidden');
 
-        // SOLUCIÓN: Usar los datos pasados
         const sortedData = [...data].sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
 
         sortedData.forEach(rec => {
@@ -58,7 +60,7 @@ function renderGeneralList(data) {
 }
 
 // --- Lógica de Estilos Dinámicos ---
-function injectGeneralStyles() { /* ... (Sin cambios aquí) ... */ 
+function injectGeneralStyles() { /* ... (Tu función sigue igual) ... */ 
     const styleId = 'general-dynamic-styles';
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
@@ -75,12 +77,40 @@ function injectGeneralStyles() { /* ... (Sin cambios aquí) ... */
     document.head.appendChild(style);
 }
 
+// === INICIO SOLUCIÓN (Item 2): Funciones para el Select de Medicamentos ===
+/**
+ * Rellena el <select> de medicamentos
+ */
+function populateMedsDropdown() {
+    if (!medSelect) return;
+    
+    const meds = store.getMeds() || [];
+    medSelect.innerHTML = '<option value="">Seleccionar medicamento...</option>'; // Opción por defecto
+    
+    meds.forEach(med => {
+        medSelect.innerHTML += `<option value="${med.name}">${med.name}</option>`;
+    });
+    
+    medSelect.innerHTML += '<option value="otro" style="font-weight: bold; color: var(--primary-blue);">+ Otro (Agregar a mi lista)</option>';
+}
+
+/**
+ * Maneja el cambio en el select de medicamentos
+ */
+function handleMedSelectChange() {
+    if (medSelect.value === 'otro') {
+        alert("Serás redirigido a la sección de Medicamentos para agregar uno nuevo. Luego podrás volver y seleccionarlo.");
+        window.location.hash = '#medicamentos';
+        medSelect.value = ""; // Resetear
+    }
+}
+// === FIN SOLUCIÓN ===
+
 // --- Función Principal ---
 export function init() {
     injectGeneralStyles();
 
-    // SOLUCIÓN: Cargar datos del store
-    let currentData = store.getGeneralData();
+    let currentData = store.getGeneralData() || []; // Cargar datos del store
 
     const formModal = document.getElementById('general-form-modal');
     const form = document.getElementById('general-form');
@@ -88,8 +118,13 @@ export function init() {
     const addMainBtn = document.getElementById('add-general-main-btn');
     const cancelBtn = document.getElementById('cancel-general-btn');
     const listContainer = document.getElementById('general-list-container');
+    
+    // === INICIO SOLUCIÓN (Item 2): Asignar variable ===
+    medSelect = document.getElementById('general-med-select');
+    // === FIN SOLUCIÓN ===
 
-    function openFormModal(record = null) { /* ... (Sin cambios aquí, solo llena el form) ... */ 
+
+    function openFormModal(record = null) {
         if (!form) return;
         form.reset();
         const now = new Date();
@@ -98,6 +133,10 @@ export function init() {
         document.getElementById('general-id').value = '';
         document.getElementById('general-form-title').textContent = 'Nuevo Registro General';
 
+        // === INICIO SOLUCIÓN (Item 2): Poblar meds al abrir ===
+        populateMedsDropdown();
+        // === FIN SOLUCIÓN ===
+
         if (record) {
             document.getElementById('general-form-title').textContent = 'Editar Registro';
             document.getElementById('general-id').value = record.id;
@@ -105,8 +144,19 @@ export function init() {
             document.getElementById('general-time').value = record.time;
             document.getElementById('general-symptom').value = record.symptom;
             document.getElementById('general-severity').value = record.severity;
-            document.getElementById('general-meds').value = record.meds || '';
             document.getElementById('general-notes').value = record.notes || '';
+            
+            // === INICIO SOLUCIÓN (Item 2): Seleccionar med guardado ===
+            if (record.meds) {
+                const medExists = (store.getMeds() || []).some(med => med.name === record.meds);
+                if (medExists) {
+                    medSelect.value = record.meds;
+                } else if (record.meds) {
+                    // Si no existe, añadirlo como opción temporal
+                    medSelect.innerHTML += `<option value="${record.meds}" selected>${record.meds} (Eliminado)</option>`;
+                }
+            }
+            // === FIN SOLUCIÓN ===
         }
         formModal?.classList.remove('hidden');
     }
@@ -119,6 +169,10 @@ export function init() {
     addMainBtn?.addEventListener('click', () => openFormModal());
     cancelBtn?.addEventListener('click', closeFormModal);
 
+    // === INICIO SOLUCIÓN (Item 2): Asignar listener al select ===
+    medSelect?.addEventListener('change', handleMedSelectChange);
+    // === FIN SOLUCIÓN ===
+
     form?.addEventListener('submit', (e) => {
         e.preventDefault();
         const id = document.getElementById('general-id').value;
@@ -129,9 +183,16 @@ export function init() {
             time: document.getElementById('general-time').value,
             symptom: document.getElementById('general-symptom').value,
             severity: document.getElementById('general-severity').value,
-            meds: document.getElementById('general-meds').value,
+            // === INICIO SOLUCIÓN (Item 2): Leer desde el select ===
+            meds: medSelect.value, // Leer el valor del select
+            // === FIN SOLUCIÓN ===
             notes: document.getElementById('general-notes').value
         };
+        
+        // Limpiar "otro" si no fue seleccionado
+        if (record.meds === 'otro') {
+            record.meds = '';
+        }
 
         if (id) {
             const index = currentData.findIndex(rec => rec.id.toString() === id);
@@ -140,32 +201,27 @@ export function init() {
             currentData.push(record);
         }
         
-        // SOLUCIÓN: Guardar en el store
         store.saveGeneralData(currentData);
-        
         closeFormModal();
-        // SOLUCIÓN: Pasar datos actualizados al render
         renderGeneralList(currentData);
     });
 
     listContainer?.addEventListener('click', (e) => {
+        // ... (Tu lógica de editar/borrar sigue igual) ...
         const deleteBtn = e.target.closest('.delete-btn');
         const editBtn = e.target.closest('.edit-btn');
         if (deleteBtn) {
             if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-                // SOLUCIÓN: Modificar currentData y guardar
                 currentData = currentData.filter(rec => rec.id.toString() !== deleteBtn.dataset.id);
                 store.saveGeneralData(currentData);
                 renderGeneralList(currentData);
             }
         }
         if (editBtn) {
-            // SOLUCIÓN: Buscar en currentData
             const record = currentData.find(rec => rec.id.toString() === editBtn.dataset.id);
             if (record) openFormModal(record);
         }
     });
 
-    // SOLUCIÓN: Render inicial con datos del store
-    renderGeneralList(currentData);
+    renderGeneralList(currentData); // Render inicial
 }

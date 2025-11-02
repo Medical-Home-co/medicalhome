@@ -1,18 +1,17 @@
 /* --- js/pages/perfil.js (Corregido) --- */
 import { store } from '../store.js';
-// import { requestNotificationPermission } from '../notifications.js'; // Esta función no existe
 
 // --- INICIO AUTH ---
 import { auth } from '../firebase-config.js';
 import { 
     createUserWithEmailAndPassword, 
     updateProfile 
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js"; // <-- CORREGIDO
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 // --- FIN AUTH ---
 
 // --- INICIO FIRESTORE ---
 import { db } from '../firebase-config.js';
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js"; // <-- CORREGIDO
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 // --- FIN FIRESTORE ---
 
 
@@ -21,13 +20,16 @@ let avatarDataUrl = null;
 
 // --- Funciones de Renderizado y UI ---
 
+/**
+ * SOLUCIÓN (Items 2 y 5): Muestra alergias y Teléfono EPS en el resumen.
+ */
 function renderProfileSummary() {
     const summaryContainer = document.getElementById('profile-summary-container');
     const emptyState = document.getElementById('profile-empty-state');
     const editBtn = document.getElementById('edit-profile-main-btn');
-    // const activateNotificationsBtn = document.getElementById('activate-notifications-btn'); 
+    const activateNotificationsBtn = document.getElementById('activate-notifications-btn'); 
     
-    if (!summaryContainer || !emptyState || !editBtn) {
+    if (!summaryContainer || !emptyState || !editBtn || !activateNotificationsBtn) {
         console.warn("Elementos principales del resumen de perfil no encontrados.");
         return;
     }
@@ -36,12 +38,19 @@ function renderProfileSummary() {
         summaryContainer.classList.add('hidden');
         emptyState.classList.remove('hidden');
         editBtn.classList.add('hidden');
-        // activateNotificationsBtn.classList.add('hidden');
+        activateNotificationsBtn.classList.add('hidden');
     } else {
         summaryContainer.classList.remove('hidden');
         emptyState.classList.add('hidden');
-        editBtn.classList.remove('hidden');
-        // activateNotificationsBtn.classList.remove('hidden');
+        
+        // Solo mostrar botones si hay un usuario real
+        if (auth.currentUser) {
+            editBtn.classList.remove('hidden');
+            activateNotificationsBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+            activateNotificationsBtn.classList.add('hidden');
+        }
         
         // --- Lógica para rellenar los datos del resumen ---
         const personalDataEl = document.getElementById('personal-data-summary');
@@ -50,7 +59,10 @@ function renderProfileSummary() {
 
         if (personalDataEl) {
              personalDataEl.innerHTML = `
-                <div class="profile-item"><span class="profile-item-label">Nombre</span><span class="profile-item-value">${tempProfileData.fullName || 'N/A'}</span></div>
+                <div class="profile-item-avatar">
+                    <img src="${tempProfileData.avatar || 'images/avatar.png'}" alt="Avatar">
+                    <span>${tempProfileData.fullName || 'N/A'}</span>
+                </div>
                 <div class="profile-item"><span class="profile-item-label">Edad</span><span class="profile-item-value">${tempProfileData.age || 'N/A'}</span></div>
                 <div class="profile-item"><span class="profile-item-label">Tipo Sangre</span><span class="profile-item-value">${tempProfileData.bloodType || 'N/A'}</span></div>
                 <div class="profile-item"><span class="profile-item-label">Peso</span><span class="profile-item-value">${tempProfileData.weight ? tempProfileData.weight + ' Kg' : 'N/A'}</span></div>
@@ -61,12 +73,21 @@ function renderProfileSummary() {
              const conditionsHTML = (tempProfileData.conditions && tempProfileData.conditions.length > 0)
                 ? tempProfileData.conditions.map(c => `<span class="tag">${c.charAt(0).toUpperCase() + c.slice(1)}</span>`).join('')
                 : '<span class="profile-item-label">No hay condiciones seleccionadas.</span>';
-             medicalDataEl.innerHTML = `<div class="tags-container">${conditionsHTML}</div>`;
+
+             // SOLUCIÓN (Items 2 y 5): Añadir alergias
+             const alergiasHTML = (tempProfileData.alergias && tempProfileData.alergias.length > 0)
+                ? `<h4 class="profile-card-title" style="font-size: 0.9rem; margin-top: 1rem; padding-top: 1rem; color: var(--text-secondary);">Alergias</h4>
+                   <div class="tags-container">${tempProfileData.alergias.map(a => `<span class="tag">${a}</span>`).join('')}</div>`
+                : '';
+
+             medicalDataEl.innerHTML = `<div class="tags-container">${conditionsHTML}</div>${alergiasHTML}`;
         }
         if (emergencyDataEl) {
+            // SOLUCIÓN (Item 5): Añadir Teléfono EPS
             emergencyDataEl.innerHTML = `
                 <div class="profile-item"><span class="profile-item-label">Email</span><span class="profile-item-value">${tempProfileData.email || 'N/A'}</span></div>
                 <div class="profile-item"><span class="profile-item-label">EPS</span><span class="profile-item-value">${tempProfileData.eps || 'N/A'}</span></div>
+                <div class="profile-item"><span class="profile-item-label">Tel. EPS</span><span class="profile-item-value">${tempProfileData.epsPhone || 'N/A'}</span></div>
                 <div class="profile-item"><span class="profile-item-label">Contacto Emerg.</span><span class="profile-item-value">${tempProfileData.emergencyContactName || 'N/A'}</span></div>
                 <div class="profile-item"><span class="profile-item-label">Tel. Emerg.</span><span class="profile-item-value">${tempProfileData.emergencyContactPhone || 'N/A'}</span></div>
             `;
@@ -98,6 +119,9 @@ function updateMainMenu(conditions = []) {
     }
 }
 
+/**
+ * SOLUCIÓN (Item 4): Rellena 'bloodType', 'fistulaLocation' y maneja 'password'.
+ */
 function openFormModal(profileData) {
     const form = document.getElementById('profile-form');
     if (!form) return; 
@@ -121,14 +145,27 @@ function openFormModal(profileData) {
     const confirmPasswordInput = document.getElementById('confirmPassword');
 
     // `profileData` es el `tempProfileData` (perfil local)
-    if (profileData) { // Editando perfil existente
+    if (profileData && profileData.eps) { // Editando perfil existente (usamos 'eps' como señal de que es un perfil real)
         document.getElementById('profile-form-title').textContent = 'Editar Perfil';
         
-        // Deshabilitar campos de email y contraseña
-        if(emailInput) { emailInput.disabled = true; emailInput.style.backgroundColor = 'var(--border-color)'; }
-        if(passwordInput) { passwordInput.disabled = true; passwordInput.placeholder = "Contraseña no se puede cambiar"; passwordInput.required = false; }
-        if(confirmPasswordInput) { confirmPasswordInput.disabled = true; confirmPasswordInput.placeholder = "Contraseña no se puede cambiar"; confirmPasswordInput.required = false; }
+        // SOLUCIÓN (Item 4): Deshabilitar campos de auth y quitar 'required'
+        if(emailInput) { 
+            emailInput.disabled = true; 
+            emailInput.style.backgroundColor = 'var(--border-color)'; 
+            emailInput.required = false; // Ya no es requerido al editar
+        }
+        if(passwordInput) { 
+            passwordInput.disabled = true; 
+            passwordInput.placeholder = "Contraseña no se puede cambiar"; 
+            passwordInput.required = false; // NO es requerido
+        }
+        if(confirmPasswordInput) { 
+            confirmPasswordInput.disabled = true; 
+            confirmPasswordInput.placeholder = "Contraseña no se puede cambiar"; 
+            confirmPasswordInput.required = false; // NO es requerido
+        }
 
+        // Rellenar todos los campos
         Object.keys(profileData).forEach(key => {
             const element = form.elements[key];
             if (element && typeof element !== 'undefined' && !element.length) {
@@ -137,6 +174,10 @@ function openFormModal(profileData) {
                 }
             }
         });
+
+        // SOLUCIÓN (Item 4): Rellenar 'select' que el loop no agarra
+        form.elements.bloodType.value = profileData.bloodType || "";
+        form.elements.fistulaLocation.value = profileData.fistulaLocation || "";
 
         if (profileData.conditions) {
             form.querySelectorAll('input[name="conditions"]').forEach(check => {
@@ -169,9 +210,9 @@ function openFormModal(profileData) {
         const checkedAccess = form.querySelector('input[name="renalAccess"]:checked');
         if(checkedAccess) checkedAccess.dispatchEvent(new Event('change'));
 
-    } else { // Creando perfil nuevo
+    } else { // Creando perfil nuevo (o Google por primera vez)
          document.getElementById('profile-form-title').textContent = 'Crear Perfil';
-         form.reset(); // Asegurar que esté limpio
+         form.reset(); 
          
          const currentUser = auth.currentUser;
          if (currentUser && currentUser.providerData[0]?.providerId === 'google.com') {
@@ -180,8 +221,9 @@ function openFormModal(profileData) {
              
              if(emailInput) { 
                  emailInput.value = currentUser.email || '';
-                 emailInput.disabled = true; // No pueden cambiar el email de Google
+                 emailInput.disabled = true;
                  emailInput.style.backgroundColor = 'var(--border-color)';
+                 emailInput.required = true; // Sigue siendo requerido para la lógica
              }
              if(passwordInput) { 
                  passwordInput.disabled = true; 
@@ -205,6 +247,7 @@ function openFormModal(profileData) {
              if(emailInput) { 
                  emailInput.disabled = false; 
                  emailInput.style.backgroundColor = 'var(--bg-secondary)'; 
+                 emailInput.required = true; 
              }
              if(passwordInput) { 
                  passwordInput.disabled = false; 
@@ -237,17 +280,54 @@ function renderAlergiaTag(alergia) {
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
-    removeBtn.style.marginLeft = '5px';
-    removeBtn.style.fontSize = '1.1em';
-    removeBtn.style.color = 'var(--danger-color)';
-    removeBtn.style.lineHeight = '1';
-
     removeBtn.onclick = (e) => {
         e.target.parentElement.remove();
     };
     tag.appendChild(removeBtn);
     alergiasList.appendChild(tag);
 }
+
+/**
+ * SOLUCIÓN (Item 3): Actualiza el estilo del botón de notificaciones
+ */
+function updateNotificationButtonState() {
+    const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
+    if (!activateNotificationsBtn) return;
+    
+    const icon = activateNotificationsBtn.querySelector('i'); // Asumiendo que el icono es <i>
+    const span = activateNotificationsBtn.querySelector('span');
+
+    // Comprobar el estado del permiso
+    if ('Notification' in window) {
+        const permission = Notification.permission;
+        
+        if (permission === 'granted') {
+            activateNotificationsBtn.classList.add('button-state-success');
+            if (icon) icon.setAttribute('data-lucide', 'bell-ring');
+            if (span) span.textContent = 'Notificaciones Activas';
+            activateNotificationsBtn.disabled = true; // Ya están activas
+        } else if (permission === 'denied') {
+            activateNotificationsBtn.classList.add('button-secondary'); // Estilo normal o 'danger'
+            if (icon) icon.setAttribute('data-lucide', 'bell-off');
+            if (span) span.textContent = 'Notificaciones Bloqueadas';
+            activateNotificationsBtn.disabled = true; // Bloqueadas
+        } else { // 'default'
+            activateNotificationsBtn.classList.remove('button-state-success');
+            if (icon) icon.setAttribute('data-lucide', 'bell');
+            if (span) span.textContent = 'Activar Notificaciones';
+            activateNotificationsBtn.disabled = false; // Se pueden activar
+        }
+    } else {
+        // El navegador no soporta notificaciones
+        activateNotificationsBtn.classList.add('hidden');
+    }
+    
+    // Recargar iconos de Lucide si existe
+    if (window.lucide) {
+        try { window.lucide.createIcons(); } catch(e) {}
+    }
+}
+
 
 // --- Función Principal (init) ---
 export function init() {
@@ -278,7 +358,7 @@ export function init() {
     const addInitialBtn = document.getElementById('add-profile-initial-btn');
     const editBtn = document.getElementById('edit-profile-main-btn');
     const cancelBtn = document.getElementById('cancel-profile-btn');
-    // const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
+    const activateNotificationsBtn = document.getElementById('activate-notifications-btn');
     const avatarUpload = document.getElementById('avatar-upload');
     const avatarPreview = document.getElementById('avatar-preview');
     const renalCheckbox = form.querySelector('input[name="conditions"][value="renal"]');
@@ -329,19 +409,31 @@ export function init() {
     editBtn?.addEventListener('click', () => openFormModal(tempProfileData));
     cancelBtn?.addEventListener('click', closeFormModal);
 
-    // activateNotificationsBtn?.addEventListener('click', (e) => {
-    //     e.preventDefault(); 
-    //     requestNotificationPermission();
-    // });
+    // SOLUCIÓN (Item 3): Evento del botón de notificaciones
+    activateNotificationsBtn?.addEventListener('click', async (e) => {
+        e.preventDefault(); 
+        if (window.requestAndRegisterToken) {
+            const user = auth.currentUser;
+            if (user) {
+                await window.requestAndRegisterToken(user.uid);
+                updateNotificationButtonState(); // Actualizar el botón después del intento
+            } else {
+                alert("Debes iniciar sesión para activar las notificaciones.");
+            }
+        }
+    });
 
     // --- Evento SUBMIT (CORREGIDO) ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Determinar si es un perfil nuevo o una edición
+        const isNewUserCreation = (auth.currentUser === null);
+        // Es una edición si ya tenemos un perfil en el store Y tiene 'eps' (señal de que está completo)
+        const isEditing = (store.getProfile() && store.getProfile().eps);
+
         const password = form.elements.password.value;
         const confirmPassword = form.elements.confirmPassword.value;
-
-        const isNewUserCreation = (auth.currentUser === null);
 
         if (isNewUserCreation && password !== confirmPassword) {
             alert('Las contraseñas no coinciden.');
@@ -352,7 +444,7 @@ export function init() {
         const data = Object.fromEntries(formData.entries());
         
         data.conditions = formData.getAll('conditions');
-        data.alergias = Array.from(document.querySelectorAll('#alergias-list .tag')).map(tag => tag.textContent.slice(0, -1)); // Quitar la 'x'
+        data.alergias = Array.from(document.querySelectorAll('#alergias-list .tag')).map(tag => tag.textContent.slice(0, -1));
 
         if (data.conditions.includes('renal')) {
              data.hemodialysisDays = formData.getAll('hemodialysisDays');
@@ -384,7 +476,7 @@ export function init() {
                     return;
                 }
                 
-                if (user.displayName !== data.fullName || user.photoURL !== data.avatar) {
+                if (user.displayName !== data.fullName || (data.avatar && user.photoURL !== data.avatar)) {
                     await updateProfile(user, { displayName: data.fullName, photoURL: data.avatar });
                 }
             }
@@ -394,33 +486,43 @@ export function init() {
             const profileRef = doc(db, "users", user.uid);
             
             const profileData = { ...data };
+            // Limpiar datos sensibles o innecesarios
             delete profileData.password;
             delete profileData.confirmPassword;
             delete profileData['avatar-upload'];
-            profileData.uid = user.uid;
+            profileData.uid = user.uid; // Guardamos el UID para referencia
             
-            await setDoc(profileRef, profileData);
+            // Si estamos editando, mantenemos el email original (no se puede cambiar)
+            if (isEditing) {
+                profileData.email = auth.currentUser.email;
+            }
+            
+            await setDoc(profileRef, profileData); // setDoc (crea o sobrescribe)
             console.log("Perfil guardado en Firestore.");
 
-            // Guardar en LocalStorage
             store.saveProfile(profileData);
             tempProfileData = profileData;
             
             closeFormModal();
-            renderProfileSummary();
-            updateMainMenu(tempProfileData.conditions);
+            // renderProfileSummary(); // No es necesario, la página se recargará
+            // updateMainMenu(tempProfileData.conditions); // No es necesario
+
+            // SOLUCIÓN (Item 6): Mostrar Toast y recargar
+            if (isEditing) {
+                window.showToast("Perfil modificado exitosamente");
+            } else {
+                window.showToast("Perfil creado con éxito");
+            }
             
-            alert("¡Perfil guardado exitosamente!");
-            sessionStorage.setItem('loginSuccess', 'true'); // Para el aviso
-            window.location.hash = '#perfil';
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000); // Esperar 2 segundos a que se lea el toast
 
         } catch (error) {
             console.error("Error al crear/guardar perfil:", error);
             alert(`Error: ${getFirebaseErrorMessage(error)}`);
             return;
         }
-        // --- FIN LÓGICA DE AUTENTICACIÓN Y GUARDADO ---
     });
 
     // --- Renderizado y actualización inicial ---
@@ -430,17 +532,22 @@ export function init() {
     } else {
         updateMainMenu();
     }
+    
+    // SOLUCIÓN (Item 3): Actualizar estado del botón de notificaciones al cargar
+    updateNotificationButtonState();
 
-    // --- Lógica del Welcome Modal ---
+    // --- Lógica del openProfileModal (Modificada) ---
     if (sessionStorage.getItem('openProfileModal') === 'true') {
         sessionStorage.removeItem('openProfileModal');
+        // Abrir modal si (no hay perfil local) O (si el perfil local no tiene 'eps',
+        // lo que indica que es un perfil incompleto de Google/invitado)
         if (!store.getProfile() || !store.getProfile().eps) {
             openFormModal(tempProfileData); 
         }
     }
 }
 
-// --- Función para traducir errores de Firebase (NUEVA) ---
+// --- Función para traducir errores de Firebase ---
 function getFirebaseErrorMessage(error) {
     switch (error.code) {
         case 'auth/invalid-email':
