@@ -1,0 +1,51 @@
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Asistente Virtual</h2>
+        <p class="page-subtitle">Obtén información general sobre salud.</p>
+    </div>
+</div>
+
+
+
+<div id="personality-selector">
+    <h3>¿Con quién quieres hablar hoy?</h3>
+    <div class="personality-options">
+        <button id="btn-john" class="personality-button" data-personality="john">
+            <div class="profile-image-container">
+                <img src="images/john_01.png" alt="Perfil de John">
+            </div>
+            <h4>John</h4>
+            <p>Un experto en salud para datos y temas médicos generales.</p>
+        </button>
+        <button id="btn-yari" class="personality-button" data-personality="yari">
+            <div class="profile-image-container">
+                <img src="images/yari_01.png" alt="Perfil de Yari">
+            </div>
+            <h4>Yari</h4>
+            <p>Una profesional en temas generales: ciencia, historia, arte, etc.</p>
+        </button>
+        <button id="btn-danilejo" class="personality-button" data-personality="danilejo">
+            <div class="profile-image-container">
+                <img src="images/dani_01.png" alt="Perfil de Danilejo">
+            </div>
+            <h4>Danilejo</h4>
+            <p>Un conversador de naturaleza, mindfulness y espiritualidad.</p>
+        </button>
+        <button id="btn-marian" class="personality-button" data-personality="marian">
+            <div class="profile-image-container">
+                <img src="images/marian_01.png" alt="Perfil de Marian">
+            </div>
+            <h4>Marian</h4>
+            <p>Una consejera para apoyo emocional y escucha activa.</p>
+        </button>
+    </div>
+</div>
+
+<div id="chat-container" class="chat-container" style="display: none;">
+    <div id="chat-window" class="chat-window">
+        </div>
+    <div class="chat-input-area">
+        <textarea id="chat-input" class="form-input" placeholder="Escribe tu pregunta..." rows="1"></textarea>
+        <button id="send-chat-btn" class="button button-primary">Enviar</button>
+    </div>
+</div>

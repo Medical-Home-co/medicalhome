@@ -1,0 +1,150 @@
+<style>
+    /* ... (Estilos base + Estilos .collapsible-info-box) ... */
+     .info-box { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; font-size: 0.9rem; color: var(--text-secondary); }
+    .info-box h3 { font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .category-card { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .category-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px var(--shadow-color); }
+    .category-icon { width: 48px; height: 48px; margin: 0 auto 1rem; object-fit: contain; }
+    .category-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+    .wellness-modal-content h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+    .wellness-modal-content ul { list-style-type: disc; list-style-position: inside; padding-left: 0.5rem; }
+    .wellness-modal-content li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+
+    .collapsible-info-box { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); }
+    .collapsible-info-box summary { font-weight: 600; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem; cursor: pointer; list-style: none; }
+    .collapsible-info-box summary img { width: 24px; height: 24px; }
+    .collapsible-info-box div.content { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); color: var(--text-primary); font-size: 1rem; }
+    .collapsible-info-box div.content hr { border: none; border-top: 1px solid var(--border-color); margin: 1rem 0; }
+    .collapsible-info-box div.content h3 { font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.05rem; }
+    .collapsible-info-box summary::-webkit-details-marker { display: none; }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Bienestar y Cuidados</h2>
+            <p class="page-subtitle">Información y consejos para tu salud.</p>
+        </div>
+    </div>
+
+    <div class="category-grid">
+        <div class="category-card" data-modal-target="wellness-general-modal"><img src="images/general.png" alt="Cuidados Generales" class="category-icon"><h3 class="category-title">Cuidados Generales</h3></div>
+        <div class="category-card" data-modal-target="wellness-renal-modal"><img src="images/renal.png" alt="Cuidado Renal" class="category-icon"><h3 class="category-title">Cuidado Renal (BCM)</h3></div>
+        <div class="category-card" data-modal-target="wellness-cardiaco-modal"><img src="images/cardiaco.png" alt="Salud Cardiaca" class="category-icon"><h3 class="category-title">Salud Cardiaca</h3></div>
+        <div class="category-card" data-modal-target="wellness-diabetes-modal"><img src="images/diabetes.png" alt="Control de Diabetes" class="category-icon"><h3 class="category-title">Control de Diabetes</h3></div>
+        <div class="category-card" data-modal-target="wellness-artritis-modal"><img src="images/artritis.png" alt="Manejo de Artritis" class="category-icon"><h3 class="category-title">Manejo de Artritis</h3></div>
+        <div class="category-card" data-modal-target="wellness-tea-modal"><img src="images/tea.png" alt="Apoyo para TEA" class="category-icon"><h3 class="category-title">Apoyo para TEA</h3></div>
+        <div class="category-card" data-modal-target="wellness-respiratorio-modal"><img src="images/respiratorio.png" alt="Cuidado Respiratorio" class="category-icon"><h3 class="category-title">Cuidado Respiratorio</h3></div>
+        <div class="category-card" data-modal-target="wellness-gastrico-modal"><img src="images/gastrico.png" alt="Bienestar Gástrico" class="category-icon"><h3 class="category-title">Bienestar Gástrico</h3></div>
+        <div class="category-card" data-modal-target="wellness-ocular-modal"><img src="images/ocular.png" alt="Cuidado Ocular" class="category-icon"><h3 class="category-title">Cuidado Ocular</h3></div>
+    </div>
+    
+    <details class="collapsible-info-box">
+         <summary>
+            <img src="images/icons/alerta.gif" alt="Alerta">
+            Información y Consejos
+        </summary>
+        <div class="content">
+            <h3>Importante</h3>
+            <p>La información es educativa y no reemplaza el consejo médico; consulta siempre a tu médico y busca ayuda urgente en caso de emergencia..</p>
+            <hr> 
+            <h3>¿Necesitas más información?</h3>
+            <p>No dudes en consultar con tu equipo médico de confianza.</p>
+            <hr> 
+            <p><strong>Recuerda: Tu salud es lo más importante.</strong></p>
+        </div>
+    </details>
+
+</div>
+
+
+<div id="wellness-general-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/general.png" class="category-icon" style="margin: 0;"> Cuidados Generales</h2>
+        <h3>Hidratación Adecuada</h3> <ul><li>Bebe suficiente agua durante el día, según las indicaciones de tu médico (algunas condiciones requieren restricción).</li><li>Evita bebidas azucaradas que pueden afectar tus niveles de energía y salud.</li></ul><h3>Descanso Reparador</h3><ul><li>Intenta dormir entre 7 y 9 horas cada noche para una recuperación óptima.</li><li>Establece un horario de sueño regular, incluso los fines de semana.</li><li>Limita el uso de pantallas (móvil, TV) al menos 30 minutos antes de dormir.</li></ul><h3>Actividad Física Ligera</h3><ul><li>Intenta caminar al menos 30 minutos al día, si tu condición lo permite.</li><li>El movimiento ayuda a la circulación, el estado de ánimo y la digestión.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-renal-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/renal.png" class="category-icon" style="margin: 0;"> Cuidado Renal (BCM)</h2>
+        <h3>Control de Nutrientes Críticos</h3><ul><li>Controla estrictamente la ingesta de **sodio** (sal), **potasio** y **fósforo**.</li><li>Lee las etiquetas de los alimentos; muchos productos procesados los contienen.</li></ul><h3>Manejo de Líquidos</h3><ul><li>Mide tu consumo de líquidos diarios según lo prescrito por tu nefrólogo.</li><li>Recuerda que alimentos como sopas, gelatinas o hielo cuentan como líquidos.</li></ul><h3>Monitoreo y Adherencia</h3><ul><li>Pésate todos los días a la misma hora para vigilar la retención de líquidos (BCM).</li><li>No te saltes ninguna sesión de diálisis; es vital para tu salud.</li><li>Toma tus medicamentos (quelantes de fósforo, antihipertensivos) exactamente como se te indicó.</li></ul>
+         <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-cardiaco-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+         <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/cardiaco.png" class="category-icon" style="margin: 0;"> Salud Cardiaca</h2>
+        <h3>Dieta Baja en Sodio</h3><ul><li>Reduce el consumo de sal (sodio) para ayudar a controlar la presión arterial.</li><li>Evita alimentos enlatados, embutidos y comidas rápidas ricas en sal.</li></ul><h3>Grasas Saludables</h3><ul><li>Limita las grasas saturadas (carnes rojas, mantequilla) y trans (procesados).</li><li>Prefiere grasas insaturadas como el aceite de oliva, aguacate y pescado.</li></ul><h3>Monitoreo y Estilo de Vida</h3><ul><li>Mide tu presión arterial regularmente, como te indicó tu médico.</li><li>Realiza actividad física moderada (como caminar) si está aprobado por tu cardiólogo.</li><li>Busca técnicas para manejar el estrés, como la respiración profunda o meditación.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-diabetes-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/diabetes.png" class="category-icon" style="margin: 0;"> Control de Diabetes</h2>
+        <h3>Alimentación Consciente</h3><ul><li>Controla las porciones de carbohidratos en cada comida.</li><li>Prioriza alimentos con bajo índice glucémico (vegetales, granos enteros).</li><li>No te saltes comidas para evitar picos o bajas de glucosa.</li></ul><h3>Monitoreo y Cuidado</h3><ul><li>Mide tus niveles de glucosa en sangre según las indicaciones de tu médico.</li><li>Revisa tus pies diariamente en busca de heridas o ampollas.</li><li>Mantente bien hidratado, preferiblemente con agua.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-artritis-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/artritis.png" class="category-icon" style="margin: 0;"> Manejo de Artritis</h2>
+        <h3>Movilidad Articular</h3><ul><li>Realiza ejercicios de bajo impacto como natación, ciclismo estacionario o yoga.</li><li>Los estiramientos suaves son cruciales para reducir la rigidez, especialmente por la mañana.</li></ul><h3>Protección de Articulaciones</h3><ul><li>Usa las articulaciones más grandes para cargar peso (ej. usa el antebrazo para empujar una puerta).</li><li>Alterna períodos de actividad con períodos de descanso.</li></ul><h3>Manejo del Dolor</h3><ul><li>Usa calor (almohadillas térmicas) para relajar músculos y aliviar la rigidez.</li><li>Usa frío (compresas de hielo) para reducir la inflamación y el dolor agudo.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-tea-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/tea.png" class="category-icon" style="margin: 0;"> Apoyo para TEA</h2>
+        <h3>Rutinas y Estructura</h3><ul><li>Establece rutinas diarias predecibles para reducir la ansiedad.</li><li>Utiliza agendas visuales, temporizadores o calendarios para anticipar actividades y transiciones.</li></ul><h3>Manejo Sensorial</h3><ul><li>Identifica y respeta las sensibilidades sensoriales (ruidos, luces, texturas).</li><li>Proporciona un "espacio seguro" o de calma al que la persona pueda retirarse si se siente abrumada.</li></ul><h3>Comunicación</h3><ul><li>Usa lenguaje claro, directo y conciso. Evita el sarcasmo o dobles sentidos.</li><li>Da tiempo suficiente para procesar la información y responder.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-respiratorio-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/respiratorio.png" class="category-icon" style="margin: 0;"> Cuidado Respiratorio</h2>
+        <h3>Ambiente Limpio</h3><ul><li>Mantén tu hogar libre de polvo, humo de tabaco y otros alérgenos conocidos.</li><li>Considera usar un purificador de aire si eres sensible al polen o ácaros.</li></ul><h3>Técnica y Prevención</h3><ul><li>Asegúrate de usar tu inhalador o nebulizador con la técnica correcta.</li><li>Evita cambios bruscos de temperatura y el aire muy frío.</li><li>Practica ejercicios de respiración diafragmática para fortalecer tu capacidad pulmonar.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-gastrico-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/gastrico.png" class="category-icon" style="margin: 0;"> Bienestar Gástrico</h2>
+        <h3>Identificación de Patrones</h3><ul><li>Lleva un diario de alimentos para identificar desencadenantes (ej. picantes, grasas, cafeína, lácteos).</li><li>Come porciones más pequeñas y frecuentes en lugar de 3 comidas grandes.</li></ul><h3>Buenos Hábitos</h3><ul><li>Evita acostarte inmediatamente después de comer; espera al menos 2-3 horas.</li><li>Come despacio y mastica bien los alimentos.</li><li>Maneja el estrés, ya que puede impactar directamente tu salud digestiva.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="wellness-ocular-modal" class="modal-overlay hidden">
+    <div class="modal-content wellness-modal-content">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.75rem;"><img src="images/ocular.png" class="category-icon" style="margin: 0;"> Cuidado Ocular</h2>
+        <h3>Descanso Visual (Regla 20-20-20)</h3><ul><li>Si usas pantallas (móvil, computador), cada 20 minutos, mira algo a 20 pies (6 metros) de distancia durante 20 segundos.</li><li>Parpadea frecuentemente para mantener los ojos lubricados.</li></ul><h3>Revisiones y Protección</h3><ul><li>No te saltes tus exámenes oftalmológicos regulares.</li><li>Si tienes diabetes, es crucial realizar revisiones de fondo de ojo (retinopatía) anualmente.</li><li>Usa gafas de sol con protección UV para proteger tus ojos de la radiación solar.</li></ul><h3>Iluminación</h3><ul><li>Asegúrate de tener buena iluminación al leer o trabajar para evitar forzar la vista.</li></ul>
+        <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+            <button class="button button-primary close-wellness-modal-btn" style="width: 100%;">Cerrar</button>
+        </div>
+    </div>
+</div>
