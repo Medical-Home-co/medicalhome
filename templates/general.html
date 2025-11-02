@@ -31,11 +31,11 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="general-date">Fecha</label>
-                    <input type="date" id="general-date" class="form-input" required>
+                    <input type="date" id="general-date" name="date" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label for="general-time">Hora</label>
-                    <input type="time" id="general-time" class="form-input" required>
+                    <input type="time" id="general-time" name="time" class="form-input" required>
                 </div>
             </div>
 
@@ -54,10 +54,11 @@
             </div>
 
             <div class="form-group" style="margin-top: 1rem;">
-                <label for="general-meds">Medicación Tomada (Opcional)</label>
-                <input type="text" id="general-meds" name="meds" placeholder="Ej: Paracetamol 500mg" class="form-input">
+                <label for="general-med-select">Medicación Tomada (Opcional)</label>
+                <select id="general-med-select" name="meds" class="form-input form-select">
+                    <option value="">Cargando medicamentos...</option>
+                </select>
             </div>
-
             <div class="form-group" style="margin-top: 1rem;">
                 <label for="general-notes">Notas Adicionales</label>
                 <textarea id="general-notes" name="notes" class="form-input" rows="3" placeholder="Describe con más detalle, posibles causas, etc."></textarea>

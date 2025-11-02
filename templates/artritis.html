@@ -125,14 +125,15 @@
             </div>
 
             <div class="form-group" style="margin-top: 1rem;">
-                <label for="artritis-med-input">Medicamentos tomados (Opcional)</label>
+                <label for="artritis-med-select">Medicamentos tomados (Opcional)</label>
                 <div class="input-with-button">
-                     <input type="text" id="artritis-med-input" placeholder="Nombre del medicamento" class="form-input">
-                     <button type="button" id="add-artritis-med-btn">+ Agregar</button>
+                     <select id="artritis-med-select" class="form-input form-select" style="padding-right: 100px;">
+                        <option value="">Cargando medicamentos...</option>
+                     </select>
+                     <button type="button" id="add-artritis-med-btn" class="button button-secondary button-small">+ Agregar</button>
                 </div>
                 <div id="artritis-meds-list" class="tags-container" style="margin-top: 0.5rem;"></div>
             </div>
-
             <div class="form-group" style="margin-top: 1rem;">
                 <label for="artritis-notes">Notas adicionales</label>
                 <textarea id="artritis-notes" name="notes" class="form-input" placeholder="Observaciones, factores desencadenantes, etc."></textarea> </div>
