@@ -1,0 +1,1437 @@
+/* --- Variables de Color y Base --- */
+:root {
+    --primary-blue: #3A86FF;
+    /* --- MEJORA: Color primario más oscuro para hover --- */
+    --primary-blue-dark: #3171e0; 
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F4F7F9;
+    --text-primary: #1A202C;
+    --text-secondary: #4A5568;
+    --border-color: #E2E8F0;
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --sidebar-width: 240px;
+    --sidebar-width-collapsed: 70px;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    
+    /* --- INICIO: Colores añadidos para iconos --- */
+    --success-color: #25D366; /* Verde WhatsApp */
+    --danger-color: #dc3545;  /* Rojo Borrar */
+    
+    /* --- INICIO: Colores para insignia "Emergencia" (Rojo Claro) --- */
+    --danger-light-text: #c53030;
+    --danger-light-bg: #fff5f5;
+    --danger-light-border: #f7d4d6;
+    /* --- FIN: Colores para insignia "Emergencia" --- */
+}
+
+body.dark-theme {
+    --primary-blue: #5a9bff;
+    /* --- MEJORA: Color primario más oscuro para hover (dark) --- */
+    --primary-blue-dark: #4a88f0;
+    --bg-primary: #1A202C;
+    --bg-secondary: #2D3748;
+    --text-primary: #F7FAFC;
+    --text-secondary: #A0AEC0;
+    --border-color: #4A5568;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+
+    /* --- INICIO: Colores añadidos para iconos (dark) --- */
+    --success-color: #30e070; /* Verde WhatsApp (más brillante) */
+    --danger-color: #e84a5a;  /* Rojo Borrar (más brillante) */
+
+    /* --- INICIO: Colores para insignia "Emergencia" (Dark) --- */
+    --danger-light-text: #fc8181;
+    --danger-light-bg: #4d2f2f;
+    --danger-light-border: #7a4a4a;
+    /* --- FIN: Colores para insignia "Emergencia" --- */
+}
+
+/* --- Reseteo y Estilos Globales --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* ===== INICIO: Corrección Tamaño Móvil ===== */
+    overflow-x: hidden;
+    /* ===== FIN: Corrección Tamaño Móvil ===== */
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: background-color 0.2s, color 0.2s;
+    line-height: 1.5;
+    /* ===== INICIO: Corrección Tamaño Móvil ===== */
+    overflow-x: hidden;
+    /* ===== FIN: Corrección Tamaño Móvil ===== */
+}
+body.hidden { visibility: hidden; }
+a { text-decoration: none; color: inherit; }
+button { background: none; border: none; cursor: pointer; }
+ul { list-style: none; }
+.hidden { display: none !important; }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+
+/* --- Modales --- */
+.modal-overlay {
+    position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--bg-primary); 
+    padding: 2rem; 
+    border-radius: 12px;
+    width: 90%; 
+    max-width: 500px;
+    text-align: left;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-logo { width: 60px; height: 60px; margin: 0 auto 1rem; }
+.modal-icon { width: 48px; height: 48px; margin: 0 auto 1rem; color: var(--primary-blue);}
+.modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+.modal-subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+.modal-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+.modal-footer { margin-top: 1.5rem; }
+.modal-form { display: flex; flex-direction: column; gap: 1rem; }
+.modal-form textarea {
+    background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 8px; padding: 0.75rem; min-height: 120px;
+    font-family: inherit; font-size: 1rem; color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-form textarea:focus,
+.modal-form textarea:focus-visible {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3);
+    outline: none;
+}
+
+
+/* --- Componentes Genéricos (Botones, etc.) --- */
+.button { 
+    padding: 0.75rem 1rem; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    transition: all 0.2s; 
+    white-space: nowrap; 
+}
+.button-primary { background-color: var(--primary-blue); color: white; }
+.button-secondary { background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+.button-primary:hover {
+    background-color: var(--primary-blue-dark);
+}
+.button-secondary:hover {
+    background-color: var(--border-color);
+}
+.button:active {
+    transform: scale(0.98);
+}
+.button:focus-visible {
+    outline: 3px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+.checkbox-label { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer; justify-content: center; }
+
+/* --- Estructura Principal y Dashboard --- */
+.app-shell { display: flex; }
+.main-content {
+    flex-grow: 1; 
+    padding: 1.5rem; 
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
+}
+.content-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1rem;
+}
+.content-logo {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-size: 1.5rem; font-weight: 700;
+}
+.content-logo img { width: 36px; height: 36px; }
+.notifications { position: relative; }
+.badge {
+    position: absolute; top: -5px; right: -5px;
+    background-color: var(--primary-blue); color: white;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.65rem; font-weight: 700;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem; 
+}
+.summary-card {
+    display: block; background-color: var(--bg-primary); border-radius: 12px;
+    border: 1px solid var(--border-color); 
+    padding: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.summary-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px var(--shadow-color); }
+.card-title {
+    font-size: 1.1rem; font-weight: 600; 
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 0.5rem;
+}
+.card-item-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.card-item-list li {
+    display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
+}
+.item-name { font-weight: 500; }
+.item-detail { color: var(--text-secondary); font-size: 0.85rem; }
+
+/* --- Estilos para Formularios de Página --- */
+.page-form-container {
+    background-color: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    max-width: 900px;
+    margin: 0 auto;
+}
+.page-form-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.page-form-header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.page-form-body {
+    padding: 1rem;
+}
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+}
+
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-input:focus-visible {
+    border-color: var(--primary-blue);
+    background-color: var(--bg-primary);
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3);
+    outline: none;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+.input-with-button { position: relative; }
+.input-with-button .form-input { padding-right: 100px; }
+.input-with-button button {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    /* background-color: var(--bg-tertiary); (variable no definida, usar secondary) */
+    background-color: var(--bg-secondary); 
+    color: var(--text-primary);
+}
+
+/* --- Menú Lateral (Sidebar) --- */
+.sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh;
+    width: var(--sidebar-width); background-color: var(--bg-primary);
+    border-right: 1px solid var(--border-color); transition: width 0.3s ease;
+    z-index: 100;
+}
+.sidebar-nav { height: 100%; display: flex; flex-direction: column; padding: 0.75rem; }
+.sidebar-profile {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem; margin-bottom: 0.5rem;
+}
+.profile-avatar { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
+}
+.profile-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+.nav-links { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-divider { border: none; height: 1px; background-color: var(--border-color); margin: 0.5rem 0.75rem; }
+.nav-link {
+    display: flex; align-items: center; gap: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px; margin-bottom: 0.1rem;
+    font-weight: 500; font-size: 0.85rem;
+    white-space: nowrap;
+}
+.nav-link:hover { background-color: var(--bg-secondary); }
+.nav-link.active { background-color: var(--primary-blue); color: white; }
+.nav-link:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: -2px;
+}
+.nav-link.active:focus-visible {
+    outline: 2px solid var(--bg-primary);
+}
+
+
+.nav-link i { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-icon-img { width: 18px; height: 18px; border-radius: 4px; }
+.sub-menu { padding-left: 28px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.nav-item-accordion.open .sub-menu { max-height: 500px; }
+.nav-item-accordion.open .chevron { transform: rotate(180deg); }
+.chevron { margin-left: auto; transition: transform 0.3s ease; }
+.sidebar-footer { display: flex; flex-direction: column; padding-top: 0.5rem; }
+.footer-actions { display: flex; justify-content: space-between; align-items: center; padding: 0 0.75rem; }
+.sidebar-footer .nav-link { flex: 1; }
+.sidebar-footer .switch { margin-left: auto; }
+.collapse-btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.85rem;
+    padding: 0.6rem 0.75rem; color: var(--text-secondary); border-radius: 6px;
+}
+.collapse-btn:hover { background-color: var(--bg-secondary); }
+
+.collapse-btn > i {
+    display: none;
+}
+.collapse-text-open,
+.collapse-text-closed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.collapse-icon-closed, .collapse-text-closed { display: none; }
+
+/* --- Estado Colapsado --- */
+.app-shell.collapsed .sidebar { width: var(--sidebar-width-collapsed); }
+.app-shell.collapsed .main-content { margin-left: var(--sidebar-width-collapsed); }
+.app-shell.collapsed .sidebar-profile .profile-info, .app-shell.collapsed .nav-link span, .app-shell.collapsed .chevron { display: none; }
+.app-shell.collapsed .sidebar-profile { padding: 0.75rem 0; justify-content: center; }
+.app-shell.collapsed .nav-link { justify-content: center; }
+.app-shell.collapsed .sidebar-footer { padding: 0; }
+.app-shell.collapsed .nav-divider { margin: 0.5rem; }
+.app-shell.collapsed .footer-actions { flex-direction: column; gap: 0.5rem; padding: 0.5rem 0; }
+
+.app-shell.collapsed .collapse-icon-open, 
+.app-shell.collapsed .collapse-text-open { 
+    display: none; 
+}
+.app-shell.collapsed .collapse-icon-closed { 
+    display: none;
+}
+.app-shell.collapsed .collapse-text-closed {
+    display: flex;
+}
+
+/* --- Navegación Móvil (Barra Inferior) --- */
+.mobile-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+    background-color: var(--bg-primary); border-top: 1px solid var(--border-color);
+    display: none; align-items: stretch; z-index: 500;
+}
+.mobile-nav-link {
+    flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-secondary);
+    -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-link.active { color: var(--primary-blue); }
+.mobile-nav-link i { width: 22px; height: 22px; }
+.mobile-menu-content {
+    position: fixed; bottom: 60px; left: 0; right: 0;
+    background-color: var(--bg-primary); padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    border-top-left-radius: 12px; border-top-right-radius: 12px;
+    max-height: 70vh; overflow-y: auto;
+}
+.mobile-menu-content .sidebar-profile { display: none; }
+.mobile-menu-content .sidebar-footer { 
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.5rem;
+}
+
+/* --- Media Queries (Responsivo) --- */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    
+    .main-content { 
+        margin-left: 0; 
+        padding: 1rem; 
+        padding-bottom: 80px;
+        overflow-x: hidden;
+    }
+    
+    .mobile-nav { display: flex; }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem; 
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    .page-subtitle {
+        font-size: 0.95rem;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+    }
+
+    /* (Botones de 'agregar' a ancho completo) */
+    #add-bcm-main-btn, 
+    #add-ocular-main-btn, 
+    #add-respiratorio-main-btn, 
+    #add-agenda-main-btn,
+    #add-bcm-initial-btn,
+    #add-ocular-initial-btn,
+    #add-respiratorio-initial-btn,
+    #add-agenda-initial-btn {
+        width: 100%;
+        padding: 0.8rem;
+    }
+
+    .checkbox-grid-ocular {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 1.5rem 1rem;
+        width: 95%;
+    }
+
+    .page-title {
+        font-size: 1.25rem;
+    }
+    .page-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkbox-grid {
+        grid-template-columns: 1fr; 
+    }
+    
+    .checkbox-grid-ocular {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* --- Switch de Tema --- */
+/* (Este es el estilo para el switch de tema en el sidebar) */
+.switch { position: relative; }
+.switch input { display: none; }
+.switch label {
+  display: block; width: 50px; height: 26px;
+  background: var(--bg-secondary); border-radius: 15px;
+  cursor: pointer; border: 1px solid var(--border-color);
+}
+.switch label span:first-child {
+  display: block; width: 20px; height: 20px;
+  border-radius: 50%; position: absolute; top: 3px; left: 3px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  background-color: white;
+  background-image: url('images/icons/sun.svg');
+  background-size: 14px 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+body.dark-theme .switch label span:first-child {
+  background-color: var(--bg-secondary);
+  background-image: url('images/icons/moon.svg');
+}
+.switch input:checked + label span:first-child {
+    transform: translateX(24px);
+}
+
+/* --- Toggle Switch (Recordatorios) --- */
+/* ================================================================
+  --- INICIO: CORRECCIÓN v3 (Color sutil, knob blanco, icono negro) ---
+  ================================================================
+*/
+
+/* Contenedor del toggle */
+label.switch {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle; 
+    width: 52px;  /* Tamaño +2px */
+    height: 28px; /* Tamaño +2px */
+}
+label.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Fondo (slider) */
+label.switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-secondary); /* Color 'off' (fondo) */
+    border: 1px solid var(--border-color);
+    transition: .4s;
+    border-radius: 15px;
+}
+
+/* Círculo (knob) */
+label.switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px; /* Tamaño +2px */
+    width: 22px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-radius: 50%;
+    transition: .4s;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    
+    /* Icono 'OFF' (bell-off.svg) */
+    background-image: url('images/icons/bell-off.svg');
+    background-size: 14px 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* Modo oscuro: knob 'OFF' */
+body.dark-theme label.switch .slider:before {
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* --- Estado 'ON' (Checked) --- */
+
+/* Fondo (slider) 'ON' */
+label.switch input:checked + .slider {
+    /* CORRECCIÓN: Verde sutil (tomado de tu paleta 'attended-yes') */
+    background-color: #A5D6A7; 
+    border-color: #A5D6A7;
+}
+
+/* Mueve el knob 'ON' */
+label.switch input:checked + .slider:before {
+    transform: translateX(26px);
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-color: transparent;
+
+    /* Icono 'ON' (bell-ring.svg) */
+    background-image: url('images/icons/bell-ring.svg');
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+
+/* Modo oscuro: knob 'ON' */
+body.dark-theme label.switch input:checked + .slider:before {
+    background-color: white; /* CORRECCIÓN: Siempre blanco */
+    border-color: transparent;
+    filter: none; /* CORRECCIÓN: Siempre negro */
+}
+/* === FIN: CORRECCIÓN v3 === */
+
+
+/* --- Botones de Citas --- */
+.attendance-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+.attendance-btn.attended-yes {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border-color: #A5D6A7;
+}
+.attendance-btn.attended-no {
+    background-color: #FFEBEE;
+    color: #C62828;
+    border-color: #EF9A9A;
+}
+
+/* --- Botones Notificaciones --- */
+.button-state-active {
+    background-color: var(--primary-blue) !important;
+    color: white !important;
+    border-color: var(--primary-blue) !important;
+}
+.button.button-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+.button.button-secondary:hover {
+     background-color: var(--border-color);
+}
+
+/* --- Estilos Ocular --- */
+.info-box-ocular {
+    /* background-color: var(--primary-light); (variable no definida) */
+    background-color: #eaf2ff; /* Azul muy claro */
+    border-left: 4px solid var(--primary-blue);
+    color: var(--text-primary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+body.dark-theme .info-box-ocular {
+    background-color: var(--bg-secondary);
+    /* color: var(--text-primary-dark); (variable no definida) */
+    color: var(--text-primary);
+}
+.examen-date-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.examen-date-row input {
+    flex-grow: 1;
+}
+.checkbox-grid-ocular {
+    display: grid;
+    /* Ajusta minmax según necesites para el ancho */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+/* === FIN SOLUCIÓN === */
+
+/* --- INICIO: CORRECCIÓN DE FILTRO DE ICONOS EN MODO OSCURO --- */
+/*
+  Invierte todos los iconos en modo oscuro, EXCEPTO los iconos
+  de la agenda que tienen color personalizado.
+*/
+body.dark-theme img[src*="images/icons/"]:not(.icon-phone):not(.icon-whatsapp):not(.icon-delete) {
+    filter: invert(1);
+}
+/* --- FIN: CORRECCIÓN DE FILTRO DE ICONOS EN MODO OSCURO --- */
+
+
+/*
+  Asegura que los iconos en botones activos (que ya son blancos
+  sobre fondo azul) no se vean afectados por el filtro
+  y sigan siendo blancos.
+*/
+body.dark-tranme .button-primary img[src*="images/icons/"],
+body.dark-theme .nav-link.active img[src*="images/icons/"] {
+    /* El filtro 'invert(1)' los haría negros sobre azul.
+      Los "des-invertimos" y forzamos a blanco puro.
+    */
+    filter: invert(1) brightness(2);
+}
+
+/* --- MEJORA: Estilos para Scrollbars (Barras de Desplazamiento) --- */
+/* Funciona en Chrome, Edge, y Safari */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+}
+/* Funciona en Firefox */
+body, .modal-content, .nav-links {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-secondary);
+}
+
+/* ===== INICIO: Estilos del Splash Screen (Integrados) ===== */
+/* (Añadido al final del archivo original) */
+
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Usamos tus variables de color */
+    background-color: var(--bg-secondary);
+    
+    /* 1. Oculto por defecto (para PC) */
+    display: none; 
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    visibility: hidden; /* Oculto hasta que se muestre en móvil */
+    opacity: 0;
+}
+
+/* 2. Se muestra SOLO en pantallas móviles (mismo breakpoint que tu nav móvil) */
+@media (max-width: 768px) {
+    .splash-screen {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+.splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Añadimos !important para sobreescribir el @media query cuando JS lo oculte */
+    display: none !important; 
+}
+
+.splash-logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 2rem;
+    animation: logoPulse 2s infinite ease-in-out;
+}
+
+@keyframes logoPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+
+.progress-bar-container {
+    width: 60%;
+    max-width: 250px;
+    height: 8px;
+    /* Usamos tus variables de color */
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    /* Usamos tus variables de color */
+    background-color: var(--primary-blue);
+    border-radius: 4px;
+    /* Usamos una animación indeterminada (va y viene) */
+    animation: indeterminateProgress 2s infinite ease-in-out;
+}
+
+/* Animación de barra de progreso indeterminada */
+@keyframes indeterminateProgress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.splash-text {
+    font-size: 1rem;
+    /* Usamos tus variables de color */
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ===== INICIO: Estilos para el texto del Splash (Añadido) ===== */
+#splash-app-name {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+#splash-slogan {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+/* ===== FIN: Estilos para el texto del Splash ===== */
+/* ===== FIN: Estilos del Splash Screen ===== */
+
+/* ===== INICIO: Estilos para Agenda (Añadido) ===== */
+.card-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    /* Alinea los items de la grid en el centro verticalmente y horizontalmente */
+    align-items: center;
+    justify-items: center;
+}
+
+.card-actions-grid .icon-button {
+    padding: 0.25rem; /* Un padding pequeño para el área de clic */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-actions-grid .icon-button img {
+    width: 20px; /* Tamaño de los iconos de la grid */
+    height: 20px;
+    opacity: 0.7;
+    transition: all 0.2s; /* Transición para opacidad y filtro */
+}
+
+.card-actions-grid .icon-button:hover img {
+    opacity: 1;
+}
+
+/* --- INICIO: Corrección de Colores de Iconos --- */
+/* Usamos filtros CSS para 'colorear' los iconos.
+  Estos generadores ayudan: https://codepen.io/sosuke/pen/Pjoqqp
+*/
+
+/* Icono Editar (Gris/Negro por defecto) */
+.icon-edit {
+    /* No necesita filtro, usa el color base (o invert(1) en dark mode) */
+}
+
+/* Icono Borrar (Rojo) */
+.icon-delete {
+    /* Filtro para --danger-color: #dc3545 */
+    filter: invert(30%) sepia(80%) saturate(2586%) hue-rotate(330deg) brightness(93%) contrast(93%);
+    opacity: 0.8;
+}
+.icon-delete:hover {
+    opacity: 1;
+}
+
+/* Icono Teléfono (Azul) */
+.icon-phone {
+    /* Filtro para --primary-blue: #3A86FF */
+    filter: invert(48%) sepia(76%) saturate(3475%) hue-rotate(206deg) brightness(101%) contrast(101%);
+    opacity: 0.8;
+}
+.icon-phone:hover {
+    opacity: 1;
+}
+
+/* Icono WhatsApp (Verde) */
+.icon-whatsapp {
+    /* Filtro para --success-color: #25D366 */
+    filter: invert(57%) sepia(96%) saturate(664%) hue-rotate(93deg) brightness(93%) contrast(88%);
+    opacity: 0.8;
+}
+.icon-whatsapp:hover {
+    opacity: 1;
+}
+
+/*
+  Sobreescribimos los filtros en modo oscuro para que coincidan
+  con las variables de color más brillantes del dark-theme.
+*/
+body.dark-theme .icon-delete {
+    /* Filtro para --danger-color (dark): #e84a5a */
+    filter: invert(45%) sepia(35%) saturate(3015%) hue-rotate(317deg) brightness(94%) contrast(92%);
+}
+
+body.dark-theme .icon-phone {
+    /* Filtro para --primary-blue (dark): #5a9bff */
+    filter: invert(61%) sepia(50%) saturate(2670%) hue-rotate(193deg) brightness(102%) contrast(100%);
+}
+
+body.dark-theme .icon-whatsapp {
+    /* Filtro para --success-color (dark): #30e070 */
+    filter: invert(70%) sepia(54%) saturate(928%) hue-rotate(90deg) brightness(94%) contrast(88%);
+}
+
+
+/* --- INICIO: Corrección Insignia "Emergencia" --- */
+/* Esta regla es más específica que el estilo en línea
+  que inyecta agenda.js, por lo que lo sobreescribe.
+*/
+.summary-card .tag-emergency {
+    background-color: var(--danger-light-bg) !important;
+    color: var(--danger-light-text) !important;
+    border: 1px solid var(--danger-light-border) !important;
+    font-weight: 500 !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+/* --- FIN: CorreScción Insignia "Emergencia" --- */
+/* ===== FIN: Estilos para Agenda ===== */
+
+/* =================================================================== */
+/* ===== INICIO: ESTILOS PARA ASISTENTE VIRTUAL ===== */
+/* =================================================================== */
+
+/* --- Variables de Color para Personalidades --- */
+:root {
+    --color-john: #3A86FF; /* Tu --primary-blue */
+    --color-yari: #25D366; /* Tu --success-color */
+    --color-danilejo: #9b59b6; /* Morado */
+    --color-marian: #e67e22; /* Naranja */
+}
+
+/* --- Estilo Base del Info-Box --- */
+/* (Tomado de tu asistente.html, pero ahora usa variables de tu style.css) */
+.info-box {
+    background-color: var(--bg-secondary);
+    border-left: 5px solid var(--primary-blue);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    
+    /* Flex para alinear imagen y texto (de mi JS) */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.info-box p {
+    margin: 0;
+}
+
+#info-box-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* --- Colores Dinámicos del Info-Box (requeridos por asistente.js) --- */
+.info-box.info-john {
+    background-color: #2a4a75;
+    border-color: #5a95e8;
+    color: #FFFFFF;
+}
+.info-box.info-yari {
+    background-color: #2a5c4f;
+    border-color: #5ce0c3;
+    color: #FFFFFF;
+}
+.info-box.info-danilejo {
+    background-color: #3e3264;
+    border-color: #8c67ff;
+    color: #FFFFFF;
+}
+.info-box.info-marian {
+    background-color: #613253;
+    border-color: #ff67d4;
+    color: #FFFFFF;
+}
+
+
+/* --- Estilos del Chat --- */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 300px); /* Ajustado para tu app */
+    
+    /* CORRECCIÓN: Aplicamos el fondo de tarjeta */
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    
+    overflow: hidden;
+}
+.chat-window {
+    flex-grow: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.chat-message {
+    padding: 0.75rem 1rem;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+.user-message {
+    background-color: var(--primary-blue);
+    color: white;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+}
+.assistant-message {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+}
+.typing-indicator {
+    align-self: flex-start;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+.chat-input-area {
+    display: flex;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    gap: 0.75rem;
+}
+#chat-input {
+    flex-grow: 1;
+    resize: none;
+    min-height: 40px;
+    /* Hereda estilos de .form-input de tu style.css */
+}
+
+/* --- Estilos de Selección de Personalidad --- */
+#personality-selector {
+    text-align: center;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-out;
+    
+    /* CORRECCIÓN: Aplicamos el fondo de tarjeta */
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.personality-options {
+    display: grid;
+    /* Usamos tu grid de 2 columnas y lo hacemos adaptable */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 600px; /* Un ancho máximo para que no se estire demasiado */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.personality-button {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.personality-button::before {
+    content: '';
+    position: absolute;
+    top: -10%; left: -10%; right: -10%; bottom: -10%;
+    background: radial-gradient(circle, var(--personal-color) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 0;
+}
+
+.personality-button:hover::before {
+    opacity: 0.15;
+}
+
+.personality-button h4,
+.personality-button p,
+.personality-button .profile-image-container {
+    position: relative;
+    z-index: 1;
+}
+
+.personality-button:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.profile-image-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    /* Usamos var(--bg-primary) para el fondo blanco/oscuro */
+    box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px var(--personal-color);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    background-color: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease-in-out;
+}
+
+.personality-button:hover .profile-image-container {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 8px var(--personal-color);
+}
+
+.personality-button h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--personal-color);
+    font-size: 1.5rem;
+}
+.personality-button p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5; /* Añadido para cálculo de altura */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 4.5em; /* 3 líneas * 1.5 line-height */
+    margin-bottom: 0.5rem;
+}
+
+/* Colores específicos de cada botón */
+#btn-john { --personal-color: var(--color-john); }
+#btn-yari { --personal-color: var(--color-yari); }
+#btn-danilejo { --personal-color: var(--color-danilejo); }
+#btn-marian { --personal-color: var(--color-marian); }
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsivo para el selector de asistente */
+@media (max-width: 768px) {
+    .personality-options {
+        grid-template-columns: 1fr 1fr;
+    }
+    .profile-image-container {
+        width: 80px;
+        height: 80px;
+    }
+    .personality-button h4 {
+        font-size: 1.2rem;
+    }
+    .personality-button p {
+        font-size: 0.85rem;
+        height: 4.25em; /* 3 * 1.5 * 0.85 (aprox) */
+    }
+}
+@media (max-width: 480px) {
+    .personality-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== FIN: ESTILOS PARA ASISTENTE VIRTUAL ===== */
+
+/* =================================================================== */
+/* ===== INICIO: CORRECCIONES ASISTENTE VIRTUAL (v7 - Colores Sombra) ===== */
+/* =================================================================== */
+
+/* --- Variables de Color con Transparencia para Sombras --- */
+:root {
+    /* (Tus variables originales --color-john, etc., se mantienen) */
+    --color-john-t60: rgba(58, 134, 255, 0.6); /* Azul 60% opacidad */
+    --color-john-t40: rgba(58, 134, 255, 0.4); /* Azul 40% opacidad */
+    --color-yari-t60: rgba(37, 211, 102, 0.6); /* Verde 60% opacidad */
+    --color-yari-t40: rgba(37, 211, 102, 0.4); /* Verde 40% opacidad */
+    --color-danilejo-t60: rgba(155, 89, 182, 0.6); /* Morado 60% opacidad */
+    --color-danilejo-t40: rgba(155, 89, 182, 0.4); /* Morado 40% opacidad */
+    --color-marian-t60: rgba(230, 126, 34, 0.6); /* Naranja 60% opacidad */
+    --color-marian-t40: rgba(230, 126, 34, 0.4); /* Naranja 40% opacidad */
+}
+
+
+/* --- 1. Hover de selección más notorio (Sin cambios) --- */
+.personality-button:hover {
+    transform: translateY(-5px) scale(1.03); 
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+.personality-button:hover::before {
+    opacity: 0.3; 
+}
+
+/* --- 2. Switcher de Avatares (SIN contenedor) --- */
+.assistant-switcher {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem; 
+    margin-bottom: 1.5rem; 
+}
+
+.switch-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent; /* Borde transparente por defecto */
+}
+
+.switch-avatar.grayscale {
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transform: scale(0.9);
+}
+
+.switch-avatar.grayscale:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Estado base del avatar activo (sin sombra específica aún) */
+.switch-avatar:not(.grayscale) {
+    transform: scale(1.1);
+    /* CORRECCIÓN: Quitamos la sombra azul genérica de aquí */
+    /* box-shadow: ... quitado ...; */ 
+}
+
+/* --- ¡NUEVO! Sombras y Bordes Específicos por Asistente --- */
+.switch-avatar.active-john {
+    border-color: var(--color-john);
+    box-shadow: 0 0 15px 5px var(--color-john-t60), inset 0 0 8px 2px var(--color-john-t40);
+}
+.switch-avatar.active-yari {
+    border-color: var(--color-yari);
+    box-shadow: 0 0 15px 5px var(--color-yari-t60), inset 0 0 8px 2px var(--color-yari-t40);
+}
+.switch-avatar.active-danilejo {
+    border-color: var(--color-danilejo);
+    box-shadow: 0 0 15px 5px var(--color-danilejo-t60), inset 0 0 8px 2px var(--color-danilejo-t40);
+}
+.switch-avatar.active-marian {
+    border-color: var(--color-marian);
+    box-shadow: 0 0 15px 5px var(--color-marian-t60), inset 0 0 8px 2px var(--color-marian-t40);
+}
+
+
+/* --- 3. Selector de Personalidad (SIN contenedor) (Sin cambios) --- */
+#personality-selector {
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    margin-bottom: 1.5rem; 
+}
+.personality-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 600px; 
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Estilos .personality-button sin cambios */
+
+
+/* --- 4. Corrección Vista Móvil (2x2) (Sin cambios) --- */
+@media (max-width: 480px) {
+    .personality-options {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .profile-image-container {
+        width: 80px;
+        height: 80px;
+    }
+    .personality-button h4 {
+        font-size: 1.1rem;
+    }
+    .personality-button p {
+        font-size: 0.8rem;
+        height: 4em; 
+    }
+    .assistant-switcher {
+        gap: 1rem;
+    }
+    .switch-avatar {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ===== FIN: CORRECCIONES ASISTENTE VIRTUAL (v7 - Colores Sombra) ===== */
+/* ===== INICIO: Estilos Modal Advertencia Invitado (Corregido) ===== */
+
+/* 1. Borde Rojo Claro para el Contenido del Modal */
+#guest-warning-modal .modal-content {
+    /* Usamos las variables de color --danger-light que ya tienes */
+    border: 3px solid var(--danger-light-border);
+    /* Quitamos la animación de aquí */
+    /* Asegurarnos que la sombra no sea roja */
+    box-shadow: 0 10px 25px var(--shadow-color);
+}
+
+/* 2. Título en Azul Primario (Sin cambios) */
+#guest-warning-modal .modal-title {
+    color: var(--primary-blue);
+}
+
+/* 3. Animación Palpitante SOLO para el Icono */
+#guest-warning-modal .modal-icon {
+    /* Aplicamos la animación 'pulseIcon' */
+    animation: pulseIcon 1.5s infinite ease-in-out;
+    /* Asegurarnos que el color base del icono sea el azul primario */
+    color: var(--primary-blue);
+}
+
+/* 4. Definición de la Animación 'pulseIcon' (Más sutil, solo escala) */
+@keyframes pulseIcon {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.15); /* Crece un poco más */
+        opacity: 0.8; /* Se atenúa ligeramente */
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===== FIN: Estilos Modal Advertencia Invitado (Corregido) ===== */
+
+/* =================================================================== */
+/* ===== INICIO: THEMING DEL CHAT POR ASISTENTE ===== */
+/* =================================================================== */
+
+/* --- Colores Base (ya los tienes) --- */
+/* :root {
+    --color-john: #3A86FF;
+    --color-yari: #25D366;
+    --color-danilejo: #9b59b6;
+    --color-marian: #e67e22;
+} */
+
+/* --- Estilos Temáticos --- */
+
+/* 1. Mensajes del Usuario */
+.chatting-with-john .user-message { background-color: var(--color-john); }
+.chatting-with-yari .user-message { background-color: var(--color-yari); }
+.chatting-with-danilejo .user-message { background-color: var(--color-danilejo); }
+.chatting-with-marian .user-message { background-color: var(--color-marian); }
+/* Asegurar color de texto blanco para contraste */
+.user-message { color: white !important; }
+
+/* 2. Botón Enviar */
+.chatting-with-john #send-chat-btn { background-color: var(--color-john); border-color: var(--color-john); }
+.chatting-with-yari #send-chat-btn { background-color: var(--color-yari); border-color: var(--color-yari); }
+.chatting-with-danilejo #send-chat-btn { background-color: var(--color-danilejo); border-color: var(--color-danilejo); }
+.chatting-with-marian #send-chat-btn { background-color: var(--color-marian); border-color: var(--color-marian); }
+/* Estado Hover para el botón (oscurecer ligeramente) */
+.chatting-with-john #send-chat-btn:hover { background-color: #3171e0; border-color: #3171e0; } /* Ajusta si tienes variables dark */
+.chatting-with-yari #send-chat-btn:hover { background-color: #1da851; border-color: #1da851; }
+.chatting-with-danilejo #send-chat-btn:hover { background-color: #8243a0; border-color: #8243a0; }
+.chatting-with-marian #send-chat-btn:hover { background-color: #c96e1c; border-color: #c96e1c; }
+
+/* 3. Borde del Input al Enfocar (Opcional) */
+.chatting-with-john #chat-input:focus { border-color: var(--color-john); box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3); }
+.chatting-with-yari #chat-input:focus { border-color: var(--color-yari); box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.3); }
+.chatting-with-danilejo #chat-input:focus { border-color: var(--color-danilejo); box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.3); }
+.chatting-with-marian #chat-input:focus { border-color: var(--color-marian); box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.3); }
+
+/* 4. Info Box (Ya tenías clases como info-john, info-yari, etc.) */
+/* Puedes ajustar estas clases si quieres que cambien más cosas */
+.info-box.info-john { border-left-color: var(--color-john); /* Ya cambia fondo y texto */ }
+.info-box.info-yari { border-left-color: var(--color-yari); /* Ya cambia fondo y texto */ }
+.info-box.info-danilejo { border-left-color: var(--color-danilejo); /* Ya cambia fondo y texto */ }
+.info-box.info-marian { border-left-color: var(--color-marian); /* Ya cambia fondo y texto */ }
+
+
+/* ===== FIN: THEMING DEL CHAT POR ASISTENTE ===== */
