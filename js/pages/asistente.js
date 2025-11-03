@@ -9,10 +9,12 @@ let currentPersonalityKey = ""; // Guarda la clave de personalidad (ej: john)
 let assistantSwitcher = null; // Para guardar el contenedor del switcher
 
 // --- INICIO: Constantes para la API ---
-// Asegúrate de reemplazar "TU_API_KEY_AQUI" con tu clave real
-const apiKey = "AIzaSyBp4pNNeJNCTKP72pVwhlA7HNk9puHdoxs"; // ¡OJO! No expongas claves reales en código público
-const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-// Modelo actualizado a gemini-1.5-flash-latest (recomendado)
+//
+// SOLUCIÓN: Ya no llamamos a Google. 
+// Llamamos a nuestra propia Firebase Function (o backend).
+// DEBE REEMPLAZAR 'gen-lang-client-0895489712' si su ID de proyecto de Firebase es otro.
+//
+const apiUrl = `https://us-central1-gen-lang-client-0895489712.cloudfunctions.net/geminiChat`; 
 // --- FIN: Constantes para la API ---
 
 
@@ -115,17 +117,19 @@ function saveChatHistory() {
     }
 }
 
+
+// ====================== INICIO DE LA CORRECCIÓN ======================
+// Esta función ha sido modificada para llamar a nuestro backend (Firebase Function)
 async function getAIResponse(userMessage) {
     // Añadir mensaje del usuario al historial local ANTES de la llamada
     chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
     saveChatHistory(); // Guardar el mensaje del usuario inmediatamente
 
-    // Preparar el payload para la API
+    // El payload que enviaremos a NUESTRO backend.
+    // El backend se encargará de formatearlo para Vertex AI.
     const payload = {
-        contents: chatHistory,
-        systemInstruction: { parts: [{ text: systemInstruction }] }
-        // Podrías añadir safetySettings si necesitas ser más estricto/permisivo
-        // generationConfig: { temperature: 0.7, maxOutputTokens: 1000 } // Ejemplo
+        history: chatHistory, // Enviamos el historial completo
+        systemInstruction: systemInstruction // Enviamos la instrucción por separado
     };
 
     let retries = 0;
@@ -143,41 +147,22 @@ async function getAIResponse(userMessage) {
             });
 
             if (!response.ok) {
-                // Manejar errores específicos de la API (rate limit, server error)
-                if (response.status === 429 || response.status >= 500) {
-                    console.warn(`API Error ${response.status}. Reintentando...`);
-                    throw new Error(`API Error ${response.status}`); // Forzar reintento
-                } else {
-                    // Otros errores (ej: 400 Bad Request por API Key inválida)
-                    const errorData = await response.json();
-                    const errorMessage = errorData?.error?.message || `Error ${response.status}`;
-                    console.error("Error no recuperable de API:", errorMessage);
-                    const friendlyError = `Lo siento, hubo un problema técnico (${errorMessage}). Verifica tu conexión o inténtalo más tarde.`;
-                    // Añadir error al historial local como mensaje del modelo
-                    chatHistory.push({ role: 'model', parts: [{ text: friendlyError }] });
-                    saveChatHistory();
-                    showTypingIndicator(false);
-                    return friendlyError; // Devolver error al usuario
-                }
+                 const errorData = await response.json();
+                 const errorMessage = errorData?.error || `Error ${response.status} llamando al backend`;
+                 console.error("Error del backend:", errorMessage);
+                 throw new Error(errorMessage); // Forzar reintento o error
             }
 
             const result = await response.json();
-            const candidate = result.candidates?.[0];
-            let aiMessage = "Lo siento, no pude generar una respuesta en este momento."; // Mensaje por defecto
+            
+            // Asumimos que nuestro backend devuelve { "response": "texto de la IA" }
+            const aiMessage = result.response; 
 
-            if (candidate && candidate.content?.parts?.[0]?.text) {
-                aiMessage = candidate.content.parts[0].text;
-            } else if (candidate?.finishReason === 'SAFETY') {
-                aiMessage = "No puedo responder a esa pregunta debido a nuestras políticas de seguridad.";
-                console.warn("Respuesta bloqueada por seguridad.");
-            } else if (candidate?.finishReason === 'MAX_TOKENS') {
-                aiMessage += " (La respuesta fue cortada porque era muy larga)";
-                console.warn("Respuesta cortada por MAX_TOKENS.");
-            } else {
-                console.warn("Respuesta inesperada de la API:", result);
+            if (!aiMessage) {
+                 throw new Error("Respuesta inesperada del backend.");
             }
-
-            // Añadir respuesta (o mensaje de error/seguridad) al historial
+            
+            // Añadir respuesta al historial
             chatHistory.push({ role: 'model', parts: [{ text: aiMessage }] });
             saveChatHistory();
             showTypingIndicator(false);
@@ -188,8 +173,11 @@ async function getAIResponse(userMessage) {
             retries++;
             if (retries >= maxRetries) {
                 const networkError = "Lo siento, estoy teniendo problemas de conexión con el asistente. Por favor, revisa tu internet e inténtalo de nuevo más tarde.";
-                chatHistory.push({ role: 'model', parts: [{ text: networkError }] });
+                
+                // Quitar el mensaje del usuario que falló
+                chatHistory.pop();
                 saveChatHistory();
+
                 showTypingIndicator(false);
                 return networkError;
             }
@@ -197,13 +185,15 @@ async function getAIResponse(userMessage) {
             delay *= 2; // Incrementar espera exponencial
         }
     }
-     // Este punto no debería alcanzarse si el bucle funciona, pero por si acaso:
+     
     showTypingIndicator(false);
-    const finalError = "Lo siento, no pude obtener una respuesta después de varios intentos.";
-    chatHistory.push({ role: 'model', parts: [{ text: finalError }] });
+    chatHistory.pop();
     saveChatHistory();
+    const finalError = "Lo siento, no pude obtener una respuesta después de varios intentos.";
     return finalError;
 }
+// ======================= FIN DE LA CORRECCIÓN =======================
+
 
 // Manejador para enviar mensaje (click o Enter)
 const handleSendMessage = async () => {
@@ -220,9 +210,8 @@ const handleSendMessage = async () => {
         sendBtn.disabled = true;
         chatInput.style.height = 'auto'; // Resetear altura
 
-        const aiResponse = await getAIResponse(message); // Obtener respuesta (ya muestra indicador)
+        const aiResponse = await getAIResponse(message); // Obtener respuesta
 
-        // showTypingIndicator(false); // getAIResponse ya lo oculta
         addMessageToChat('assistant', aiResponse); // Mostrar respuesta IA
 
         chatInput.disabled = false; // Rehabilitar input
@@ -384,7 +373,7 @@ export function init() {
         chatInput?.addEventListener('keydown', handleKeydown);
         chatInput?.addEventListener('input', handleInput);
 
-        chatInput?.focus(); // Poner foco en el input
+        chatInput?.focus(); // Poner foco al input
     };
 
     // --- Helper Functions para Listeners ---
