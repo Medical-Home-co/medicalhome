@@ -1,16 +1,10 @@
-/* --- js/main.js (Corregido) --- */
+/* --- js/main.js (Corregido: Bugs #3 y #5 sobre la base funcional) --- */
 import { store } from './store.js';
-
-// --- IMPORTACIONES DE FIREBASE (AÑADIDAS) ---
-// Importar los servicios principales desde tu config
 import { auth, db, messaging } from './firebase-config.js';
-// Importar funciones específicas que usaremos
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-
-// --- Funciones Globales Modal Invitado ---
 let guestWarningModal;
 window.showGuestWarningModal = () => {
     if (!guestWarningModal) guestWarningModal = document.getElementById('guest-warning-modal');
@@ -21,63 +15,43 @@ window.hideGuestWarningModal = () => {
     guestWarningModal?.classList.add('hidden');
 }
 
-/**
- * -------------------------------------------------------------------
- * NUEVA FUNCIÓN: REGISTRAR TOKEN FCM
- * Esta es la lógica que faltaba para las notificaciones.
- * -------------------------------------------------------------------
- */
 async function registrarTokenFCM(userId) {
     try {
-        // 1. Pedir permiso y obtener el token
         console.log("Solicitando permiso para notificaciones...");
-        
-        // ¡IMPORTANTE! Reemplaza esto con tu clave VAPID de Firebase
         const fcmToken = await getToken(messaging, { 
             vapidKey: "BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I" 
         }); 
-
         if (fcmToken) {
             console.log("Token de dispositivo obtenido:", fcmToken);
-            
-            // 2. Definir la ruta en Firestore
             const tokenRef = doc(db, "users", userId, "fcmTokens", fcmToken);
-            
-            // 3. Guardarlo en la base de datos
-            await setDoc(tokenRef, { 
-                registeredAt: new Date() 
-            });
-
+            await setDoc(tokenRef, { registeredAt: new Date() });
             console.log("Token FCM guardado en Firestore exitosamente!");
-
-        } else {
-            console.log("No se pudo obtener el token. El usuario no dio permiso.");
-        }
-    } catch (err) {
-        console.error("Error al obtener o guardar el token FCM:", err);
-    }
+        } else { console.log("No se pudo obtener el token. El usuario no dio permiso."); }
+    } catch (err) { console.error("Error al obtener o guardar el token FCM:", err); }
 }
-// -------------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', async () => {
-    guestWarningModal = document.getElementById('guest-warning-modal'); // Asignar aquí
-
-    // Intenta cargar Lucide Icons si está disponible
+    guestWarningModal = document.getElementById('guest-warning-modal'); 
     if (window.lucide) { try { lucide.createIcons(); } catch(e){ console.warn("Lucide no pudo crear iconos:", e); } }
 
     const body = document.body;
+    const splashScreen = document.getElementById('splash-screen');
+    
+    // --- SOLUCIÓN: Referencias a los contenedores principales ---
+    const authContainer = document.getElementById('auth-container');
     const appShell = document.querySelector('.app-shell');
     const appContent = document.getElementById('app-content');
-    const splashScreen = document.getElementById('splash-screen');
+    const mobileNav = document.querySelector('.mobile-nav');
 
-    if (!body || !appShell || !appContent) { console.error("Elementos base de la UI faltan!"); return; }
-    body.classList.remove('hidden'); // Mostrar cuerpo una vez que JS cargue
+    if (!body || !authContainer || !appShell || !appContent || !mobileNav) { 
+        console.error("Elementos base de la UI faltan (auth-container, app-shell, app-content, mobile-nav)!"); 
+        return; 
+    }
+    body.classList.remove('hidden'); 
 
     /* --- Lógica del Router --- */
     async function loadPage(page) {
-        // Objeto de rutas actualizado
         const routes = {
-            // --- AÑADIR RUTA DE LOGIN ---
             'login':        { template: 'templates/login.html', script: './pages/login.js' },
             'dashboard':    { template: 'templates/dashboard.html', script: './pages/dashboard.js' },
             'perfil':       { template: 'templates/perfil.html', script: './pages/perfil.js' },
@@ -101,14 +75,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const route = routes[page];
-        appContent.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Cargando...</p>';
+        
+        // --- SOLUCIÓN BUG #3: Elegir el contenedor de destino ---
+        let targetContainer = appContent; // Por defecto, dentro de la app
+        const user = auth.currentUser;
+        
+        // Condición especial: Si es 'login' O si es 'perfil' Y NO estamos logueados
+        // (es decir, estamos creando una cuenta), usar el contenedor de login.
+        if (page === 'login' || (page === 'perfil' && !user && !store.isGuestMode())) {
+            targetContainer = authContainer;
+        }
+        // --- FIN SOLUCIÓN BUG #3 ---
+        
+        // No cargar nada si el contenedor de destino está oculto
+        if (targetContainer.offsetParent === null && page !== 'login') {
+             // Evita cargar #dashboard si .app-shell está oculto
+             if (page !== 'perfil') return; 
+        }
+        
+        targetContainer.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Cargando...</p>';
 
          if (route) {
              try {
                  const response = await fetch(`${route.template}?v=${Date.now()}`);
                  if (!response.ok) throw new Error(`Plantilla no encontrada: ${route.template}`);
                  const content = await response.text();
-                 appContent.innerHTML = content;
+                 targetContainer.innerHTML = content;
 
                  if (route.script) {
                      try {
@@ -120,33 +112,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                          }, 0);
                     } catch(importError) {
                         console.error(`Error al importar/ejecutar script ${page} (${route.script}):`, importError);
-                        appContent.innerHTML += `<div style="padding:1rem; color: red;">Error al cargar la funcionalidad de esta página.</div>`;
+                        targetContainer.innerHTML += `<div style="padding:1rem; color: red;">Error al cargar la funcionalidad.</div>`;
                     }
                  }
              } catch (fetchError) {
                  console.error(`Error al cargar plantilla ${page}:`, fetchError);
-                 appContent.innerHTML = `<div class="page-container" style="text-align: center; padding: 2rem;"><h2 class="page-title">Error</h2><p>No se pudo cargar la sección '${page}'.</p></div>`;
+                 targetContainer.innerHTML = `<div class="page-container" style="text-align: center; padding: 2rem;"><h2 class="page-title">Error</h2><p>No se pudo cargar la sección '${page}'.</p></div>`;
              }
          }
          else if (page === 'logout') {
               console.log("Cerrando sesión...");
-              localStorage.clear();
-              sessionStorage.clear();
-              // --- CORRECCIÓN DE LOGOUT (v9) ---
-              try {
-                  await signOut(auth); // Usar la función signOut importada
-                  console.log("Sesión de Firebase cerrada.");
-              } catch (e) {
-                  console.error("Error cerrando sesión de Firebase:", e);
-              } finally {
-                  window.location.hash = '';
-                  window.location.reload();
-              }
+              // --- INICIO SOLUCIÓN BUG #5 (LOGOUT INVITADO) ---
+              // La lógica de logout ahora está en handleLogout()
+              // Llamamos a la función
+              await handleLogout();
+              // --- FIN SOLUCIÓN BUG #5 ---
               return;
          }
          else {
              const pageTitle = page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' ');
-             appContent.innerHTML = `<div class="page-container" style="text-align: center; padding: 2rem;"><h2 class="page-title">Página ${pageTitle} no encontrada</h2><p>La sección solicitada no existe.</p></div>`;
+             targetContainer.innerHTML = `<div class="page-container" style="text-align: center; padding: 2rem;"><h2 class="page-title">Página ${pageTitle} no encontrada</h2></div>`;
          }
 
         document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
@@ -164,36 +149,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function handleNavigation() {
-        // --- LÓGICA DE PROTECCIÓN DE RUTAS ---
-        // (Usamos el 'auth' importado al inicio)
         const user = auth.currentUser;
-        let hash = window.location.hash.substring(1) || 'dashboard'; // Default
+        let hash = window.location.hash.substring(1) || 'dashboard'; 
 
-        const guestPages = ['login', 'dashboard', 'about', 'report']; // Páginas que un invitado puede ver
+        // const guestPages = ['login', 'dashboard', 'about', 'report']; // No se usa, podemos quitarla
 
         if (!user && !store.isGuestMode()) {
-            // No hay usuario Y no es invitado
-            if (hash !== 'login' && !guestPages.includes(hash)) {
-                // Si intenta acceder a una página protegida (ej. #perfil), redirigir a #login
-                // Excepción: Si está en #perfil y viene de 'Crear Usuario', se le permite
-                if (hash === 'perfil' && sessionStorage.getItem('openProfileModal') === 'true') {
-                    // Permitir continuar a #perfil para registrarse
-                } else if (hash === '') {
-                    // Si está en la raíz, dejar que el modal de bienvenida decida
-                }
-                else {
-                    console.log("Usuario no logueado, redirigiendo a login");
-                    hash = 'login';
-                    window.location.hash = '#login';
-                }
+            if (hash === 'perfil' && sessionStorage.getItem('openProfileModal') === 'true') {
+                 // Permitir
+            } else if (hash !== 'login') {
+                console.log("Usuario no logueado, redirigiendo a login");
+                hash = 'login';
+                window.location.hash = '#login';
             }
-        } else if (user && hash === 'login') {
-            // Usuario ya logueado, no dejarlo ver la página de login
+        } else if ((user || store.isGuestMode()) && hash === 'login') { // Si estamos logueados (o invitado) y vamos a #login, redirigir
             hash = 'dashboard';
             window.location.hash = '#dashboard';
         }
 
-        // Si el hash por defecto es 'dashboard' y no hay usuario, mostrar 'login'
         if (hash === 'dashboard' && !user && !store.isGuestMode()) {
              hash = 'login';
              window.location.hash = '#login';
@@ -203,65 +176,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     window.addEventListener('hashchange', handleNavigation);
 
-    /* --- Lógica Modal Bienvenida --- */
-    const welcomeModal = document.getElementById('welcome-modal');
-    if (welcomeModal) {
-        const guestBtn = document.getElementById('guest-btn');
-        const createUserBtn = document.getElementById('create-user-btn');
-        const dontShowAgainCheckbox = document.getElementById('dont-show-again');
-        const welcomeModalShown = localStorage.getItem('welcomeModalShown');
-        
-        // (Lógica para determinar si hay datos reales)
-        let hasRealUserData = false;
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key !== 'theme' && key !== 'welcomeModalShown' && key !== 'medicalHome-userMode') {
-                hasRealUserData = true; break;
-            }
-        }
-        
-        // Mostrar modal si no se ha mostrado Y no hay datos
-        if (!welcomeModalShown && !hasRealUserData) {
-            welcomeModal.classList.remove('hidden');
-        } else {
-            welcomeModal.classList.add('hidden');
-        }
-
-        function closeWelcomeModal(isGuestAction = false) {
-            if (dontShowAgainCheckbox && dontShowAgainCheckbox.checked && !isGuestAction) {
-                try { localStorage.setItem('welcomeModalShown', 'true'); } catch (error) { console.error("Error localStorage:", error); }
-            }
-            welcomeModal.classList.add('hidden');
-        }
-
-        guestBtn?.addEventListener('click', () => {
-            closeWelcomeModal(true);
-            store.loadGuestData();
-        });
-
-        // --- CORREGIDO: "Crear Usuario" va a #perfil ---
-        createUserBtn?.addEventListener('click', () => {
-            closeWelcomeModal();
-            localStorage.setItem('welcomeModalShown', 'true');
-            sessionStorage.setItem('openProfileModal', 'true'); // Indicar a #perfil que abra el modal
-            window.location.hash = '#perfil'; 
-        });
-    }
-
     /* --- Lógica Otros Modales (Acerca de, Reportar) y Sidebar --- */
     const aboutModal = document.getElementById('about-modal');
     const reportModal = document.getElementById('report-modal');
-
     function openModal(modal) { modal?.classList.remove('hidden'); }
     function closeModalOnClick(modal) { modal?.classList.add('hidden'); }
-
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const modalToClose = btn.closest('.modal-overlay');
             closeModalOnClick(modalToClose);
         });
     });
-
     const reportForm = document.getElementById('report-form');
     reportForm?.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -271,7 +196,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         closeModalOnClick(reportModal);
         reportForm.reset();
     });
-
     const collapseBtn = document.querySelector('.collapse-btn');
     collapseBtn?.addEventListener('click', () => {
         appShell?.classList.toggle('collapsed');
@@ -287,7 +211,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const desktopNav = document.querySelector('.sidebar-nav > .nav-links');
         const desktopFooter = document.querySelector('.sidebar-nav > .sidebar-footer');
         let isMobileMenuCloned = false;
-
         mobileMenuBtn.addEventListener('click', () => {
             if (!isMobileMenuCloned && mobileMenuContent && desktopNav && desktopFooter) {
                 try {
@@ -295,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const clonedFooter = desktopFooter.cloneNode(true);
                     mobileMenuContent.appendChild(clonedNav);
                     mobileMenuContent.appendChild(clonedFooter);
-
                     const mobileThemeToggle = clonedFooter.querySelector('#theme-toggle-desktop');
                     if (mobileThemeToggle) {
                         mobileThemeToggle.id = 'theme-toggle-mobile';
@@ -315,9 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             mobileMenuModal.classList.toggle('hidden');
         });
-
         mobileMenuModal.addEventListener('click', (e) => { if (e.target === mobileMenuModal) closeModalOnClick(mobileMenuModal); });
-
         mobileMenuContent?.addEventListener('click', (e) => {
             if (e.target.closest('a.nav-link') && !e.target.closest('.accordion-toggle')) {
                  closeModalOnClick(mobileMenuModal);
@@ -355,19 +275,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyTheme(currentTheme || 'light');
     themeToggleDesktop?.addEventListener('change', toggleTheme);
 
-     /* --- Lógica Logout (CORREGIDA) --- */
+     /* --- Lógica Logout (CORREGIDA BUG #5) --- */
      async function handleLogout() {
          if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+              // --- SOLUCIÓN BUG #5: Limpiar localStorage es crucial ---
+              localStorage.clear();
               sessionStorage.clear();
-              // --- CORRECCIÓN DE LOGOUT (v9) ---
               try {
-                  await signOut(auth); // Usar la función signOut importada
+                  await signOut(auth); // Esto disparará onAuthStateChanged
                   console.log("Sesión de Firebase cerrada.");
-              } catch (e) {
-                  console.error("Error cerrando sesión de Firebase:", e);
-              } finally {
-                  window.location.hash = '#login';
-                  window.location.reload();
+              } catch (e) { console.error("Error cerrando sesión de Firebase:", e); } 
+              finally {
+                  window.location.hash = '#login'; // Dispara hashchange
               }
          }
      }
@@ -384,13 +303,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const reportBtn = e.target.closest('#report-btn');
         if (aboutBtn) { e.preventDefault(); openModal(aboutModal); }
         if (reportBtn) { e.preventDefault(); openModal(reportModal); }
-
         const accordionToggle = e.target.closest('.sidebar-nav .accordion-toggle');
         if (accordionToggle) {
             e.preventDefault();
             accordionToggle.closest('.nav-item-accordion')?.classList.toggle('open');
         }
-
         const shareLink = e.target.closest('a[href="#share"]');
         if (shareLink) {
             e.preventDefault();
@@ -398,73 +315,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             const shareText = '¡Descubre MedicalHome, tu asistente de salud personal!';
             const shareUrl = window.location.origin + window.location.pathname;
             if (navigator.share) {
-                try {
-                    await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-                } catch (err) {
-                    if (err.name !== 'AbortError') console.error('Error al compartir:', err);
-                }
+                try { await navigator.share({ title: shareTitle, text: shareText, url: shareUrl }); }
+                catch (err) { if (err.name !== 'AbortError') console.error('Error al compartir:', err); }
             } else {
-                try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert('¡Enlace de la app copiado al portapapeles!');
-                } catch (err) {
-                    console.error('No se pudo copiar el enlace:', err);
-                    alert('No se pudo copiar el enlace.');
-                }
+                try { await navigator.clipboard.writeText(shareUrl); alert('¡Enlace de la app copiado!'); }
+                catch (err) { console.error('No se pudo copiar el enlace:', err); alert('No se pudo copiar el enlace.'); }
             }
         }
-
         const guestWarningCreateBtn = e.target.closest('#guest-warning-create-btn');
         if (guestWarningCreateBtn) {
             console.log("Cambiando de Invitado a Crear Usuario...");
             hideGuestWarningModal();
-            window.location.hash = '#perfil'; // Redirigir a la página de perfil
+            sessionStorage.setItem('openProfileModal', 'true'); // Asegurarnos
+            window.location.hash = '#perfil'; 
         }
     });
 
     /* --- Actualizar Sidebar con Datos del Perfil --- */
-    try {
-        const profile = store.getProfile();
-        if (profile) {
+    function updateSidebarProfile() {
+        try {
+            const profile = store.getProfile();
             const sidebarAvatar = document.getElementById('sidebar-avatar');
             const sidebarUsername = document.getElementById('sidebar-username');
-            if (sidebarAvatar) sidebarAvatar.src = profile.avatar || 'images/avatar.png';
-            if (sidebarUsername) sidebarUsername.textContent = `Hola, ${profile.fullName ? profile.fullName.split(' ')[0] : 'Usuario'}`;
-        } else {
-             const sidebarUsername = document.getElementById('sidebar-username');
-             if (sidebarUsername) sidebarUsername.textContent = 'Hola, Invitado';
-        }
-    } catch (e) {
-        console.error("Error al actualizar sidebar:", e);
+            if (profile) {
+                if (sidebarAvatar) sidebarAvatar.src = profile.avatar || 'images/avatar.png';
+                if (sidebarUsername) sidebarUsername.textContent = `Hola, ${profile.fullName ? profile.fullName.split(' ')[0] : 'Usuario'}`;
+            } else {
+                 // --- CORRECCIÓN (ya estaba en tu archivo funcional) ---
+                 const sidebarUsername = document.getElementById('sidebar-username');
+                 if (sidebarUsername) sidebarUsername.textContent = 'Hola, Invitado';
+                 // --- FIN CORRECCIÓN ---
+            }
+        } catch (e) { console.error("Error al actualizar sidebar:", e); }
     }
+    updateSidebarProfile(); // Llamada inicial
 
     // -----------------------------------------------------------------
-    // --- CARGA INICIAL Y LISTENER DE AUTH (AÑADIDO) ---
+    // --- CARGA INICIAL Y LISTENER DE AUTH (MODIFICADO) ---
     // -----------------------------------------------------------------
-    
-    // Este listener se dispara cuando el estado de auth cambia (login/logout)
-    // y también una vez al cargar la página.
     onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            // Usuario ha iniciado sesión
-            console.log("Auth state changed: Usuario logueado", user.uid);
-            // ¡REGISTRAMOS EL TOKEN!
-            await registrarTokenFCM(user.uid);
+        // --- SOLUCIÓN: El interruptor principal de la UI ---
+        if (user || store.isGuestMode()) {
+            console.log("Auth state changed: Logueado o Invitado. Mostrando App.");
+            appShell.classList.remove('hidden');
+            mobileNav.classList.remove('hidden');
+            authContainer.classList.add('hidden');
+            authContainer.innerHTML = ''; // Limpiar el login del DOM
+            updateSidebarProfile(); // Actualizar el nombre/avatar
+            
+            if(user) { await registrarTokenFCM(user.uid); }
+            
         } else {
-            // Usuario ha cerrado sesión
-            console.log("Auth state changed: Usuario deslogueado");
+            console.log("Auth state changed: Deslogueado. Mostrando Login.");
+            appShell.classList.add('hidden');
+            mobileNav.classList.add('hidden');
+            authContainer.classList.remove('hidden');
+            // --- CORRECCIÓN (ya estaba en tu archivo funcional) ---
+            updateSidebarProfile(); // Resetea el nombre a "Invitado"
+            // --- FIN CORRECCIÓN ---
         }
         
-        // Una vez que sabemos el estado de auth, cargamos la navegación.
-        // Esto reemplaza la llamada a handleNavigation() que estaba al final.
+        // Cargar la página correspondiente DESPUÉS de mostrar/ocultar los contenedores
         await handleNavigation();
     });
 
-
     // --- Ocultar Splash Screen ---
-    if (splashScreen) {
-        setTimeout(() => {
-            splashScreen.classList.add('hidden');
-        }, 500);
-    }
+    if (splashScreen) { setTimeout(() => { splashScreen.classList.add('hidden'); }, 500); }
 });
