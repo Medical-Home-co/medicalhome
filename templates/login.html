@@ -1,83 +1,61 @@
 <style>
-    /* Estilos rápidos para la página de autenticación */
-    .auth-page-container {
-        width: 100%;
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
+    /* Estilos (Condensados) */
+    .auth-page-container { 
+        width: 100%; min-height: 100vh; 
+        display: flex; align-items: center; justify-content: center; 
+        padding: 1rem; 
+        background-image: url('images/fondo.jpg');
+        background-size: cover; background-position: center; background-repeat: no-repeat;
     }
     .auth-card {
-        width: 100%;
-        max-width: 400px;
-        background-color: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
+        width: 100%; max-width: 400px;
+        background-color: var(--bg-primary); border: 1px solid var(--border-color);
+        border-radius: 12px; padding: 2rem; text-align: center;
+        box-shadow: 0 4px 12px var(--shadow-color);
     }
-    .auth-logo {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 1rem;
+    /* --- SOLUCIÓN BUG #6: Sombra de logo añadida --- */
+    .auth-logo { 
+        width: 80px; height: 80px; margin: 0 auto 1rem;
+        border-radius: 50%; /* Para que la sombra sea circular */
+        box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); /* Sombra de .profile-avatar */
     }
-    .auth-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    .auth-subtitle {
-        color: var(--text-secondary);
-        margin-bottom: 1.5rem;
-    }
-    .space-y-4 {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .w-full {
-        width: 100%;
-    }
-    .text-red-500 {
-        color: var(--danger-color);
-    }
-    .text-sm {
-        font-size: 0.875rem;
-    }
-    .mt-6 {
-        margin-top: 1.5rem;
-    }
-    .auth-toggle-link {
-        color: var(--primary-blue);
-        font-weight: 600;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1em; /* Heredar tamaño */
-    }
+    /* --- FIN SOLUCIÓN BUG #6 --- */
+    .auth-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .auth-subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+    .space-y-4 { display: flex; flex-direction: column; gap: 1rem; }
+    .w-full { width: 100%; }
+    .text-red-500 { color: var(--danger-color); }
+    .text-sm { font-size: 0.875rem; }
 </style>
 
 <div class="auth-page-container">
     <div class="auth-card">
-        <img src="images/logo.png" alt="MedicalHome Logo" class="auth-logo">
-        <h2 id="auth-title" class="auth-title">Inicia Sesión</h2>
-        <p id="auth-subtitle" class="auth-subtitle">Qué bueno verte de nuevo.</p>
+        <img src="images/icono.png" alt="MedicalHome Logo" class="auth-logo">
+        <h2 id="auth-title" class="auth-title">Medical Home</h2>
+        <p id="auth-subtitle" class="auth-subtitle">Bienvenido a tu asistente virtual de salud.</p>
         
         <form id="login-form" class="space-y-4">
-             <div class="form-group">
-                <input type="email" name="identifier" placeholder="Correo electrónico" class="form-input" required>
-            </div>
+             <div class="form-group"><input type="email" name="identifier" placeholder="Correo electrónico" class="form-input" required></div>
             <div class="form-group">
-                <input type="password" name="password" placeholder="Contraseña" class="form-input" required>
+                <div class="input-with-icon">
+                    <input type="password" name="password" placeholder="Contraseña" class="form-input" required>
+                    <button type="button" class="icon-button password-toggle-btn" aria-label="Mostrar contraseña"><img src="images/icons/eye.svg" alt="Mostrar"></button>
+                </div>
             </div>
             <p id="login-error" class="text-red-500 text-sm hidden"></p>
             <button type="submit" class="button button-primary w-full">Iniciar Sesión</button>
         </form>
 
-        <div class="mt-6 text-sm">
-            <p id="auth-toggle-text">¿No tienes una cuenta?</p>
-            <a href="#perfil" class="auth-toggle-link">Crea una Cuenta</a>
+        <div class="auth-divider">o</div>
+
+        <button id="google-login-btn" class="button button-google">
+            <img src="images/icons/google.svg" alt="Google">
+            <span>Inicio de Sesión con Gmail</span>
+        </button>
+
+        <div class="auth-bottom-grid">
+            <button id="guest-login-btn" class="button button-secondary">Entrar como Invitado</button>
+            <button id="create-account-btn" class="button button-primary">Crear Usuario</button>
         </div>
     </div>
 </div>
