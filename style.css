@@ -433,6 +433,93 @@ ul { list-style: none; }
     padding-top: 0.5rem;
 }
 
+/*--------------------------------*/
+/* ===== INICIO: Solicitud Perfil (Password Toggle y Notificaciones) ===== */
+
+/* --- 1. Estilos para Toggle de Contraseña --- */
+/* (Usamos .input-with-icon para no chocar con .input-with-button) */
+.input-with-icon { position: relative; }
+.input-with-icon .form-input { padding-right: 3rem; /* Espacio para el icono */ }
+.password-toggle-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+.password-toggle-btn:hover { opacity: 1; }
+.password-toggle-btn img { width: 20px; height: 20px; }
+
+/* --- 2. Estilos para Botón de Notificaciones Activo --- */
+#activate-notifications-btn.is-active {
+    background-color: #A5D6A7; /* Verde de toggle 'ON' */
+    border-color: #A5D6A7;
+    color: #2E7D32; /* Texto oscuro para contraste */
+}
+#activate-notifications-btn.is-active:hover { background-color: #81C784; }
+
+/* Ocultar el ícono/texto inactivo */
+#activate-notifications-btn.is-active .icon-inactive,
+#activate-notifications-btn.is-active span {
+    display: none;
+}
+/* Mostrar el ícono activo */
+#activate-notifications-btn .icon-active { display: none; }
+#activate-notifications-btn.is-active .icon-active { display: inline-block; }
+
+/* ===== FIN: Solicitud Perfil (Password Toggle y Notificaciones) ===== */
+/*---------------------------------*
+
+/* ===== INICIO: Solicitud Login (Botón Google y Layout) ===== */
+.auth-logo { width: 80px; height: 80px; margin: 0 auto 1rem; }
+.auth-divider {
+    display: flex; align-items: center; text-align: center;
+    color: var(--text-secondary); font-size: 0.8rem;
+    margin: 1.5rem 0;
+}
+.auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1; border-bottom: 1px solid var(--border-color);
+}
+.auth-divider:not(:empty)::before { margin-right: .5em; }
+.auth-divider:not(:empty)::after { margin-left: .5em; }
+
+.button-google {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+.button-google:hover { background-color: var(--bg-secondary); }
+.button-google img { width: 20px; height: 20px; }
+
+.auth-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+/* ===== FIN: Solicitud Login (Botón Google y Layout) ===== */
+
+/* ===== INICIO: Solicitud Perfil (Ayuda Contraseña) ===== */
+.form-help-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: -0.25rem; /* Pega el texto un poco más al input de arriba */
+    padding-left: 0.25rem;
+}
+/* ===== FIN: Solicitud Perfil (Ayuda Contraseña) ===== */
+
 /* --- Media Queries (Responsivo) --- */
 @media (max-width: 768px) {
     .sidebar { display: none; }
