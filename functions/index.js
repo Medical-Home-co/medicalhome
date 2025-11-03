@@ -1,17 +1,103 @@
-/* --- functions/index.js --- */
+/* --- functions/index.js (CORREGIDO - TODO EN 1a GEN) --- */
 
-// Importar los módulos de Firebase
-const {onSchedule} = require("firebase-functions/v2/scheduler");
+// --- Importaciones de Firebase (TODO v1) ---
+const functions = require("firebase-functions"); 
+const {initializeApp} = require("firebase-admin/app");
 const {getFirestore} = require("firebase-admin/firestore");
 const {getMessaging} = require("firebase-admin/messaging");
-const {initializeApp} = require("firebase-admin/app");
 
-// Inicializar Firebase Admin
+// --- Importaciones para el Chatbot ---
+const { VertexAI } = require("@google-cloud/vertexai");
+const cors = require("cors")({ origin: true }); // v1 usa 'cors' así
+
+// --- Inicialización (se llama UNA SOLA VEZ) ---
 initializeApp();
 
-// Definir la Cloud Function para que se ejecute cada 5 minutos
-exports.sendScheduledNotifications = onSchedule(
-  "every 5 minutes", async (event) => {
+// --- Configuración de Vertex AI (Solo constantes) ---
+const PROJECT_ID = "gen-lang-client-0895489712"; 
+const LOCATION = "us-central1"; 
+const MODEL_NAME = "gemini-1.5-pro-001"; 
+
+// --- Variables Globales (SIN INICIALIZAR) ---
+let vertex_ai;
+let generativeModel;
+
+
+// ================================================================
+// FUNCIÓN 1: Chatbot (EN SINTAXIS v1)
+// ================================================================
+exports.geminiChat = functions.https.onRequest((request, response) => {
+  // v1 maneja CORS de esta forma
+  cors(request, response, async () => {
+    
+    // --- Carga Perezosa de Vertex AI ---
+    if (!generativeModel) {
+      console.log("Inicializando Vertex AI por primera vez...");
+      try {
+        vertex_ai = new VertexAI({ project: PROJECT_ID, location: LOCATION });
+        generativeModel = vertex_ai.preview.getGenerativeModel({
+          model: MODEL_NAME,
+        });
+        console.log("Vertex AI inicializado.");
+      } catch (initError) {
+        console.error("Error FATAL inicializando Vertex AI:", initError);
+        return response.status(500).json({ error: "No se pudo inicializar el modelo de IA." });
+      }
+    }
+    // --- Fin Carga Perezosa ---
+
+    // --- 1. Validar la solicitud ---
+    if (request.method !== "POST") {
+      return response.status(405).json({ error: "Method Not Allowed" });
+    }
+    if (!request.body.history || !request.body.systemInstruction) {
+      return response.status(400).json({ error: "Invalid request: 'history' and 'systemInstruction' are required." });
+    }
+
+    try {
+      const reqHistory = request.body.history;
+      const systemInstruction = request.body.systemInstruction;
+
+      // --- 2. Formatear el historial para Vertex AI ---
+      const contents = reqHistory.map(item => {
+        const role = (item.role === 'assistant') ? 'model' : item.role;
+        return {
+          role: role,
+          parts: item.parts
+        };
+      });
+
+      // --- 3. Iniciar el chat con Vertex AI ---
+      const chat = generativeModel.startChat({
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        history: contents.slice(0, -1) // Historial sin el último mensaje
+      });
+
+      // --- 4. Enviar el último mensaje del usuario ---
+      const lastUserMessage = contents[contents.length - 1].parts[0].text;
+      const result = await chat.sendMessage(lastUserMessage);
+
+      // --- 5. Obtener y devolver la respuesta ---
+      const aiResponse = result.response.candidates[0].content.parts[0].text;
+      
+      return response.status(200).json({ response: aiResponse });
+
+    } catch (error) {
+      console.error("Error en la función de Vertex AI:", error);
+      return response.status(500).json({ error: "Error interno del servidor al contactar Gemini." });
+    }
+  }); // Fin del wrapper de CORS
+});
+
+
+// ================================================================
+// FUNCIÓN 2: Notificaciones Programadas (REVERTIDA A SINTAXIS v1)
+// ================================================================
+exports.sendScheduledNotifications = functions.pubsub.schedule("every 5 minutes")
+  .onRun(async (context) => { // 'onRun' y 'context' en lugar de 'onSchedule' y 'event'
+    
     const db = getFirestore();
     const messaging = getMessaging();
     const now = new Date();
@@ -37,15 +123,14 @@ exports.sendScheduledNotifications = onSchedule(
 
       console.log(`Se encontraron ${querySnapshot.size} alarmas para procesar.`);
 
-      // Usar un array de promesas para manejar todas las alarmas
+      // 2. Procesar cada alarma
       const tasks = querySnapshot.docs.map(async (doc) => {
         const alarm = doc.data();
         const alarmRef = doc.ref;
 
-        // 2. Obtener el token de notificación del usuario
+        // Obtener token
         let token = "";
         try {
-          // Asumimos que el token está en /users/{userId}/fcmTokens/{tokenId}
           const tokenQuery = await db.collection(
             `users/${alarm.userId}/fcmTokens`,
           ).limit(1).get();
@@ -60,17 +145,15 @@ exports.sendScheduledNotifications = onSchedule(
             `Error obteniendo token para userId ${alarm.userId}:`,
             tokenError,
           );
-          // Marcar como fallida para no reintentar
           await alarmRef.update({status: "failed_no_token"});
-          return; // Saltar esta alarma
+          return; 
         }
 
-        // 3. Preparar el mensaje de notificación
+        // 3. Preparar el mensaje
         const payload = {
           notification: {
             title: alarm.title || "Recordatorio de MedicalHome",
             body: alarm.body || "Tienes un nuevo recordatorio.",
-            // Ruta de tu icono
             icon: "images/icons/icon-192x192.png", 
           },
           token: token,
@@ -83,12 +166,11 @@ exports.sendScheduledNotifications = onSchedule(
           );
           await messaging.send(payload);
 
-          // 5. Actualizar la alarma a "sent"
+          // 5. Actualizar la alarma
           await alarmRef.update({status: "sent"});
           console.log(`Alarma ${alarm.alarmId} marcada como enviada.`);
         } catch (sendError) {
           console.error(`Error enviando mensaje a ${token}:`, sendError);
-          // Si el token es inválido, marcar como fallido
           if (sendError.code === "messaging/registration-token-not-registered") {
             await alarmRef.update({status: "failed_bad_token"});
           } else {
@@ -99,7 +181,6 @@ exports.sendScheduledNotifications = onSchedule(
         }
       });
 
-      // Esperar a que todas las tareas (envíos) terminen
       await Promise.all(tasks);
       console.log("Ciclo de procesamiento de alarmas completado.");
     } catch (error) {
