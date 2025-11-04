@@ -150,9 +150,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleNavigation() {
         const user = auth.currentUser;
-        let hash = window.location.hash.substring(1) || 'dashboard'; 
-
-        // const guestPages = ['login', 'dashboard', 'about', 'report']; // No se usa, podemos quitarla
+        
+        // --- INICIO SOLUCIÓN (Request 1) ---
+        // Se cambia la página por defecto de 'dashboard' a 'perfil'
+        let hash = window.location.hash.substring(1) || 'perfil'; 
+        // --- FIN SOLUCIÓN (Request 1) ---
 
         if (!user && !store.isGuestMode()) {
             if (hash === 'perfil' && sessionStorage.getItem('openProfileModal') === 'true') {
@@ -162,9 +164,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hash = 'login';
                 window.location.hash = '#login';
             }
-        } else if ((user || store.isGuestMode()) && hash === 'login') { // Si estamos logueados (o invitado) y vamos a #login, redirigir
-            hash = 'dashboard';
-            window.location.hash = '#dashboard';
+        // --- INICIO SOLUCIÓN (Request 1) ---
+        // Si estamos logueados (o invitado) y vamos a #login, redirigir a 'perfil'
+        } else if ((user || store.isGuestMode()) && hash === 'login') { 
+            hash = 'perfil';
+            window.location.hash = '#perfil';
+        // --- FIN SOLUCIÓN (Request 1) ---
         }
 
         if (hash === 'dashboard' && !user && !store.isGuestMode()) {
@@ -287,6 +292,12 @@ document.addEventListener('DOMContentLoaded', async () => {
               } catch (e) { console.error("Error cerrando sesión de Firebase:", e); } 
               finally {
                   window.location.hash = '#login'; // Dispara hashchange
+                  
+                  // --- INICIO DE LA SOLUCIÓN ---
+                  // Forzar recarga para limpiar el estado en memoria (store) 
+                  // y evitar race conditions.
+                  window.location.reload();
+                  // --- FIN DE LA SOLUCIÓN ---
               }
          }
      }
@@ -322,13 +333,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 catch (err) { console.error('No se pudo copiar el enlace:', err); alert('No se pudo copiar el enlace.'); }
             }
         }
+
+        // --- INICIO: LÓGICA MODAL INVITADO (ACTUALIZADA) ---
         const guestWarningCreateBtn = e.target.closest('#guest-warning-create-btn');
+        const guestWarningLoginBtn = e.target.closest('#guest-warning-login-btn');
+
         if (guestWarningCreateBtn) {
             console.log("Cambiando de Invitado a Crear Usuario...");
             hideGuestWarningModal();
             sessionStorage.setItem('openProfileModal', 'true'); // Asegurarnos
             window.location.hash = '#perfil'; 
+            // No se recarga, se deja que el hashchange maneje la carga de #perfil
         }
+        
+        if (guestWarningLoginBtn) {
+            console.log("Cambiando de Invitado a Login...");
+            hideGuestWarningModal();
+            // Limpiamos los datos de invitado antes de ir a login
+            localStorage.clear(); 
+            sessionStorage.clear();
+            window.location.hash = '#login';
+            window.location.reload(); // Forzar recarga para limpiar estado de la app
+        }
+        // --- FIN: LÓGICA MODAL INVITADO ---
     });
 
     /* --- Actualizar Sidebar con Datos del Perfil --- */
