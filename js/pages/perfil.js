@@ -44,7 +44,13 @@ function renderProfileSummary() {
                 ? `<div class="profile-item-label" style="margin-bottom: 0.5rem; margin-top: 0.5rem; font-weight: 600;">Alergias:</div><div class="tags-container">${tempProfileData.alergias.map(a => `<span class="tag">${a}</span>`).join('')}</div>`
                 : '';
              const conditionsHTML = (tempProfileData.conditions && tempProfileData.conditions.length > 0)
-                ? `<div class="profile-item-label" style="margin-bottom: 0.5rem; margin-top: 1rem; font-weight: 600;">Condiciones:</div><div class="tags-container">${tempProfileData.conditions.map(c => `<span class="tag">${c.charAt(0).toUpperCase() + c.slice(1)}</span>`).join('')}</div>`
+                ? `<div class="profile-item-label" style="margin-bottom: 0.5rem; margin-top: 1rem; font-weight: 600;">Condiciones:</div><div class="tags-container">
+                    ${tempProfileData.conditions.map(c => 
+                        `<a href="#${c}" style="text-decoration: none;">
+                            <span class="tag tag-link">${c.charAt(0).toUpperCase() + c.slice(1)}</span>
+                        </a>`
+                    ).join('')}
+                  </div>`
                 : '<span class="profile-item-label" style="margin-top: 1rem;">No hay condiciones seleccionadas.</span>';
              medicalDataEl.innerHTML = alergiasHTML + conditionsHTML;
         }
@@ -200,7 +206,23 @@ export function init() {
     alergiasInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addAlergiaBtn.click(); } });
     addInitialBtn?.addEventListener('click', () => openFormModal(null));
     editBtn?.addEventListener('click', () => openFormModal(tempProfileData));
-    cancelBtn?.addEventListener('click', closeFormModal);
+
+    // --- INICIO DE LA SOLUCIÓN (Botón Cancelar) ---
+    cancelBtn?.addEventListener('click', () => {
+        // Revisa si estamos en el flujo de "nuevo usuario" (sin perfil guardado Y sin usuario de Firebase)
+        const isNewUserFlow = (tempProfileData === null) && (auth.currentUser === null);
+        
+        if (isNewUserFlow) {
+            // Si es un usuario nuevo cancelando, lo enviamos de vuelta al login
+            console.log("Creación de perfil cancelada, volviendo a login.");
+            window.location.hash = '#login';
+        } else {
+            // Si es un usuario existente editando su perfil, solo cerramos el modal
+            closeFormModal();
+        }
+    });
+    // --- FIN DE LA SOLUCIÓN ---
+
     function updateNotificationButtonState() {
         if (!activateNotificationsBtn) return;
         if (window.Notification && Notification.permission === 'granted') {
@@ -277,7 +299,6 @@ export function init() {
                 renderProfileSummary();
                 updateMainMenu(tempProfileData.conditions);
                 alert("¡Perfil creado exitosamente!");
-                window.location.hash = '#dashboard';
                 // --- SOLUCIÓN: Quitar reload. onAuthStateChanged se encargará ---
                 // window.location.reload(); 
             } catch (error) {

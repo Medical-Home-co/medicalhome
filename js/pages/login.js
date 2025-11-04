@@ -2,8 +2,10 @@
 import { auth } from '../firebase-config.js';
 import { 
     signInWithEmailAndPassword,
-    GoogleAuthProvider, // Importar proveedor de Google
-    signInWithPopup     // Importar login con PopUp
+    // ===== INICIO: CÓDIGO COMENTADO (LOGIN GMAIL) =====
+    // GoogleAuthProvider, // Importar proveedor de Google
+    // signInWithPopup     // Importar login con PopUp
+    // ===== FIN: CÓDIGO COMENTADO (LOGIN GMAIL) =====
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { store } from '../store.js'; // Importar store para modo invitado
 
@@ -12,11 +14,16 @@ export function init() {
 
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
-    const googleLoginBtn = document.getElementById('google-login-btn');
+    // ===== INICIO: CÓDIGO COMENTADO (LOGIN GMAIL) =====
+    // const googleLoginBtn = document.getElementById('google-login-btn');
+    // ===== FIN: CÓDIGO COMENTADO (LOGIN GMAIL) =====
     const guestLoginBtn = document.getElementById('guest-login-btn');
     const createAccountBtn = document.getElementById('create-account-btn');
 
-    if (!loginForm || !googleLoginBtn || !guestLoginBtn || !createAccountBtn) {
+    // ===== INICIO: CÓDIGO MODIFICADO (LOGIN GMAIL) =====
+    // Se elimina !googleLoginBtn de la comprobación
+    if (!loginForm || !guestLoginBtn || !createAccountBtn) {
+    // ===== FIN: CÓDIGO MODIFICADO (LOGIN GMAIL) =====
         console.error("Faltan elementos clave en login.html.");
         return;
     }
@@ -37,7 +44,9 @@ export function init() {
         }
     });
 
+    // ===== INICIO: CÓDIGO COMENTADO (LOGIN GMAIL) =====
     // --- 2. Login con Google ---
+    /*
     googleLoginBtn.addEventListener('click', async () => {
         loginError.classList.add('hidden');
         const provider = new GoogleAuthProvider();
@@ -49,19 +58,29 @@ export function init() {
             handleLoginError(error);
         }
     });
+    */
+    // ===== FIN: CÓDIGO COMENTADO (LOGIN GMAIL) =====
 
     // --- 3. Entrar como Invitado ---
     guestLoginBtn.addEventListener('click', () => {
         console.log("Cargando datos de invitado...");
         store.loadGuestData(); // Carga los datos de muestra
-        window.location.hash = '#dashboard';
+        window.location.hash = '#perfil';
         window.location.reload(); // Recargar para actualizar todo
     });
 
-    // --- 4. Ir a Crear Cuenta ---
+    // --- 4. Ir a Crear Cuenta (CORREGIDO) ---
     createAccountBtn.addEventListener('click', () => {
+        
+        // Limpiamos cualquier sesión de invitado antes de ir a crear un perfil.
+        console.log("Borrando datos de invitado (si existen) para crear cuenta nueva.");
+        localStorage.clear();
+        sessionStorage.clear();
+
         sessionStorage.setItem('openProfileModal', 'true'); // Indicar a #perfil que abra el modal
         window.location.hash = '#perfil'; 
+        // Forzamos una recarga para que main.js lea el estado limpio (sin invitado)
+        window.location.reload(); 
     });
     
     // --- 5. Toggle de Contraseña (copiado de perfil.js) ---
@@ -88,7 +107,7 @@ export function init() {
     function handleLoginSuccess() {
         console.log("¡Sesión iniciada!");
         sessionStorage.removeItem('openProfileModal'); 
-        window.location.hash = '#dashboard';
+        window.location.hash = '#perfil';
         window.location.reload(); 
     }
 
