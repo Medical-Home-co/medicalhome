@@ -8,10 +8,22 @@
       "firebase.json",
       ".firebaserc",
       ".gitignore",
-      "node_modules",
-      "functions"
+      "node_modules/**",
+      "functions/**"
     ],
     "rewrites": [
+      {
+        "source": "/firebase-messaging-sw.js",
+        "destination": "/firebase-messaging-sw.js"
+      },
+      {
+        "source": "/manifest.json",
+        "destination": "/manifest.json"
+      },
+      {
+        "source": "/images/**",
+        "destination": "/images/**"
+      },
       {
         "source": "**",
         "destination": "/index.html"

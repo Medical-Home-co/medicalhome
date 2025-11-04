@@ -519,6 +519,104 @@ ul { list-style: none; }
     padding-left: 0.25rem;
 }
 /* ===== FIN: Solicitud Perfil (Ayuda Contraseña) ===== */
+/* =================================================================== */
+/* ===== INICIO: CORRECCIÓN MENÚ COLAPSADO (v3 - Definitiva) ===== */
+/* =================================================================== */
+
+/* --- 1. Arregla el padding del submenú --- */
+/*
+ * Quita el padding-left del submenú cuando la sidebar está colapsada,
+ * ya que este padding estaba empujando el contenido fuera del área visible.
+*/
+.app-shell.collapsed .sub-menu {
+    padding-left: 0;
+}
+
+/* --- 2. Arregla los links del submenú (Icono + Texto) --- */
+/*
+ * Anula la regla 'justify-content: center' para los links del sub-menú.
+ * Esto los alinea a la izquierda.
+*/
+.app-shell.collapsed .sub-menu .nav-link {
+    justify-content: flex-start;
+    /* * Añadimos padding manual para que el contenido del submenú 
+     * no quede pegado al borde. 1rem = 16px
+     */
+    padding-left: 0.5rem;
+    padding-right: 1rem;
+}
+
+/*
+ * Anula la regla 'display: none' para los <span> del sub-menú.
+ * Esto hace que el texto (ej. "BCM (Renal)") vuelva a aparecer.
+*/
+.app-shell.collapsed .sub-menu .nav-link span {
+    display: inline;
+}
+
+/*
+ * Asegura que los iconos del submenú sean visibles.
+ * (Aunque el problema principal era el padding, esto es una 
+ * salvaguarda para que no se oculten).
+*/
+.app-shell.collapsed .sub-menu .nav-link .nav-icon-img {
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
+    flex-shrink: 0;
+}
+
+/* --- 3. Destaca el botón "Condición Médica" (Sin cambios) --- */
+/*
+ * Este es el código que sí funcionó y le da el fondo gris.
+*/
+.app-shell.collapsed .nav-item-accordion > .accordion-toggle {
+    background-color: var(--bg-secondary);
+}
+.app-shell.collapsed .nav-item-accordion > .accordion-toggle:hover {
+    background-color: var(--border-color);
+}
+
+/* =================================================================== */
+/* ===== FIN: CORRECCIÓN MENÚ COLAPSADO (v3) ===== */
+/* =================================================================== */
+/* =================================================================== */
+/* ===== INICIO: Estilos Modal Invitado (Botonera v2) ===== */
+/* =================================================================== */
+
+/*
+ * Define la grilla para los botones "Iniciar Sesión" y "Crear Usuario"
+ * para que estén en la misma línea.
+*/
+.guest-modal-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/*
+ * Estilo para el botón "Seguir Explorando" (sin fondo)
+*/
+.button-tertiary {
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px; /* Coincide con .button */
+    text-align: center; /* Asegura centrado */
+}
+.button-tertiary:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* =================================================================== */
+/* ===== FIN: Estilos Modal Invitado (Botonera v2) ===== */
+/* =================================================================== */
 
 /* --- Media Queries (Responsivo) --- */
 @media (max-width: 768px) {
