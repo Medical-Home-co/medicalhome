@@ -32,7 +32,7 @@
     <div class="auth-card">
         <img src="images/icono.png" alt="MedicalHome Logo" class="auth-logo">
         <h2 id="auth-title" class="auth-title">Medical Home</h2>
-        <p id="auth-subtitle" class="auth-subtitle">Bienvenido a tu asistente virtual de salud.</p>
+        <p id="auth-subtitle" class_name="auth-subtitle">Bienvenido a tu asistente virtual de salud.</p>
         
         <form id="login-form" class="space-y-4">
              <div class="form-group"><input type="email" name="identifier" placeholder="Correo electrónico" class="form-input" required></div>
@@ -45,16 +45,8 @@
             <p id="login-error" class="text-red-500 text-sm hidden"></p>
             <button type="submit" class="button button-primary w-full">Iniciar Sesión</button>
         </form>
-
-        <div class="auth-divider">o</div>
-
-        <button id="google-login-btn" class="button button-google">
-            <img src="images/icons/google.svg" alt="Google">
-            <span>Inicio de Sesión con Gmail</span>
-        </button>
-
-        <div class="auth-bottom-grid">
-            <button id="guest-login-btn" class="button button-secondary">Entrar como Invitado</button>
+<br><br><hr><br>
+        <div class="auth-bottom-grid" style="margin-top: 1.5rem;"> <button id="guest-login-btn" class="button button-secondary">Entrar como Invitado</button>
             <button id="create-account-btn" class="button button-primary">Crear Usuario</button>
         </div>
     </div>
