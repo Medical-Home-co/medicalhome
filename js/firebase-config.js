@@ -1,30 +1,37 @@
-// --- js/firebase-config.js ---
-// ¡POR FAVOR REEMPLAZA TODO EL CONTENIDO DE ESTE ARCHIVO CON ESTE CÓDIGO!
-// El error "SyntaxError: Unexpected token ':'" indica que
-// probablemente hay texto o código duplicado en tu archivo.
-
-// 1. Importar las funciones de Firebase (SDK v9)
+/* --- js/firebase-config.js (ACTUALIZADO CON APP CHECK) --- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 import { getMessaging } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app-check.js";
 
-// 2. Tu objeto de configuración (con el storageBucket corregido)
+// Tu configuración web de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBytSlZT9mY7e-As32G-1k7o65NqVrQ2PY",
   authDomain: "medicalhomeapp-1a68b.firebaseapp.com",
   projectId: "medicalhomeapp-1a68b",
-  storageBucket: "medicalhomeapp-1a68b.firebasestorage.app", // Esta es la URL correcta
+  storageBucket: "medicalhomeapp-1a68b.appspot.com",
   messagingSenderId: "312247676705",
   appId: "1:312247676705:web:afbb8f37376027621c9860"
 };
 
-// 3. Inicializar Firebase
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// 4. Exportar los servicios que usaremos
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const messaging = getMessaging(app);
+// --- INICIO: SOLUCIÓN DE APP CHECK ---
+const appCheck = initializeAppCheck(app, {
+  // 
+  // Clave del sitio (Clave A) insertada:
+  //
+  provider: new ReCaptchaV3Provider('6LcSvgMsAAAAAOFRnKtJD7F0MK1ly1boz6sX0kUq'), 
+  
+  isTokenAutoRefreshEnabled: true
+});
+// --- FIN: SOLUCIÓN DE APP CHECK ---
 
-console.log("Firebase (v9) inicializado correctamente desde firebase-config.js");
+// Exportar los servicios
+const auth = getAuth(app);
+const db = getFirestore(app);
+const messaging = getMessaging(app);
+
+export { app, auth, db, messaging, appCheck };
