@@ -1,9 +1,9 @@
-/* --- js/firebase-config.js (ACTUALIZADO CON APP CHECK v3 - CLAVES CORRECTAS) --- */
+/* --- js/firebase-config.js (SOLUCIÓN: AppCheck se mueve a main.js) --- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 import { getMessaging } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app-check.js";
+// NO importar initializeAppCheck ni ReCaptchaV3Provider aquí
 
 // Tu configuración web de Firebase
 const firebaseConfig = {
@@ -18,20 +18,12 @@ const firebaseConfig = {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// --- INICIO: SOLUCIÓN DE APP CHECK ---
-const appCheck = initializeAppCheck(app, {
-  // 
-  // Clave del sitio (de image_7d3821.png) insertada:
-  //
-  provider: new ReCaptchaV3Provider('6Lc5IgMsAAAAACF0FMXvJD7F0MKtly1boz6sX0KOKUq'), 
-  
-  isTokenAutoRefreshEnabled: true
-});
-// --- FIN: SOLUCIÓN DE APP CHECK ---
+// La inicialización de AppCheck se elimina de este archivo
 
 // Exportar los servicios
 const auth = getAuth(app);
 const db = getFirestore(app);
 const messaging = getMessaging(app);
 
-export { app, auth, db, messaging, appCheck };
+// Exportar 'app' para que main.js pueda inicializar AppCheck
+export { app, auth, db, messaging };

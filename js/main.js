@@ -1,6 +1,9 @@
-/* --- js/main.js (Corregido: Logout y FCM Path) --- */
+/* --- js/main.js (Corregido: AppCheck Init y Logout) --- */
 import { store } from './store.js';
-import { auth, db, messaging } from './firebase-config.js';
+// Importar 'app' (para AppCheck) y los demás servicios
+import { app, auth, db, messaging } from './firebase-config.js';
+// Importar AppCheck aquí, en el archivo principal
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app-check.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
@@ -57,6 +60,26 @@ async function registrarTokenFCM(userId) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+    
+    // --- INICIO: SOLUCIÓN 'already-initialized' ---
+    // Inicializar App Check AQUÍ, una sola vez.
+    try {
+        const appCheck = initializeAppCheck(app, {
+            // Esta es tu clave v3 correcta de la imagen image_7d3821.png
+            provider: new ReCaptchaV3Provider('6Lc5IgMsAAAAACF0FMXvJD7F0MKtly1boz6sX0KOKUq'),
+            isTokenAutoRefreshEnabled: true
+        });
+        console.log("AppCheck initialized in main.js");
+    } catch (e) {
+        // Si AppCheck ya fue inicializado (ej. por un hot-reload), no falles.
+        if (e.code !== 'appCheck/already-initialized') {
+            console.error("Error initializing AppCheck in main.js:", e);
+        } else {
+            console.log("AppCheck already initialized.");
+        }
+    }
+    // --- FIN: SOLUCIÓN ---
+
     guestWarningModal = document.getElementById('guest-warning-modal'); 
     if (window.lucide) { try { lucide.createIcons(); } catch(e){ console.warn("Lucide no pudo crear iconos:", e); } }
 
@@ -293,13 +316,9 @@ document.addEventListener('DOMContentLoaded', async () => {
      async function handleLogout() {
          if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
             
-            // --- INICIO SOLUCIÓN: Logout Inteligente ---
-            // Leemos la clave USER_MODE_KEY de tu store.js
+            // --- INICIO SOLUCIÓN: Logout Inteligente (de store.js) ---
             const USER_MODE_KEY = 'medicalHome-userMode';
-            
-            // Borramos solo la clave de invitado
             localStorage.removeItem(USER_MODE_KEY); 
-            // Borramos sessionStorage
             sessionStorage.clear();
             // --- FIN SOLUCIÓN ---
 
@@ -359,10 +378,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (guestWarningLoginBtn) {
             console.log("Cambiando de Invitado a Login...");
             hideGuestWarningModal();
-            // --- INICIO SOLUCIÓN: Logout Inteligente ---
-            localStorage.removeItem('medicalHome-userMode'); // Solo borra clave de invitado
+            localStorage.removeItem('medicalHome-userMode'); 
             sessionStorage.clear();
-            // --- FIN SOLUCIÓN ---
             window.location.hash = '#login';
             window.location.reload(); 
         }
