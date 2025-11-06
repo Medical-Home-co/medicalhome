@@ -1,0 +1,126 @@
+*/*-/*-/*-/*-/*-/*/-/-/-/-/-/-/-/-/-/-/*/*/**/*/-/-*/*/-*/-/-/-*/-*/
+"Genera este código en una versión minificada (sin saltos de línea ni espacios innecesarios)."
+/-//-*/-*/-*/-/-*/*-/-*/*-/-/-/-/-/-/-*/*/*/*/**-/-*/*-/-*/*/*/-/-/*
+
+hola vamos a realizar algunos cambios de una App asistente virtual de salud. ya tengo todas las funciones, estetica, estructura, etc... tengo casi todo listo, es mas tengo ya algunas funciones en firebase, login, tokens, en fin me falta muy poco para terminar este proyecto que es una App PWA, ya tengo mas del 80% de la PWA creada, lo que vamos a realizar de este punto en adelante es hacer arreglos visuales, unas cuantas funciones que faltan agregar, terminar de organizar las notificaciones, arreglar el logue final con cuenta de correo y con gmail, ademas de terminar unas cuantas cosas de frontend y el backend. 
+
+PERO LO MAS IMPORTANTE DE TODO ES !NO! modificar de mas los archivos si no es necesario, no cortarlos, no resumirlos, no quitar codigo, en resumen si el archivo es muy extenso o muy grande se procesa de una manera mas lenta para no desbordar la memoria de procesamiento, y solo realizar los cambios que se le solicitan.
+
+esta es la estructura:
+.firebase/
+hosting..cache
+
+functions/
+.eslintrc.js
+.gitignore
+index.js
+node_modules/
+package-lock.json
+package.json
+{
+
+images/
+images/icons/
+
+templates/
+agenda.html
+artritis.html
+asistente.html
+bienestar.html
+cardiaco.html
+citas.html
+dashboard.html
+diabetes.html
+gastrico.html
+general.html
+graficas.html
+login.html
+medicamentos.html
+notificaciones.html
+ocular.html
+perfil.html
+renal.html
+respiratorio.html
+share.html
+tea.html
+terapias.html
+
+js/
+alarm-manager.js
+firebase-config.js
+main.js
+notifications.js
+page-handler.js
+pages.js
+perfil.js
+router.js
+storage.js
+store.js
+ui.js
+
+js/pages/
+agenda.js
+artritis.js
+asistente.js
+bienestar.js
+cardiaco.js
+citas.js
+dashboard.js
+diabetes.js
+gastrico.js
+general.js
+graficas.js
+login.js
+medicamentos.js
+notificaciones.js
+ocular.js
+renal.js
+respiratorio.js
+tea.js
+terapias.js
+
+.firebaserc
+.gitignore
+firebase-messaging-sw.js
+firebase.json
+index.html
+manifest.json
+style.css
+
+asumiendo que las imagenes e iconos (.png y .svg) estan en las carpetas correspondientes.
+
+
+cualquier cambio que se solicite y usted (segun la estructura dada) debe de pedir el archivo antes de realizar cualquier accion de modificacion o generacion.
+
+algo que podemos hacer es que yo suba los archivos originales antes de empezar nada. como la subida de archivos  es solo por tandas de 10, o vamos subiendo los archivos que se vayan necesitando segun cada solicitud... 
+
+Ademas tengo ya un repositorio en github
+https://github.com/Medical-Home-co/medicalhome
+
+page de github:
+https://medical-home-co.github.io/medicalhome/
+
+Consola en firebase:
+https://console.firebase.google.com/project/medicalhomeapp-1a68b/overview
+
+Y una url de firebase:
+https://medicalhomeapp-1a68b.web.app/
+aunque este ultimo no esta actualizado con los ultimos cambios realizados
+
+vamos a empezar con el mejor animo, profesionalismo, mejores practicas de desarrollo, y tratando al maximo de analizar primero cada solicitud antes de realizar cualquier cambio
+
+y con apikey para un asistente virtual.
+
+en fin lo que se debe arreglar y mejor es muy poco.
+
+le voy a suministrar los archivos que para mi consideracion son algunos de los mas importantes para entender el proyecto y de aqui ya partiremos a realizar lo que nos haga falta
+
+fucntions/index-js
+index.html
+style.css
+templates/dashboard.html
+js/pages/dashboard.js
+js/perfil.js
+js/main.js
+js/pages/medicamentos.js
+templates/medicamentos.html

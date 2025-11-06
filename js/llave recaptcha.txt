@@ -1,0 +1,41 @@
+Llave de recaptcha
+(google console)
+6LcMaAMsAAAAAL1egxqMLUQYIFqZ8KOeQ6TugCnv
+
+
+llave de recaptcha
+google recaptcha 
+
+Inserta esta clave de sitio en el código HTML que utiliza tu sitio.
+
+6LcSvgMsAAAAAOFRnKtJD7F0MK1ly1boz6sX0kUq
+
+Utiliza esta clave secreta para la comunicación entre tu sitio y reCAPTCHA.
+6LcSvgMsAAAAAKWQJB-LeHY5yIlYjv2mWyS2_iTI
+
+
+
+An invalid form control with name='hemodialysisDays' is not focusable. <input type=​"radio" name=​"hemodialysisDays" value=​"M-J-S" required>​Understand this error
+medicalhome/#perfil:1 
+
+An invalid form control with name='hemodialysisTime' is not focusable. <input type=​"time" id=​"hemodialysisTime" name=​"hemodialysisTime" class=​"form-input" required>​Understand this error
+medicalhome/#perfil:1 
+
+An invalid form control with name='clinicName' is not focusable. <input type=​"text" id=​"clinicName" name=​"clinicName" class=​"form-input" required>​Understand this error
+perfil.js?v=1762379809978:292 Creando usuario en Firebase Authpre
+
+main.js?v=1.0.5:30 Error al obtener o guardar el token FCM: FirebaseError: Messaging: The notification permission was not granted and blocked instead. (messaging/permission-blocked).
+    at getToken$1 (updateVapidKey.ts:21:8)
+    at getToken (api.ts:127:7)
+    at registrarTokenFCM (main.js?v=1.0.5:21:32)
+    at Object.next (main.js?v=1.0.5:393:30)
+    at firebase-auth.js:1:10501
+    at firebase-auth.js:1:11641
+
+
+main.js?v=1.0.5:30 Error al obtener o guardar el token FCM: FirebaseError: Messaging: The notification permission was not granted and blocked instead. (messaging/permission-blocked).
+    at getToken$1 (updateVapidKey.ts:21:8)
+    at getToken (api.ts:127:7)
+    at registrarTokenFCM (main.js?v=1.0.5:21:32)
+    at main.js?v=1.0.5:393:30
+    at firebase-auth.js:1:70411

@@ -1,4 +1,4 @@
-/* --- js/main.js (Corregido: FCM Path en GitHub) --- */
+/* --- js/main.js (Corregido: Logout y FCM Path) --- */
 import { store } from './store.js';
 import { auth, db, messaging } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
@@ -15,7 +15,6 @@ window.hideGuestWarningModal = () => {
     guestWarningModal?.classList.add('hidden');
 }
 
-// --- INICIO SOLUCIÓN: FCM en GitHub Pages ---
 async function registrarTokenFCM(userId) {
     try {
         let swRegistration;
@@ -24,20 +23,19 @@ async function registrarTokenFCM(userId) {
             : '/firebase-messaging-sw.js';
 
         try {
-            // Intentar registrar el Service Worker manualmente con la ruta correcta
             swRegistration = await navigator.serviceWorker.register(swPath, {
                 scope: swPath.replace('firebase-messaging-sw.js', '')
             });
             console.log('Service Worker registrado manualmente:', swRegistration);
         } catch (regError) {
             console.error('Error al registrar SW manualmente:', regError);
-            throw regError; // Lanza el error para que sea capturado abajo
+            throw regError; 
         }
 
         console.log("Solicitando permiso para notificaciones...");
         const fcmToken = await getToken(messaging, { 
             vapidKey: "BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I",
-            serviceWorkerRegistration: swRegistration // Usar el SW registrado
+            serviceWorkerRegistration: swRegistration 
         }); 
 
         if (fcmToken) {
@@ -49,7 +47,6 @@ async function registrarTokenFCM(userId) {
             console.log("No se pudo obtener el token. El usuario no dio permiso."); 
         }
     } catch (err) { 
-        // No mostrar el error "permission-blocked" como un error rojo
         if (err.code === 'messaging/permission-blocked') {
             console.warn('Permiso de notificación bloqueado por el usuario.');
         } else {
@@ -57,7 +54,6 @@ async function registrarTokenFCM(userId) {
         }
     }
 }
-// --- FIN SOLUCIÓN: FCM en GitHub Pages ---
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -293,11 +289,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyTheme(currentTheme || 'light');
     themeToggleDesktop?.addEventListener('change', toggleTheme);
 
-     /* --- Lógica Logout (CORREGIDA BUG #5) --- */
+     /* --- Lógica Logout (CORREGIDA) --- */
      async function handleLogout() {
          if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-              localStorage.clear();
-              sessionStorage.clear();
+            
+            // --- INICIO SOLUCIÓN: Logout Inteligente ---
+            // Leemos la clave USER_MODE_KEY de tu store.js
+            const USER_MODE_KEY = 'medicalHome-userMode';
+            
+            // Borramos solo la clave de invitado
+            localStorage.removeItem(USER_MODE_KEY); 
+            // Borramos sessionStorage
+            sessionStorage.clear();
+            // --- FIN SOLUCIÓN ---
+
               try {
                   await signOut(auth); 
                   console.log("Sesión de Firebase cerrada.");
@@ -354,8 +359,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (guestWarningLoginBtn) {
             console.log("Cambiando de Invitado a Login...");
             hideGuestWarningModal();
-            localStorage.clear(); 
+            // --- INICIO SOLUCIÓN: Logout Inteligente ---
+            localStorage.removeItem('medicalHome-userMode'); // Solo borra clave de invitado
             sessionStorage.clear();
+            // --- FIN SOLUCIÓN ---
             window.location.hash = '#login';
             window.location.reload(); 
         }
@@ -365,9 +372,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateSidebarProfile() {
         try {
             const profile = store.getProfile();
-            const sidebarAvatar = document.getElementById('sidebar-avatar');
-            const sidebarUsername = document.getElementById('sidebar-username');
             if (profile) {
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                const sidebarUsername = document.getElementById('sidebar-username');
                 if (sidebarAvatar) sidebarAvatar.src = profile.avatar || 'images/avatar.png';
                 if (sidebarUsername) sidebarUsername.textContent = `Hola, ${profile.fullName ? profile.fullName.split(' ')[0] : 'Usuario'}`;
             } else {

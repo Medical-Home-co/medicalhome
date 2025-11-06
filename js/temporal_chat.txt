@@ -1,0 +1,54 @@
+ok. listo.
+
+otra coasa... cuando "cierro secion" con el boton de cerrar secion en el menu lateral efectivamente se cierra la secion y aparece (adjunto imagen) pero en esa interface no aparece la opcion de entrar como invitado agregar este boton por favor, ademas que falta lo opcion de olvidaste tu contraseña y como hablamos anteriormente que haya una forma para crear perfil con gmail (eso ya lo habia sugerido mensajes anteriores). 
+
+otra cosa es que cuando yo salgo de la pagina y vuelvo a entrar el logueo no se mantiene y toca volver a ingresar los datos (la idea es que se mantenga loguea hasta que el usuario no cierree secion).
+
+PD: si necesita archivos para realizar estos cambios PIDAMELOS, antes de empezar a generar codigo sin fundamento.
+
+
+
+ok, vamos a realizar primero todos los cambios y luego los voy a probar en pc a ver si funcionan y luego de verificar que si funcionan en pc los voy a verificar en movil, para hacer los cambios y detalles por partes muy bien separadas.
+
+1. en la seccion de graficas en este momento se estan generando los cuadros vacios de las diferentes secciones que tienen graficas, esteticamente se ve MUY MAL, ENTONCES DEBE ARREGLAR QUE SOLO SE CARGUEN los graficos cuando alguna de las secciones con esta caracteristica tenga informacion de resto no aparezca nada, solo un aviso explicando para que sirve esa pagina.
+
+2. un arreglo muy sutil pero que debe se hacerse para integrar aun mas todo es que tenemos una seccion de "medicamentos" cierto? y alli ses supone que el usuario va a poner todos los medicamentos que le administran o toma o ingiere o le aplican o le inyectan (se entiende si) pero en otras secciones tambien existe el campo de "medicamentos" en esas otras secciones en vez que el usuario tenga que ingresar de nuevo medicamentos deberia de aparecer una lista con los medicamentos ingresados en la seccion de medicamentos (secciones que tienen la opcion de ingresar medicamentos son: artritis, gastrico, general) y al final de la lista una opcion que diga "otro" y en ese caso lo lleve a la seccion de agregar medicamento para que lo ingrese.
+
+3. el asistente no esta funcionando: Lo siento, hubo un problema técnico (models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.). Verifica tu conexión o inténtalo más tarde.
+
+4. arreglar el boton de compartir app con la nueva url
+
+
+
+2. cuando creo el perfil la opcion de "alergias" deberia de quedar en la tarjeta resumen del perfil.
+
+
+
+3. El Boton de "activar notificaciones" que aparece el la pantalla de resumen al lado del boton de editar perfil: a) cuando no este activado que se vea como se esta viendo en este momento pero al momento de "activar" las notificaciones que el boton cambie aun icono de bell-ring.svg y el fondo del icono de verde (el mismo que se esta usando para las otras notificaciones)
+
+
+
+4. en el formulario de perfil cuando uno ya lo ha ingresado y quiere editar algun dato existen datos que o no estan seleccionados o esta borrados, ejemplo: • tipo de sangre. • Contraseña. • ubicacion fistula.
+
+
+
+5. ademas existen 2 datos que no estan siendo mostrados en la tarjeta resumen: • alergias y Teléfono EPS (Opcional)
+
+
+
+6. cuando se cree el perfil o se modifique lo que se quiere es que aparezca un pequeño aviso que diga : en el caso de primera vez "perfil creado con exito" y si es una modificacion "perfil modificado exitosamente" PERO que ses desaparezca despues de 2 segundos (esto ayuda a que la tarjeta resumen cargue mientras el usuario lee este aviso) y no tengan que dar click en ninguna parte ni aceptar nada.
+
+LA IDEA ES QUE AL iniciar la app, aparezca una modal con algo parecido a la imagen adjunta (obviamente con las estructura visual que estamos manejando) ademas de agregar el inicio de secion con google (imagen para el icono (images/icons/google.svg) ; la idea es que lleve esta informacion, pero eso quiere decir que el modal que aparece cuando esta en la version de invitado debe seguir funcionando; tambien cuando ingresen el usuario (ya sea nuevo o uno anteriormente creado) aparezca la pantalla de perfil y un pequeño aviso (de color azul claro) que diga "inicio exitoso"
+
+¡Estoy Listo! ¿Cuál es el Primer Paso?
+He analizado la base y estoy listo para comenzar a trabajar en las mejoras.
+
+¿Por dónde te gustaría empezar? Aquí hay algunas opciones basadas en tus objetivos:
+
+Finalizar Notificaciones: Si quieres, puedes subir el archivo js/alarm-manager.js para que pueda revisarlo y confirmar que la lógica de creación de alarmas es correcta.
+
+Arreglar el Login: Puedes subir templates/login.html y js/pages/login.js para que pueda diagnosticar y arreglar el flujo de inicio de sesión.
+
+Arreglos Visuales: ¿Hay algún elemento visual específico en los archivos que subiste (como dashboard.html o medicamentos.html) que te gustaría cambiar primero?
+
+Otra Tarea: Si tienes otra prioridad en mente, ¡dímela!
