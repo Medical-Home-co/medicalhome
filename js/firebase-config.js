@@ -1,4 +1,4 @@
-/* --- js/firebase-config.js (ACTUALIZADO CON APP CHECK) --- */
+/* --- js/firebase-config.js (ACTUALIZADO CON APP CHECK v3 - CLAVES CORRECTAS) --- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
@@ -21,9 +21,9 @@ const app = initializeApp(firebaseConfig);
 // --- INICIO: SOLUCIÓN DE APP CHECK ---
 const appCheck = initializeAppCheck(app, {
   // 
-  // Clave del sitio (Clave A) insertada:
+  // Clave del sitio (de image_7d3821.png) insertada:
   //
-  provider: new ReCaptchaV3Provider('6LcSvgMsAAAAAOFRnKtJD7F0MK1ly1boz6sX0kUq'), 
+  provider: new ReCaptchaV3Provider('6Lc5IgMsAAAAACF0FMXvJD7F0MKtly1boz6sX0KOKUq'), 
   
   isTokenAutoRefreshEnabled: true
 });
