@@ -21,8 +21,20 @@
         "destination": "/manifest.json"
       },
       {
+        "source": "/style.css",
+        "destination": "/style.css"
+      },
+      {
         "source": "/images/**",
         "destination": "/images/**"
+      },
+      {
+        "source": "/js/**",
+        "destination": "/js/**"
+      },
+      {
+        "source": "/templates/**",
+        "destination": "/templates/**"
       },
       {
         "source": "**",
