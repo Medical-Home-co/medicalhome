@@ -1,4 +1,4 @@
-/* --- js/main.js (Corregido: Bugs #3 y #5 sobre la base funcional) --- */
+/* --- js/main.js (Corregido: FCM Path en GitHub) --- */
 import { store } from './store.js';
 import { auth, db, messaging } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
@@ -15,20 +15,50 @@ window.hideGuestWarningModal = () => {
     guestWarningModal?.classList.add('hidden');
 }
 
+// --- INICIO SOLUCIÓN: FCM en GitHub Pages ---
 async function registrarTokenFCM(userId) {
     try {
+        let swRegistration;
+        const swPath = window.location.hostname.includes('github.io') 
+            ? '/medicalhome/firebase-messaging-sw.js' 
+            : '/firebase-messaging-sw.js';
+
+        try {
+            // Intentar registrar el Service Worker manualmente con la ruta correcta
+            swRegistration = await navigator.serviceWorker.register(swPath, {
+                scope: swPath.replace('firebase-messaging-sw.js', '')
+            });
+            console.log('Service Worker registrado manualmente:', swRegistration);
+        } catch (regError) {
+            console.error('Error al registrar SW manualmente:', regError);
+            throw regError; // Lanza el error para que sea capturado abajo
+        }
+
         console.log("Solicitando permiso para notificaciones...");
         const fcmToken = await getToken(messaging, { 
-            vapidKey: "BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I" 
+            vapidKey: "BFaLD8fCZUz7o_nSOOz4ioRlEpDAQpewlMOXs7r7ONdOx7O6NCxaZHhJDwLR5iWbwm3X1o3Z2JpYPzkkq71ul6I",
+            serviceWorkerRegistration: swRegistration // Usar el SW registrado
         }); 
+
         if (fcmToken) {
             console.log("Token de dispositivo obtenido:", fcmToken);
             const tokenRef = doc(db, "users", userId, "fcmTokens", fcmToken);
             await setDoc(tokenRef, { registeredAt: new Date() });
             console.log("Token FCM guardado en Firestore exitosamente!");
-        } else { console.log("No se pudo obtener el token. El usuario no dio permiso."); }
-    } catch (err) { console.error("Error al obtener o guardar el token FCM:", err); }
+        } else { 
+            console.log("No se pudo obtener el token. El usuario no dio permiso."); 
+        }
+    } catch (err) { 
+        // No mostrar el error "permission-blocked" como un error rojo
+        if (err.code === 'messaging/permission-blocked') {
+            console.warn('Permiso de notificación bloqueado por el usuario.');
+        } else {
+            console.error("Error al obtener o guardar el token FCM:", err); 
+        }
+    }
 }
+// --- FIN SOLUCIÓN: FCM en GitHub Pages ---
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     guestWarningModal = document.getElementById('guest-warning-modal'); 
@@ -37,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const body = document.body;
     const splashScreen = document.getElementById('splash-screen');
     
-    // --- SOLUCIÓN: Referencias a los contenedores principales ---
     const authContainer = document.getElementById('auth-container');
     const appShell = document.querySelector('.app-shell');
     const appContent = document.getElementById('app-content');
@@ -76,20 +105,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const route = routes[page];
         
-        // --- SOLUCIÓN BUG #3: Elegir el contenedor de destino ---
-        let targetContainer = appContent; // Por defecto, dentro de la app
+        let targetContainer = appContent;
         const user = auth.currentUser;
         
-        // Condición especial: Si es 'login' O si es 'perfil' Y NO estamos logueados
-        // (es decir, estamos creando una cuenta), usar el contenedor de login.
         if (page === 'login' || (page === 'perfil' && !user && !store.isGuestMode())) {
             targetContainer = authContainer;
         }
-        // --- FIN SOLUCIÓN BUG #3 ---
         
-        // No cargar nada si el contenedor de destino está oculto
         if (targetContainer.offsetParent === null && page !== 'login') {
-             // Evita cargar #dashboard si .app-shell está oculto
              if (page !== 'perfil') return; 
         }
         
@@ -122,11 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
          }
          else if (page === 'logout') {
               console.log("Cerrando sesión...");
-              // --- INICIO SOLUCIÓN BUG #5 (LOGOUT INVITADO) ---
-              // La lógica de logout ahora está en handleLogout()
-              // Llamamos a la función
               await handleLogout();
-              // --- FIN SOLUCIÓN BUG #5 ---
               return;
          }
          else {
@@ -151,10 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleNavigation() {
         const user = auth.currentUser;
         
-        // --- INICIO SOLUCIÓN (Request 1) ---
-        // Se cambia la página por defecto de 'dashboard' a 'perfil'
         let hash = window.location.hash.substring(1) || 'perfil'; 
-        // --- FIN SOLUCIÓN (Request 1) ---
 
         if (!user && !store.isGuestMode()) {
             if (hash === 'perfil' && sessionStorage.getItem('openProfileModal') === 'true') {
@@ -164,12 +180,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hash = 'login';
                 window.location.hash = '#login';
             }
-        // --- INICIO SOLUCIÓN (Request 1) ---
-        // Si estamos logueados (o invitado) y vamos a #login, redirigir a 'perfil'
         } else if ((user || store.isGuestMode()) && hash === 'login') { 
             hash = 'perfil';
             window.location.hash = '#perfil';
-        // --- FIN SOLUCIÓN (Request 1) ---
         }
 
         if (hash === 'dashboard' && !user && !store.isGuestMode()) {
@@ -283,21 +296,15 @@ document.addEventListener('DOMContentLoaded', async () => {
      /* --- Lógica Logout (CORREGIDA BUG #5) --- */
      async function handleLogout() {
          if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-              // --- SOLUCIÓN BUG #5: Limpiar localStorage es crucial ---
               localStorage.clear();
               sessionStorage.clear();
               try {
-                  await signOut(auth); // Esto disparará onAuthStateChanged
+                  await signOut(auth); 
                   console.log("Sesión de Firebase cerrada.");
               } catch (e) { console.error("Error cerrando sesión de Firebase:", e); } 
               finally {
-                  window.location.hash = '#login'; // Dispara hashchange
-                  
-                  // --- INICIO DE LA SOLUCIÓN ---
-                  // Forzar recarga para limpiar el estado en memoria (store) 
-                  // y evitar race conditions.
+                  window.location.hash = '#login'; 
                   window.location.reload();
-                  // --- FIN DE LA SOLUCIÓN ---
               }
          }
      }
@@ -334,28 +341,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // --- INICIO: LÓGICA MODAL INVITADO (ACTUALIZADA) ---
         const guestWarningCreateBtn = e.target.closest('#guest-warning-create-btn');
         const guestWarningLoginBtn = e.target.closest('#guest-warning-login-btn');
 
         if (guestWarningCreateBtn) {
             console.log("Cambiando de Invitado a Crear Usuario...");
             hideGuestWarningModal();
-            sessionStorage.setItem('openProfileModal', 'true'); // Asegurarnos
+            sessionStorage.setItem('openProfileModal', 'true'); 
             window.location.hash = '#perfil'; 
-            // No se recarga, se deja que el hashchange maneje la carga de #perfil
         }
         
         if (guestWarningLoginBtn) {
             console.log("Cambiando de Invitado a Login...");
             hideGuestWarningModal();
-            // Limpiamos los datos de invitado antes de ir a login
             localStorage.clear(); 
             sessionStorage.clear();
             window.location.hash = '#login';
-            window.location.reload(); // Forzar recarga para limpiar estado de la app
+            window.location.reload(); 
         }
-        // --- FIN: LÓGICA MODAL INVITADO ---
     });
 
     /* --- Actualizar Sidebar con Datos del Perfil --- */
@@ -368,10 +371,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (sidebarAvatar) sidebarAvatar.src = profile.avatar || 'images/avatar.png';
                 if (sidebarUsername) sidebarUsername.textContent = `Hola, ${profile.fullName ? profile.fullName.split(' ')[0] : 'Usuario'}`;
             } else {
-                 // --- CORRECCIÓN (ya estaba en tu archivo funcional) ---
                  const sidebarUsername = document.getElementById('sidebar-username');
                  if (sidebarUsername) sidebarUsername.textContent = 'Hola, Invitado';
-                 // --- FIN CORRECCIÓN ---
             }
         } catch (e) { console.error("Error al actualizar sidebar:", e); }
     }
@@ -381,14 +382,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- CARGA INICIAL Y LISTENER DE AUTH (MODIFICADO) ---
     // -----------------------------------------------------------------
     onAuthStateChanged(auth, async (user) => {
-        // --- SOLUCIÓN: El interruptor principal de la UI ---
         if (user || store.isGuestMode()) {
             console.log("Auth state changed: Logueado o Invitado. Mostrando App.");
             appShell.classList.remove('hidden');
             mobileNav.classList.remove('hidden');
             authContainer.classList.add('hidden');
-            authContainer.innerHTML = ''; // Limpiar el login del DOM
-            updateSidebarProfile(); // Actualizar el nombre/avatar
+            authContainer.innerHTML = ''; 
+            updateSidebarProfile(); 
             
             if(user) { await registrarTokenFCM(user.uid); }
             
@@ -397,12 +397,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             appShell.classList.add('hidden');
             mobileNav.classList.add('hidden');
             authContainer.classList.remove('hidden');
-            // --- CORRECCIÓN (ya estaba en tu archivo funcional) ---
-            updateSidebarProfile(); // Resetea el nombre a "Invitado"
-            // --- FIN CORRECCIÓN ---
+            updateSidebarProfile(); 
         }
         
-        // Cargar la página correspondiente DESPUÉS de mostrar/ocultar los contenedores
         await handleNavigation();
     });
 
