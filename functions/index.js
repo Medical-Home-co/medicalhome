@@ -1,16 +1,18 @@
-/* --- functions/index.js (OPTIMIZADO PARA DEPLOY) --- */
+/* --- functions/index.js (FINAL - Optimizado para Despliegue v1) --- */
 
 const functions = require("firebase-functions");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { VertexAI } = require("@google-cloud/vertexai");
+// Inicializamos CORS para permitir peticiones desde cualquier origen (tu PWA)
 const cors = require("cors")({ origin: true });
 
 // Inicialización de Firebase Admin (Global)
 initializeApp();
 
-// Constantes de Vertex AI
+// Configuración de Vertex AI
+// Asegúrate de que este ID corresponda a tu proyecto en Google Cloud
 const PROJECT_ID = "gen-lang-client-0895489712";
 const LOCATION = "us-central1";
 const MODEL_NAME = "gemini-1.5-pro-001";
@@ -21,6 +23,7 @@ let generativeModel;
 
 /**
  * FUNCIÓN 1: Chatbot con Gemini (HTTP v1)
+ * Soluciona errores de CORS y Timeout.
  */
 exports.geminiChat = functions.https.onRequest((req, res) => {
   // Envolver en CORS para permitir peticiones desde tu web
@@ -36,7 +39,7 @@ exports.geminiChat = functions.https.onRequest((req, res) => {
 
     try {
       // 2. Inicialización Perezosa de Vertex AI (Solo si no existe)
-      // Esto evita que el despliegue falle por timeout al cargar librerías pesadas
+      // Esto evita el error "User code failed to load" durante el deploy
       if (!generativeModel) {
         console.log("Inicializando Vertex AI...");
         vertex_ai = new VertexAI({ project: PROJECT_ID, location: LOCATION });
@@ -49,14 +52,14 @@ exports.geminiChat = functions.https.onRequest((req, res) => {
       const reqHistory = req.body.history;
       const systemInstruction = req.body.systemInstruction;
 
-      // Formatear historial: 'assistant' debe ser 'model' para la API de Google
+      // Formatear historial: la API de Google usa 'model' en lugar de 'assistant'
       const contents = reqHistory.map(item => ({
         role: (item.role === 'assistant') ? 'model' : item.role,
         parts: item.parts
       }));
 
       // Extraer el último mensaje del usuario (el prompt actual)
-      // Vertex AI prefiere historial previo + mensaje nuevo
+      // Vertex AI prefiere recibir el historial previo y luego el mensaje nuevo aparte
       const lastMessageObj = contents.pop(); 
       const userMessageText = lastMessageObj.parts[0].text;
 
@@ -94,19 +97,20 @@ exports.geminiChat = functions.https.onRequest((req, res) => {
 
 /**
  * FUNCIÓN 2: Notificaciones Programadas (Cron Job v1)
- * Se ejecuta cada 5 minutos.
+ * Se ejecuta cada 5 minutos para enviar recordatorios.
  */
 exports.sendScheduledNotifications = functions.pubsub.schedule("every 5 minutes")
   .onRun(async (context) => {
     const db = getFirestore();
     const messaging = getMessaging();
     const now = new Date();
+    // Buscar alarmas en el rango de ahora hasta dentro de 5 minutos
     const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60000);
 
     console.log(`Cron ejecutado: ${now.toISOString()}. Buscando hasta: ${fiveMinutesFromNow.toISOString()}`);
 
     try {
-      // 1. Buscar alarmas pendientes
+      // 1. Buscar alarmas pendientes en Firestore
       const querySnapshot = await db.collectionGroup("alarms")
         .where("status", "==", "pending")
         .where("alarmTime", "<=", fiveMinutesFromNow.toISOString())
@@ -124,10 +128,14 @@ exports.sendScheduledNotifications = functions.pubsub.schedule("every 5 minutes"
         const alarm = doc.data();
         const alarmRef = doc.ref;
 
-        // Obtener token del usuario
+        // Obtener token del usuario (dispositivo)
         let token = "";
         try {
-            const tokensSnap = await db.collection(`users/${alarm.userId}/fcmTokens`).limit(1).get();
+            const tokensSnap = await db.collection(`users/${alarm.userId}/fcmTokens`)
+                .orderBy("registeredAt", "desc") // Intentar obtener el más reciente
+                .limit(1)
+                .get();
+                
             if (!tokensSnap.empty) {
                 token = tokensSnap.docs[0].id;
             } else {
@@ -136,9 +144,17 @@ exports.sendScheduledNotifications = functions.pubsub.schedule("every 5 minutes"
                 return;
             }
         } catch (e) {
-            console.error(`Error buscando token para ${alarm.userId}:`, e);
-            return;
+            // Fallback si no existe el índice de fecha
+            try {
+                 const tokensSnapFallback = await db.collection(`users/${alarm.userId}/fcmTokens`).limit(1).get();
+                 if (!tokensSnapFallback.empty) token = tokensSnapFallback.docs[0].id;
+            } catch (err2) {
+                 console.error(`Error buscando token para ${alarm.userId}:`, e);
+                 return;
+            }
         }
+
+        if (!token) return;
 
         // Payload de notificación
         const payload = {
@@ -159,6 +175,7 @@ exports.sendScheduledNotifications = functions.pubsub.schedule("every 5 minutes"
         } catch (sendError) {
           console.error(`Fallo envío a ${token}:`, sendError);
           if (sendError.code === 'messaging/registration-token-not-registered') {
+             // Token inválido, lo marcamos para no reintentar
              await alarmRef.update({ status: "failed_invalid_token" });
           }
         }
