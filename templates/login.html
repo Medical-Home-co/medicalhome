@@ -1,9 +1,11 @@
 <style>
-    /* Estilos (Condensados) */
+    /* Estilos (Condensados para este template específico) */
     .auth-page-container { 
         width: 100%; min-height: 100vh; 
         display: flex; align-items: center; justify-content: center; 
         padding: 1rem; 
+        /* Fondo sutil si la imagen falla */
+        background-color: var(--bg-secondary);
         background-image: url('images/fondo.jpg');
         background-size: cover; background-position: center; background-repeat: no-repeat;
     }
@@ -13,13 +15,11 @@
         border-radius: 12px; padding: 2rem; text-align: center;
         box-shadow: 0 4px 12px var(--shadow-color);
     }
-    /* --- SOLUCIÓN BUG #6: Sombra de logo añadida --- */
     .auth-logo { 
         width: 80px; height: 80px; margin: 0 auto 1rem;
-        border-radius: 50%; /* Para que la sombra sea circular */
-        box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); /* Sombra de .profile-avatar */
+        border-radius: 50%; 
+        box-shadow: 0 4px 12px 0 rgba(58, 134, 255, 0.5); 
     }
-    /* --- FIN SOLUCIÓN BUG #6 --- */
     .auth-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
     .auth-subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
     .space-y-4 { display: flex; flex-direction: column; gap: 1rem; }
@@ -32,21 +32,32 @@
     <div class="auth-card">
         <img src="images/icono.png" alt="MedicalHome Logo" class="auth-logo">
         <h2 id="auth-title" class="auth-title">Medical Home</h2>
-        <p id="auth-subtitle" class_name="auth-subtitle">Bienvenido a tu asistente virtual de salud.</p>
+        <p id="auth-subtitle" class="auth-subtitle">Bienvenido a tu asistente virtual de salud.</p>
         
         <form id="login-form" class="space-y-4">
-             <div class="form-group"><input type="email" name="identifier" placeholder="Correo electrónico" class="form-input" required></div>
+             <div class="form-group">
+                 <input type="email" name="identifier" placeholder="Correo electrónico" class="form-input" required>
+             </div>
             <div class="form-group">
                 <div class="input-with-icon">
                     <input type="password" name="password" placeholder="Contraseña" class="form-input" required>
-                    <button type="button" class="icon-button password-toggle-btn" aria-label="Mostrar contraseña"><img src="images/icons/eye.svg" alt="Mostrar"></button>
+                    <button type="button" class="icon-button password-toggle-btn" aria-label="Mostrar contraseña" tabindex="-1">
+                        <img src="images/icons/eye.svg" alt="Mostrar">
+                    </button>
                 </div>
             </div>
             <p id="login-error" class="text-red-500 text-sm hidden"></p>
             <button type="submit" class="button button-primary w-full">Iniciar Sesión</button>
         </form>
-<br><br><hr><br>
-        <div class="auth-bottom-grid" style="margin-top: 1.5rem;"> <button id="guest-login-btn" class="button button-secondary">Entrar como Invitado</button>
+
+        <div class="auth-divider">O continúa con</div>
+        
+        <button id="google-login-btn" class="button button-google">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 18px; height: 18px;">
+            <span>Iniciar con Google</span>
+        </button>
+        <div class="auth-bottom-grid" style="margin-top: 1.5rem;"> 
+            <button id="guest-login-btn" class="button button-secondary">Entrar como Invitado</button>
             <button id="create-account-btn" class="button button-primary">Crear Usuario</button>
         </div>
     </div>
