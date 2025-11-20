@@ -1,11 +1,13 @@
-/* --- js/pages/perfil.js (Corregido: Bug "not focusable") --- */
-import { store } from '../store.js';
-import { requestNotificationPermission } from '../notifications.js';
-import { auth } from '../firebase-config.js';
+/* --- js/pages/perfil.js (SOLUCIÓN: Restaurado y con Rutas Absolutas) --- */
+import { store } from '/js/store.js';
+import { requestNotificationPermission } from '/js/notifications.js';
+import { auth } from '/js/firebase-config.js';
 import { 
     createUserWithEmailAndPassword, 
     updateProfile 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// NINGUNA inicialización de initializeAppCheck() va aquí
 
 let tempProfileData = null; 
 let avatarDataUrl = null;
@@ -108,11 +110,8 @@ function openFormModal(profileData) {
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     
-    // --- INICIO SOLUCIÓN: Deshabilitar 'required' en campos renales por defecto ---
-    // (Esto se hace ANTES de llenar el formulario)
     const renalInputs = document.querySelectorAll('#renal-info-container [required]');
     renalInputs.forEach(input => input.required = false);
-    // --- FIN SOLUCIÓN ---
     
     if (profileData) { // Editando perfil existente
         document.getElementById('profile-form-title').textContent = 'Editar Perfil';
@@ -144,12 +143,10 @@ function openFormModal(profileData) {
                     if(radio) radio.checked = true;
                 }
             }
-            // --- INICIO SOLUCIÓN: Habilitar 'required' si se está editando ---
             renalInputs.forEach(input => input.required = true);
             if (form.querySelector('input[name="renalAccess"][value="fistula"]').checked === false) {
                  document.getElementById('fistulaLocation').required = false;
             }
-            // --- FIN SOLUCIÓN ---
         }
         if(profileData.avatar && avatarPreview) { avatarPreview.src = profileData.avatar; avatarDataUrl = profileData.avatar; }
         if (profileData.alergias) { profileData.alergias.forEach(alergia => renderAlergiaTag(alergia)); }
@@ -194,16 +191,13 @@ export function init() {
     const avatarUpload = document.getElementById('avatar-upload');
     const avatarPreview = document.getElementById('avatar-preview');
     
-    // --- INICIO SOLUCIÓN: Referencias para campos condicionales ---
     const renalCheckbox = form.querySelector('input[name="conditions"][value="renal"]');
     const renalInfoContainer = document.getElementById('renal-info-container');
-    // Obtenemos TODOS los campos que deben ser requeridos si 'renal' está activo
     const renalInputs = renalInfoContainer.querySelectorAll('input[name="renalAccess"], input[name="hemodialysisDays"], #hemodialysisTime, #clinicName');
     
     const fistulaRadio = form.querySelector('input[name="renalAccess"][value="fistula"]');
     const fistulaLocationContainer = document.getElementById('fistula-location-container');
     const fistulaSelect = document.getElementById('fistulaLocation');
-    // --- FIN SOLUCIÓN ---
 
     avatarUpload?.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -214,32 +208,25 @@ export function init() {
         }
     });
 
-    // --- INICIO SOLUCIÓN: Listener de Checkbox "Renal" ---
     renalCheckbox?.addEventListener('change', () => {
         const isRenalChecked = renalCheckbox.checked;
         renalInfoContainer.classList.toggle('hidden', !isRenalChecked);
-        // Activa o desactiva 'required' en todos los campos renales
         renalInputs.forEach(input => input.required = isRenalChecked);
         
-        // Manejo especial para el select de fístula
         if (isRenalChecked && fistulaRadio.checked) {
             fistulaSelect.required = true;
         } else {
             fistulaSelect.required = false;
         }
     });
-    // --- FIN SOLUCIÓN ---
     
-    // --- INICIO SOLUCIÓN: Listener de Radio "Tipo de Acceso" ---
     form.querySelectorAll('input[name="renalAccess"]').forEach(radio => {
         radio.addEventListener('change', () => {
             const isFistulaChecked = fistulaRadio.checked;
             fistulaLocationContainer.classList.toggle('hidden', !isFistulaChecked);
-            // Activa o desactiva 'required' solo en el select de fístula
             fistulaSelect.required = isFistulaChecked;
         });
     });
-    // --- FIN SOLUCIÓN ---
     
     const alergiasInput = document.getElementById('alergias-input');
     const addAlergiaBtn = document.getElementById('add-alergia-btn');
@@ -371,10 +358,8 @@ function getFirebaseErrorMessage(error) {
         case 'auth/invalid-email': return 'El correo electrónico no es válido.';
         case 'auth/email-already-in-use': return 'Este correo electrónico ya está en uso.';
         case 'auth/weak-password': return 'La contraseña es muy débil (mín. 6 caracteres).';
-        // --- INICIO SOLUCIÓN: Mensaje de error para App Check ---
         case 'auth/network-request-failed':
             return 'Ocurrió un error de red. Verifica tu conexión o la configuración de App Check (reCAPTCHA).';
-        // --- FIN SOLUCIÓN ---
         default: return 'Ocurrió un error. Intenta de nuevo.';
     }
 }

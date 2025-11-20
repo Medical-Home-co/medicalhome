@@ -1,6 +1,6 @@
-/* --- js/pages/dashboard.js --- */
+/* --- js/pages/dashboard.js (SOLUCIÓN: Rutas Absolutas) --- */
 
-import { store } from '../store.js';
+import { store } from '/js/store.js'; // RUTA ABSOLUTA
 
 /**
  * SOLUCIÓN: Función 'getStoreData' actualizada.
@@ -12,7 +12,8 @@ function getStoreData(key) {
         case 'citas': return store.getCitas() || [];
         case 'terapias': return store.getTerapias() || [];
         case 'agenda': return store.getAgenda() || [];
-        case 'renal': return store.getBcmData() || null;
+        // --- CORRECCIÓN: BCM es Array ---
+        case 'renal': return store.getBcmData() || []; 
         case 'cardiaco': return store.getCardiacoData() || [];
         case 'diabetes': return store.getDiabetesData() || [];
         case 'artritis': return store.getArtritisData() || [];
@@ -22,33 +23,25 @@ function getStoreData(key) {
         case 'ocular': return store.getOcularData() || [];
         case 'general': return store.getGeneralData() || [];
         
-        // --- INICIO SOLUCIÓN NOTIFICACIONES ---
         case 'notificaciones': 
             try {
-                // Obtenemos los datos de las fuentes de notificaciones
                 const meds = store.getMeds() || [];
                 const citas = store.getCitas() || [];
                 const terapias = store.getTerapias() || [];
-                const bcmData = store.getBcmData() || {};
+                const bcmDataArray = store.getBcmData() || [];
+                const bcmAppointments = bcmDataArray.filter(item => item && item.dryWeightAppointmentDate);
 
-                // Contamos cuántos tienen 'notify: true' (o no está definido, que asume true)
                 const medCount = meds.filter(item => item.notify !== false).length;
                 const citaCount = citas.filter(item => item.notify !== false).length;
                 const terapiaCount = terapias.filter(item => item.notify !== false).length;
-                
-                // Contamos las citas BCM que tienen 'notify: true'
-                const bcmAppointments = bcmData.dryWeightAppointments || [];
                 const bcmCount = bcmAppointments.filter(item => item.notify !== false).length;
 
-                // Devolvemos un array FALSO que solo contiene el CONTEO TOTAL.
-                // Usamos .fill() para crear un array de esa longitud.
                 return new Array(medCount + citaCount + terapiaCount + bcmCount).fill(true);
 
             } catch (e) {
                 console.error("Error calculando notificaciones:", e);
-                return []; // Devolver 0 si falla
+                return []; 
             }
-        // --- FIN SOLUCIÓN NOTIFICACIONES ---
             
         default: return [];
     }
@@ -74,11 +67,19 @@ async function renderDashboard() {
     ];
 
     for (const key of allCards) {
-        const data = getStoreData(key);
-        if (key === 'agenda') {
-            grid.innerHTML += createAgendaCard(data, profile);
-        } else {
-            grid.innerHTML += createDashboardCard(key, data);
+        // Solo renderizar la tarjeta si la condición está en el perfil
+        if (allCards.slice(4, -1).includes(key)) { // Condicionales
+             if (profile.conditions && profile.conditions.includes(key)) {
+                const data = getStoreData(key);
+                grid.innerHTML += createDashboardCard(key, data);
+             }
+        } else { // No condicionales (medicamentos, citas, etc.)
+            const data = getStoreData(key);
+            if (key === 'agenda') {
+                grid.innerHTML += createAgendaCard(data, profile);
+            } else {
+                grid.innerHTML += createDashboardCard(key, data);
+            }
         }
     }
     
@@ -154,19 +155,19 @@ function createCardDataSummary(key, data) {
     }
 
     if (key === 'renal') {
-        if (data && data.currentWeight) {
-            return `<p style="${itemStyle}">Peso actual: <strong>${data.currentWeight} Kg</strong></p>`;
+        // --- CORRECCIÓN: BCM es Array ---
+        if (data && Array.isArray(data) && data.length > 0) {
+            const lastRecord = data[data.length - 1];
+            return `<p style="${itemStyle}">Peso actual: <strong>${lastRecord.currentWeight} Kg</strong></p>`;
         } else {
             return noRecordStyle;
         }
     }
 
     if (Array.isArray(data)) {
-        // SOLUCIÓN: Si la 'key' es 'notificaciones', usamos 'Alertas activas'
         const label = (key === 'notificaciones') ? 'Alertas activas' : 'Registros';
         
         if (data.length === 0) {
-             // SOLUCIÓN: Si es 'notificaciones', el texto de "cero" es diferente
             if (key === 'notificaciones') {
                 return `<p style="${itemStyle} color: var(--text-secondary); font-weight: 400;">No hay alertas activas.</p>`;
             }
