@@ -1,0 +1,93 @@
+[debug] [2025-11-20T00:41:53.063Z] ----------------------------------------------------------------------
+[debug] [2025-11-20T00:41:53.067Z] Command:       C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2025-11-20T00:41:53.068Z] CLI Version:   14.25.0
+[debug] [2025-11-20T00:41:53.068Z] Platform:      win32
+[debug] [2025-11-20T00:41:53.068Z] Node Version:  v20.19.5
+[debug] [2025-11-20T00:41:53.069Z] Time:          Wed Nov 19 2025 19:41:53 GMT-0500 (hora estándar de Colombia)
+[debug] [2025-11-20T00:41:53.069Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-11-20T00:41:53.381Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-20T00:41:53.382Z] > authorizing via signed-in user (johnbeta1977@gmail.com)
+[debug] [2025-11-20T00:41:53.382Z] [iam] checking project medicalhomeapp-1a68b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-11-20T00:41:53.384Z] Checked if tokens are valid: false, expires at: 1763599073985
+[debug] [2025-11-20T00:41:53.385Z] Checked if tokens are valid: false, expires at: 1763599073985
+[debug] [2025-11-20T00:41:53.385Z] > refreshing access token with scopes: []
+[debug] [2025-11-20T00:41:53.388Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-11-20T00:41:53.388Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-20T00:41:53.900Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-11-20T00:41:53.900Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-11-20T00:41:54.974Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions [none]
+[debug] [2025-11-20T00:41:54.975Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions x-goog-quota-user=projects/medicalhomeapp-1a68b
+[debug] [2025-11-20T00:41:54.975Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-11-20T00:41:55.576Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions 200
+[debug] [2025-11-20T00:41:55.576Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-11-20T00:41:55.576Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:55.576Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:55.577Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-11-20T00:41:55.577Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-11-20T00:41:56.207Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-11-20T00:41:56.208Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/medicalhomeapp-1a68b/serviceAccounts/medicalhomeapp-1a68b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-11-20T00:41:56.208Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.208Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.209Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b [none]
+[debug] [2025-11-20T00:41:56.721Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b 200
+[debug] [2025-11-20T00:41:56.721Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b {"projectId":"medicalhomeapp-1a68b","projectNumber":"312247676705","displayName":"MedicalHomeApp","name":"projects/medicalhomeapp-1a68b","resources":{"hostingSite":"medicalhomeapp-1a68b"},"state":"ACTIVE","etag":"1_afcb8294-550d-4922-9c32-7c889546162a"}
+[info] 
+[info] === Deploying to 'medicalhomeapp-1a68b'...
+[info] 
+[info] i  deploying functions, hosting 
+[debug] [2025-11-20T00:41:56.728Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.729Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.729Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b [none]
+[debug] [2025-11-20T00:41:56.895Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b 200
+[debug] [2025-11-20T00:41:56.895Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/medicalhomeapp-1a68b {"projectNumber":"312247676705","projectId":"medicalhomeapp-1a68b","lifecycleState":"ACTIVE","name":"MedicalHomeApp","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-10-16T17:33:43.029868Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-11-20T00:41:56.900Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.900Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:56.900Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig [none]
+[debug] [2025-11-20T00:41:57.267Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig 200
+[debug] [2025-11-20T00:41:57.267Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/adminSdkConfig {"projectId":"medicalhomeapp-1a68b","storageBucket":"medicalhomeapp-1a68b.firebasestorage.app"}
+[debug] [2025-11-20T00:41:57.268Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:57.268Z] Checked if tokens are valid: true, expires at: 1763602912900
+[debug] [2025-11-20T00:41:57.268Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs [none]
+[debug] [2025-11-20T00:41:57.885Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs 200
+[debug] [2025-11-20T00:41:57.885Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/medicalhomeapp-1a68b/configs {}
+[debug] [2025-11-20T00:41:57.886Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2025-11-20T00:41:59.982Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "@google-cloud/vertexai": "^1.1.0",
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.15.0",
+    "eslint-plugin-promise": "^6.0.0"
+  },
+  "private": true
+}
+[debug] [2025-11-20T00:41:59.982Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-11-20T00:41:59.985Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-11-20T00:42:00.007Z] Found firebase-functions binary at 'C:\MEDICALHOME\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8738
+
