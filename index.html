@@ -5,75 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedicalHome</title>
     <meta name="description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
+    
     <meta property="og:title" content="MedicalHome">
     <meta property="og:description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
     <meta property="og:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true">
     <meta property="og:url" content="">
     <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MedicalHome">
-    <meta name="twitter:description" content="Tu asistente de salud personal. Organiza tus medicamentos, citas y seguimientos.">
-    <meta name="twitter:image" content="https://github.com/Medical-Home-co/medicalhome/blob/main/images/social-preview.png?raw=true">
-    <link rel="stylesheet" href="style.css?v=1.0.5">
+    
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/icono.png" type="image/png">
     <meta name="theme-color" content="#3A86FF"/>
+    
+    <link rel="stylesheet" href="style.css?v=1.0.6">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="hidden">
 
     <div id="splash-screen" class="splash-screen">
-        <img src="images/icono.png" alt="Logo" class="splash-logo">
+        <img src="images/icono.png" alt="Logo MedicalHome" class="splash-logo">
+        <h1 id="splash-app-name">MedicalHome</h1>
         <div class="progress-bar-container"><div class="progress-bar"></div></div>
         <p class="splash-text" id="splash-slogan">Tu asistente de salud personal</p>
     </div>
 
-    <div id="about-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="text-align: center;">
-            <img src="images/marca.png" alt="Logo de VivirAplicaciones" class="modal-logo">
-            <h2 class="modal-title">Sobre VivirAplicaciones</h2>
-            <p class="modal-subtitle">Somos una organización sin ánimo de lucro...</p>
-            <div class="modal-actions"><button class="button button-primary close-modal-btn" style="width: 100%;">Cerrar</button></div>
-        </div>
-    </div>
-
-    <div id="report-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-           <h2 class="modal-title"> Reportar un Fallo</h2>
-            <p class="modal-subtitle">Si has encontrado un error o tienes una sugerencia...</p>
-            <form id="report-form" class="modal-form">
-                <textarea id="report-text" class="form-input" placeholder="Describe el problema..." required></textarea>
-                <div class="modal-actions" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <button type="submit" class="button button-primary" style="width: 100%;">Enviar Reporte</button>
-                    <button type="button" class="button button-secondary close-modal-btn" style="width: 100%;">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="auth-container">
-        </div>
+    <div id="auth-container"></div>
 
     <div class="app-shell hidden">
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-profile">
-                    <img src="images/avatar.png" alt="Avatar de usuario" class="profile-avatar" id="sidebar-avatar">
-                    <div class="profile-info"><span class="profile-name" id="sidebar-username">Hola, Invitado</span></div>
+                    <img src="images/avatar.png" alt="Avatar" class="profile-avatar" id="sidebar-avatar">
+                    <div class="profile-info"><span class="profile-name" id="sidebar-username">Hola, Usuario</span></div>
                 </div>
+
                 <ul class="nav-links">
                     <li><a href="#perfil" class="nav-link"><img src="images/icons/user.svg" class="nav-icon-img" alt="Perfil"><span>Perfil</span></a></li>
-                    <li><a href="#dashboard" class="nav-link active"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
+                    <li><a href="#dashboard" class="nav-link"><img src="images/icons/layout-grid.svg" class="nav-icon-img" alt="Resumen"><span>Resumen</span></a></li>
                     <li><a href="#graficas" class="nav-link"><img src="images/icons/chart-area.svg" class="nav-icon-img" alt="Gráficas"><span>Gráficas</span></a></li>
+                    
                     <hr class="nav-divider">
+                    
                     <li><a href="#medicamentos" class="nav-link"><img src="images/icons/pill.svg" class="nav-icon-img" alt="Medicamentos"><span>Medicamentos</span></a></li>
                     <li><a href="#citas" class="nav-link"><img src="images/icons/calendar-days.svg" class="nav-icon-img" alt="Citas"><span>Citas</span></a></li>
                     <li><a href="#terapias" class="nav-link"><img src="images/icons/accessibility.svg" class="nav-icon-img" alt="Terapias"><span>Terapias</span></a></li>
+                    
                     <hr class="nav-divider">
+                    
                     <li class="nav-item-accordion">
                         <a href="#" class="nav-link accordion-toggle">
-                            <span><img src="images/icons/microscope.svg" class="nav-icon-img" alt="Condición Médica"> Condición Médica</span>
-                            <img src="images/icons/chevron-down.svg" class="chevron nav-icon-img" alt="Desplegar">
+                            <span style="display: flex; align-items: center; gap: 0.85rem;">
+                                <img src="images/icons/microscope.svg" class="nav-icon-img" alt="Condición"> Condición Médica
+                            </span>
+                            <img src="images/icons/chevron-down.svg" class="chevron nav-icon-img" alt="Flecha">
                         </a>
                         <ul class="sub-menu">
                             <li><a href="#renal" class="nav-link sub-link"><img src="images/icons/bean.svg" class="nav-icon-img" alt="Renal"> BCM (Renal)</a></li>
@@ -87,18 +72,24 @@
                             <li><a href="#general" class="nav-link sub-link"><img src="images/icons/clipboard-list.svg" class="nav-icon-img" alt="General"> General</a></li>
                         </ul>
                     </li>
+                    
                     <hr class="nav-divider">
-                    <li><a href="#asistente-ia" class="nav-link"><img src="images/icons/bot.svg" class="nav-icon-img" alt="Asistente Virtual"><span>Asistente Virtual</span></a></li>
+                    
+                    <li><a href="#asistente-ia" class="nav-link"><img src="images/icons/bot.svg" class="nav-icon-img" alt="Asistente"><span>Asistente Virtual</span></a></li>
                     <li><a href="#agenda" class="nav-link"><img src="images/icons/book-user.svg" class="nav-icon-img" alt="Agenda"><span>Agenda</span></a></li>
                     <li><a href="#bienestar" class="nav-link"><img src="images/icons/flower-2.svg" class="nav-icon-img" alt="Bienestar"><span>Bienestar</span></a></li>
                     <li><a href="#notificaciones" class="nav-link"><img src="images/icons/bell.svg" class="nav-icon-img" alt="Notificaciones"><span>Notificaciones</span></a></li>
+                    
                     <hr class="nav-divider">
-                    <li><a href="#share" class="nav-link"><img src="images/icons/share-2.svg" class="nav-icon-img" alt="Compartir App"><span>Compartir App</span></a></li>
-                    <li><a href="#report" class="nav-link" id="report-btn"><img src="images/icons/shield-alert.svg" class="nav-icon-img" alt="Reportar fallo"><span>Reportar fallo</span></a></li>
+                    
+                    <li><a href="#share" class="nav-link"><img src="images/icons/share-2.svg" class="nav-icon-img" alt="Compartir"><span>Compartir App</span></a></li>
+                    <li><a href="#" class="nav-link" id="report-btn"><img src="images/icons/shield-alert.svg" class="nav-icon-img" alt="Reportar"><span>Reportar fallo</span></a></li>
+                    
                     <hr class="nav-divider">
-                    <li><a href="#about" class="nav-link" id="about-btn"><img src="images/marca.png" class="nav-icon-img"/><span>Quiénes somos</span></a></li>
-                    <hr class="nav-divider">
+                    
+                    <li><a href="#" class="nav-link" id="about-btn"><img src="images/marca.png" class="nav-icon-img" alt="Marca"/><span>Quiénes somos</span></a></li>
                 </ul>
+
                 <div class="sidebar-footer">
                     <div class="footer-actions">
                         <span style="font-size: 0.8rem; color: var(--text-secondary);">Tema</span>
@@ -108,11 +99,13 @@
                         </div>
                     </div>
                     <hr class="nav-divider">
-                   <a href="#logout" class="nav-link logout-btn"><img src="images/icons/log-out.svg" class="nav-icon-img" alt="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+                    <a href="#logout" class="nav-link logout-btn">
+                        <img src="images/icons/log-out.svg" class="nav-icon-img" alt="Salir"><span>Cerrar Sesión</span>
+                    </a>
                     <hr class="nav-divider">
-                    <button class="collapse-btn" aria-expanded="true" aria-label="Colapsar menú">
-                        <span class="collapse-text-open"><img src="images/icons/chevrons-left.svg" class_name="nav-icon-img" alt="Cerrar">Cerrar</span>
-                        <span class="collapse-text-closed"><img src="images/icons/menu.svg" class_name="nav-icon-img" alt="Menú"></span>
+                    <button class="collapse-btn" aria-label="Colapsar menú">
+                        <span class="collapse-text-open"><img src="images/icons/chevrons-left.svg" class="nav-icon-img" alt="Cerrar"> Cerrar</span>
+                        <span class="collapse-text-closed"><img src="images/icons/menu.svg" class="nav-icon-img" alt="Menú"></span>
                     </button>
                 </div>
             </nav>
@@ -121,13 +114,39 @@
         <main id="app-content" class="main-content">
             </main>
     </div>
+
     <nav class="mobile-nav hidden">
-        <a href="#dashboard" class="mobile-nav-link active"> <span><img src="images/icons/layout-grid.svg" alt="Resumen"><br>Resumen</span> </a>
-        <a href="#medicamentos" class="mobile-nav-link"> <span><img src="images/icons/pill.svg" alt="Medicamentos"><br>Med/tos</span> </a>
+        <a href="#perfil" class="mobile-nav-link active"> <span><img src="images/icons/user.svg" alt="Perfil"><br>Perfil</span> </a>
+        <a href="#dashboard" class="mobile-nav-link"> <span><img src="images/icons/layout-grid.svg" alt="Resumen"><br>Resumen</span> </a>
+        <a href="#medicamentos" class="mobile-nav-link"> <span><img src="images/icons/pill.svg" alt="Meds"><br>Meds</span> </a>
         <a href="#citas" class="mobile-nav-link"> <span><img src="images/icons/calendar-days.svg" alt="Citas"><br>Citas</span> </a>
         <button id="mobile-menu-btn" class="mobile-nav-link"> <span><img src="images/icons/menu.svg" alt="Menú"><br>Menú</span> </button>
     </nav>
     <div id="mobile-menu-modal" class="modal-overlay hidden"><div class="mobile-menu-content"></div></div>
+
+
+    <div id="about-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center;">
+            <img src="images/marca.png" alt="Logo VivirAplicaciones" class="modal-logo" style="border-radius: 0;">
+            <h2 class="modal-title">Sobre VivirAplicaciones</h2>
+            <p class="modal-subtitle">Somos una organización sin ánimo de lucro dedicada a crear herramientas tecnológicas accesibles para mejorar la calidad de vida.</p>
+            <div class="modal-actions"><button class="button button-primary close-modal-btn" style="width: 100%;">Cerrar</button></div>
+        </div>
+    </div>
+
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+           <h2 class="modal-title">Reportar un Fallo</h2>
+            <p class="modal-subtitle">Si has encontrado un error o tienes una sugerencia...</p>
+            <form id="report-form" class="modal-form">
+                <textarea id="report-text" class="form-input" placeholder="Describe el problema..." required></textarea>
+                <div class="modal-actions" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button type="submit" class="button button-primary" style="width: 100%;">Enviar Reporte</button>
+                    <button type="button" class="button button-secondary close-modal-btn" style="width: 100%;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="guest-warning-modal" class="modal-overlay hidden">
         <div class="modal-content" style="text-align: center; max-width: 450px;">
@@ -144,6 +163,20 @@
             </div>
         </div>
     </div>
-    <script type="module" src="js/main.js?v=1.0.5"></script> 
+
+    <div id="logout-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <img src="images/icons/log-out.svg" alt="Salir" class="modal-icon" style="color: var(--danger-color);">
+            <h2 class="modal-title">Cerrar Sesión</h2>
+            <p class="modal-subtitle">¿Estás seguro de que quieres salir?</p>
+            
+            <div class="modal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                <button class="button button-secondary close-modal-btn" style="width: 100%;">Cancelar</button>
+                <button id="confirm-logout-btn" class="button button-primary" style="width: 100%; background-color: var(--danger-color); border-color: var(--danger-color);">Salir</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js?v=1.0.6"></script> 
 </body>
 </html>
