@@ -1,8 +1,6 @@
-/* --- js/alarm-manager.js (Corregido) --- */
-import { db, auth } from './firebase-config.js'; // Importa desde tu config
-// --- CORRECCIÓN: Usar la misma versión 12.4.0 que firebase-config.js ---
+/* --- js/alarm-manager.js (SOLUCIÓN: Rutas Absolutas) --- */
+import { db, auth } from '/js/firebase-config.js'; // RUTA ABSOLUTA
 import { doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-// NO importar store.js
 
 /**
  * Guarda o actualiza una alarma en Firestore.
@@ -11,31 +9,19 @@ import { doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com
  * @param {string} type - 'medicamento', 'cita' o 'terapia'.
  */
 export async function syncAlarmWithFirestore(item, type) {
-    // 1. EL CHEQUEO DE MODO INVITADO SE HACE AFUERA (en citas.js, etc.)
-    
-    // 2. No hacer nada si el usuario no está autenticado
     const user = auth.currentUser;
     if (!user) {
         console.log("Usuario no autenticado: Sincronización de alarma omitida.");
         return;
     }
-
-    // 3. Definir la referencia del documento en Firestore
     if (!db) {
         console.error("Error crítico: la conexión a Firestore (db) no está definida en alarm-manager.");
         return;
     }
-
-    // -----------------------------------------------------------------
-    // --- CORRECCIÓN CRÍTICA ---
-    // La ruta debe coincidir con la CollectionGroup de tu Cloud Function
     const alarmCollection = `users/${user.uid}/alarms`;
-    // -----------------------------------------------------------------
-    
     const alarmId = `${type}-${item.id}`;
     const alarmRef = doc(db, alarmCollection, alarmId);
 
-    // 4. Si el toggle está APAGADO (notify: false), borrar la alarma
     if (item.notify === false) {
         try {
             await deleteDoc(alarmRef);
@@ -43,10 +29,9 @@ export async function syncAlarmWithFirestore(item, type) {
         } catch (error) {
             console.error(`Error eliminando alarma ${alarmId}:`, error);
         }
-        return; // Terminar
+        return; 
     }
 
-    // 5. Si el toggle está ENCENDIDO, crear o actualizar la alarma
     let alarmTimestampISO;
     try {
         if (type === 'medicamento') {
@@ -66,7 +51,6 @@ export async function syncAlarmWithFirestore(item, type) {
         return;
     }
 
-    // 6. Preparar el "payload"
     const alarmData = {
         userId: user.uid,
         alarmId: alarmId,
@@ -81,7 +65,6 @@ export async function syncAlarmWithFirestore(item, type) {
         itemLocation: item.location || item.address || null
     };
 
-    // 7. Guardar en Firestore
     try {
         await setDoc(alarmRef, alarmData, { merge: true }); 
         console.log(`Alarma ${alarmId} guardada/actualizada en Firestore.`);
@@ -96,7 +79,6 @@ export async function syncAlarmWithFirestore(item, type) {
  * @param {string} type - 'medicamento', 'cita' o 'terapia'.
  */
 export async function deleteAlarmFromFirestore(itemId, type) {
-    // EL CHEQUEO DE MODO INVITADO SE HACE AFUERA
     if (!auth.currentUser) {
         return; 
     }
@@ -107,12 +89,7 @@ export async function deleteAlarmFromFirestore(itemId, type) {
 
     const user = auth.currentUser;
     const alarmId = `${type}-${itemId}`;
-
-    // -----------------------------------------------------------------
-    // --- CORRECCIÓN CRÍTICA ---
-    // La ruta debe coincidir con la CollectionGroup de tu Cloud Function
     const alarmRef = doc(db, `users/${user.uid}/alarms`, alarmId);
-    // -----------------------------------------------------------------
 
     try {
         await deleteDoc(alarmRef);

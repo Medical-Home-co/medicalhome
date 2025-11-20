@@ -1,78 +1,105 @@
-// js/router.js
+/* --- js/router.js (Mapa de Rutas Completo) --- */
 
-// Mapeo de rutas: hash -> plantilla HTML -> script JS
+// 1. Mapa de Rutas: Define qué HTML y qué JS cargar para cada sección
 const routes = {
-    'dashboard': {
-        template: 'templates/dashboard.html',
-        script: 'js/dashboard.js'
-    },
-    // --- Aquí agregaremos las otras 11 secciones ---
-    // 'perfil': {
-    //     template: 'templates/perfil.html',
-    //     script: 'js/perfil.js'
-    // },
+    'login':        { template: 'templates/login.html', script: 'js/pages/login.js' },
+    'dashboard':    { template: 'templates/dashboard.html', script: 'js/pages/dashboard.js' },
+    'perfil':       { template: 'templates/perfil.html', script: 'js/pages/perfil.js' },
+    'graficas':     { template: 'templates/graficas.html', script: 'js/pages/graficas.js' },
+    'medicamentos': { template: 'templates/medicamentos.html', script: 'js/pages/medicamentos.js' },
+    'citas':        { template: 'templates/citas.html', script: 'js/pages/citas.js' },
+    'terapias':     { template: 'templates/terapias.html', script: 'js/pages/terapias.js' },
+    'renal':        { template: 'templates/renal.html', script: 'js/pages/renal.js' },
+    'ocular':       { template: 'templates/ocular.html', script: 'js/pages/ocular.js' },
+    'cardiaco':     { template: 'templates/cardiaco.html', script: 'js/pages/cardiaco.js' },
+    'diabetes':     { template: 'templates/diabetes.html', script: 'js/pages/diabetes.js' },
+    'artritis':     { template: 'templates/artritis.html', script: 'js/pages/artritis.js' },
+    'tea':          { template: 'templates/tea.html', script: 'js/pages/tea.js' },
+    'respiratorio': { template: 'templates/respiratorio.html', script: 'js/pages/respiratorio.js' },
+    'gastrico':     { template: 'templates/gastrico.html', script: 'js/pages/gastrico.js' },
+    'general':      { template: 'templates/general.html', script: 'js/pages/general.js' },
+    'agenda':       { template: 'templates/agenda.html', script: 'js/pages/agenda.js' },
+    'asistente-ia': { template: 'templates/asistente.html', script: 'js/pages/asistente.js' },
+    'bienestar':    { template: 'templates/bienestar.html', script: 'js/pages/bienestar.js' },
+    'notificaciones':{ template: 'templates/notificaciones.html', script: 'js/pages/notificaciones.js' }
 };
 
-const appContent = document.getElementById('app-content');
-let currentPageModule = null; // Para guardar el módulo JS de la página actual
+// 2. Función Principal de Carga
+export async function loadPage(pageKey) {
+    const appContent = document.getElementById('app-content');
+    const authContainer = document.getElementById('auth-container');
+    
+    // Detección de entorno (GitHub Pages vs Local/Firebase)
+    const isGitHub = window.location.hostname.includes('github.io');
+    const basePath = isGitHub ? '/medicalhome/' : '/';
 
-async function loadPage(pageKey) {
-    // 1. Obtener la ruta o usar 'dashboard' por defecto
-    const route = routes[pageKey] || null;
+    // Normalizar rutas relativas
+    const cleanBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
 
-    // Si la ruta no existe, mostrar un "En construcción"
-    if (!route) {
-        appContent.innerHTML = `
-            <div class="page-header">
-                <div>
-                    <h2 class="page-title">${pageKey.charAt(0).toUpperCase() + pageKey.slice(1)}</h2>
-                    <p class="page-subtitle">Esta sección está en construcción.</p>
-                </div>
-            </div>`;
+    // Validar ruta
+    const route = routes[pageKey];
+    if (!route && pageKey !== 'logout') {
+        console.warn(`Ruta no encontrada: ${pageKey}`);
+        if(appContent) appContent.innerHTML = `<div class="page-container"><h2 class="page-title">Página no encontrada</h2></div>`;
         return;
     }
 
+    // Determinar contenedor destino (Login va a authContainer, el resto a appContent)
+    const targetContainer = (pageKey === 'login') ? authContainer : appContent;
+    
+    // Mostrar indicador de carga
+    if(targetContainer) targetContainer.innerHTML = '<div style="display:flex;justify-content:center;padding:2rem;"><p>Cargando...</p></div>';
+
     try {
-        // 2. Cargar el contenido HTML de la plantilla
-        const response = await fetch(route.template);
-        if (!response.ok) throw new Error('Plantilla no encontrada');
+        // A. Cargar HTML
+        const templatePath = `${cleanBasePath}/${route.template}?v=${Date.now()}`; // Cache busting
+        const response = await fetch(templatePath);
+        if (!response.ok) throw new Error(`No se pudo cargar ${templatePath}`);
         const html = await response.text();
         
-        // 3. Inyectar el HTML en el <main>
-        appContent.innerHTML = html;
+        if(targetContainer) targetContainer.innerHTML = html;
 
-        // 4. Cargar dinámicamente el módulo JS de la página
-        // Usamos un 'cache-buster' (la fecha) para asegurar que se carga el script nuevo en desarrollo
-        const modulePath = `${route.script}?v=${new Date().getTime()}`;
-        currentPageModule = await import(`../${modulePath}`);
-        
-        // 5. Ejecutar la función 'init' de ese módulo
-        if (currentPageModule && typeof currentPageModule.init === 'function') {
-            currentPageModule.init();
+        // B. Cargar y Ejecutar JS
+        if (route.script) {
+            const scriptPath = `${cleanBasePath}/${route.script}?v=${Date.now()}`;
+            try {
+                // Importación dinámica del módulo
+                const pageModule = await import(scriptPath);
+                
+                // Ejecutar función init() si existe
+                if (pageModule && typeof pageModule.init === 'function') {
+                    pageModule.init();
+                }
+            } catch (scriptError) {
+                console.error(`Error ejecutando script ${scriptPath}:`, scriptError);
+            }
+        }
+
+        // C. Actualizar Menú Activo
+        updateActiveMenu(pageKey);
+
+        // D. Reinicializar Iconos (si usas Lucide)
+        if (window.lucide) {
+             setTimeout(() => lucide.createIcons(), 50);
         }
 
     } catch (error) {
-        console.error('Error al cargar la página:', error);
-        appContent.innerHTML = `<p>Error al cargar el contenido. Intenta de nuevo.</p>`;
+        console.error("Error fatal en router:", error);
+        if(targetContainer) targetContainer.innerHTML = `<p style="color:red;text-align:center;">Error cargando la sección. Revisa tu conexión.</p>`;
     }
 }
 
-function handleNavigation() {
-    const hash = window.location.hash.substring(1) || 'dashboard';
-    loadPage(hash);
-
-    // Actualizar el estado 'active' de los enlaces
+// 3. Actualizar estado visual del menú sidebar/mobile
+function updateActiveMenu(pageKey) {
     document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
         link.classList.remove('active');
-        // Usamos startsWith para que los sub-menús también activen al padre (si quisiéramos)
-        // Por ahora, usamos href === para coincidencia exacta
-        if (link.getAttribute('href') === `#${hash}`) {
+        const href = link.getAttribute('href');
+        if (href === `#${pageKey}`) {
             link.classList.add('active');
+            
+            // Abrir acordeón si está dentro de uno
+            const accordion = link.closest('.nav-item-accordion');
+            if (accordion) accordion.classList.add('open');
         }
     });
-}
-
-export function initRouter() {
-    window.addEventListener('hashchange', handleNavigation);
-    handleNavigation(); // Carga inicial
 }
